@@ -10,6 +10,7 @@ message Bootstrap {
   Server server = 1;
   Data data = 2;
   string env = 3;
+  MQ mq = 4;
 }
 
 message Server {
@@ -71,4 +72,18 @@ message Data {
   Database bizDatabase = 2;
   // 缓存，支持多缓存方式
   Cache cache = 3;
+}
+
+message MQ {
+  message Kafka {
+    repeated string endpoints = 1;
+    string groupId = 2;
+    string username = 3;
+    string password = 4;
+    string kafkaVersion = 5;
+    string clientID = 6;
+  }
+
+  Kafka kafka = 1;
+
 }
