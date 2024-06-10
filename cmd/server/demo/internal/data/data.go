@@ -2,8 +2,9 @@ package data
 
 import (
 	"context"
-
 	"github.com/aide-family/moon/cmd/server/demo/internal/democonf"
+	"github.com/aide-family/moon/cmd/server/demo/internal/mq"
+	"github.com/aide-family/moon/cmd/server/demo/internal/service"
 	"github.com/aide-family/moon/pkg/conn"
 	"github.com/aide-family/moon/pkg/conn/cacher/nutsdbcacher"
 	"github.com/aide-family/moon/pkg/conn/cacher/rediscacher"
@@ -34,6 +35,8 @@ func NewData(c *democonf.Bootstrap) (*Data, func(), error) {
 	mainConf := c.GetData().GetDatabase()
 	bizConf := c.GetData().GetBizDatabase()
 	cacheConf := c.GetData().GetCache()
+	kafkaConf := c.GetMq().GetKafka()
+
 	if !types.IsNil(cacheConf) {
 		d.cacher = newCache(cacheConf)
 		closeFuncList = append(closeFuncList, func() {
@@ -65,6 +68,11 @@ func NewData(c *democonf.Bootstrap) (*Data, func(), error) {
 			bizDBClose, _ := d.bizDB.DB()
 			log.Debugw("close biz db", bizDBClose.Close())
 		})
+	}
+
+	// init mq conf
+	if !types.IsNil(kafkaConf) {
+		service.KafkaClient = mq.InitKafkaMQServer(kafkaConf)
 	}
 
 	cleanup := func() {

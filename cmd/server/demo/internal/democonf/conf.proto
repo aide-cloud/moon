@@ -72,3 +72,17 @@ message Data {
   // 缓存，支持多缓存方式
   Cache cache = 3;
 }
+
+message MQ {
+  message Kafka {
+    repeated string endpoints = 1;
+    string groupId = 2;
+    string username = 3;
+    string password = 4;
+    string kafkaVersion = 5;
+    string clientID = 6;
+  }
+
+  Kafka kafka = 1;
+
+}

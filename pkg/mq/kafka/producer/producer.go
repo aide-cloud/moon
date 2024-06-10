@@ -26,6 +26,11 @@ func InitSynProducer(brokers []string, conf *sarama.Config) sarama.SyncProducer 
 	return producer
 }
 
+// InitAsyncProducer init AsyncProducer
+func InitAsyncProducer(brokers []string, conf *sarama.Config) (sarama.AsyncProducer, error) {
+	return sarama.NewAsyncProducer(brokers, conf)
+}
+
 func newProducerProvider(brokers []string, producerConfigurationProvider func() *sarama.Config) *producerProvider {
 	provider := &producerProvider{
 		producers: make(map[topicPartition][]sarama.AsyncProducer),

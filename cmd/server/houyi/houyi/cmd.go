@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-
 	"github.com/aide-family/moon/cmd/server/houyi"
 	"github.com/aide-family/moon/pkg/env"
 )
