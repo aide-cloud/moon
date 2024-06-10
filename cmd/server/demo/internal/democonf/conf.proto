@@ -10,6 +10,7 @@ message Bootstrap {
   Server server = 1;
   Data data = 2;
   string env = 3;
+  MQ mq = 4;
 }
 
 message Server {

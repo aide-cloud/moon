@@ -43,6 +43,8 @@ data:
       bucket: test
 mq:
   kafka:
-    Endpoints:
+    endpoints:
       - 192.168.100.9:9092
     clientID: moon-client
+    username: root
+    password: "123456"

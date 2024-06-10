@@ -6,6 +6,7 @@ import (
 	"github.com/aide-family/moon/pkg/mq/kafka/consume"
 	"github.com/aide-family/moon/pkg/mq/kafka/producer"
 	"github.com/go-kratos/kratos/v2/log"
+	"time"
 )
 
 type KafkaMQ struct {
@@ -14,14 +15,14 @@ type KafkaMQ struct {
 	producer      sarama.SyncProducer
 }
 
-func InitKafkaMQServer(mqConf democonf.KafkaMQServerConfig) *KafkaMQ {
+func InitKafkaMQServer(mqConf *democonf.MQ_Kafka) *KafkaMQ {
 
 	kafkaEndpoints := mqConf.GetEndpoints()
 	kafkaGroupId := mqConf.GetGroupId()
 	username := mqConf.GetUsername()
 	password := mqConf.GetPassword()
 
-	conf := &sarama.Config{}
+	conf := sarama.NewConfig()
 
 	if len(username) > 0 || len(password) > 0 {
 		conf.Net.SASL.Enable = true
@@ -46,6 +47,8 @@ func InitProducer(brokers []string, conf *sarama.Config) sarama.SyncProducer {
 	conf.Producer.Retry.Max = 1
 	conf.Producer.RequiredAcks = sarama.WaitForAll
 	conf.Producer.Return.Successes = true
+	conf.Producer.Return.Errors = true
+	conf.Net.DialTimeout = 5 * time.Second
 	return producer.InitSynProducer(brokers, conf)
 }
 
