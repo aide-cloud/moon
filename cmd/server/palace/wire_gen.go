@@ -18,6 +18,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/service"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/authorization"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/datasource"
+	"github.com/aide-family/moon/cmd/server/palace/internal/service/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/resource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/team"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/user"
@@ -42,6 +43,7 @@ func wireApp(bootstrap *palaceconf.Bootstrap, logger log.Logger) (*kratos.App, f
 	captchaBiz := biz.NewCaptchaBiz(captcha)
 	repositoryUser := repoimpl.NewUserRepository(dataData)
 	runtimeCache := runtimecache.NewRuntimeCache(dataData)
+	repositoryDict:=repoimpl.NewDictRepository(dataData)
 	repositoryTeam := repoimpl.NewTeamRepository(dataData, runtimeCache)
 	cache := repoimpl.NewCacheRepository(dataData)
 	teamRole := repoimpl.NewTeamRoleRepository(dataData)
@@ -59,6 +61,8 @@ func wireApp(bootstrap *palaceconf.Bootstrap, logger log.Logger) (*kratos.App, f
 	resourceService := resource.NewResourceService(resourceBiz)
 	teamBiz := biz.NewTeamBiz(repositoryTeam)
 	teamService := team.NewTeamService(teamBiz)
+	dictBiz :=biz.NewDictBiz(repositoryDict)
+	dictService:= dict.NewDictService(dictBiz)
 	teamRoleBiz := biz.NewTeamRoleBiz(teamRole)
 	roleService := team.NewRoleService(teamRoleBiz)
 	repositoryDatasource := repoimpl.NewDatasourceRepository(dataData)
@@ -85,7 +89,7 @@ func wireApp(bootstrap *palaceconf.Bootstrap, logger log.Logger) (*kratos.App, f
 	metric := repoimpl.NewMetricRepository(dataData)
 	metricBiz := biz.NewMetricBiz(metric)
 	metricService := datasource.NewMetricService(metricBiz)
-	serverServer := server.RegisterService(grpcServer, httpServer, greeterService, healthService, userService, authorizationService, resourceService, teamService, roleService, datasourceService, menuService, metricService)
+	serverServer := server.RegisterService(grpcServer, httpServer, greeterService, healthService, userService, authorizationService, resourceService, teamService, roleService, datasourceService, menuService, metricService,dictService)
 	app := newApp(bootstrap, serverServer, logger)
 	return app, func() {
 		cleanup3()

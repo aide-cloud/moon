@@ -1,0 +1,8 @@
+data_source: "root:b4fG8tM#@tcp(121.41.168.20:3306)/moon"
+biz_database: "root:b4fG8tM#@tcp(121.41.168.20:3306)/moon"
+
+drive: mysql
+
+outputPath:
+
+isBiz: true

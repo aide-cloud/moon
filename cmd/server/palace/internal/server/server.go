@@ -4,6 +4,7 @@ import (
 	"github.com/aide-family/moon/api"
 	authorizationapi "github.com/aide-family/moon/api/admin/authorization"
 	datasourceapi "github.com/aide-family/moon/api/admin/datasource"
+	dictapi "github.com/aide-family/moon/api/admin/dict"
 	resourceapi "github.com/aide-family/moon/api/admin/resource"
 	teamapi "github.com/aide-family/moon/api/admin/team"
 	userapi "github.com/aide-family/moon/api/admin/user"
@@ -11,6 +12,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/service"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/authorization"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/datasource"
+	"github.com/aide-family/moon/cmd/server/palace/internal/service/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/resource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/team"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/user"
@@ -60,6 +62,7 @@ func RegisterService(
 	datasourceService *datasource.Service,
 	teamMenuService *resource.MenuService,
 	metricService *datasource.MetricService,
+	dictService *dict.Service,
 ) *Server {
 	// 注册GRPC服务
 	v1.RegisterGreeterServer(rpcSrv, greeter)
@@ -71,6 +74,7 @@ func RegisterService(
 	teamapi.RegisterRoleServer(rpcSrv, teamRoleService)
 	datasourceapi.RegisterDatasourceServer(rpcSrv, datasourceService)
 	datasourceapi.RegisterMetricServer(rpcSrv, metricService)
+	dictapi.RegisterDictServer(rpcSrv, dictService)
 	api.RegisterHealthServer(rpcSrv, healthService)
 
 	// 注册HTTP服务
@@ -83,6 +87,7 @@ func RegisterService(
 	teamapi.RegisterRoleHTTPServer(httpSrv, teamRoleService)
 	datasourceapi.RegisterDatasourceHTTPServer(httpSrv, datasourceService)
 	datasourceapi.RegisterMetricHTTPServer(httpSrv, metricService)
+	dictapi.RegisterDictHTTPServer(httpSrv, dictService)
 	api.RegisterHealthHTTPServer(httpSrv, healthService)
 
 	return &Server{
