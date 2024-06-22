@@ -40,6 +40,7 @@ config:
 .PHONY: api
 # generate api proto
 api:
+	go install github.com/aide-cloud/protoc-gen-go-errors@latest
 	protoc --proto_path=./api \
 	       --proto_path=./third_party \
  	       --go_out=paths=source_relative:./api \
@@ -72,6 +73,26 @@ all:
 	make api;
 	make config;
 	make wire;
+
+.PHONY: clean
+# clean
+clean:
+	rm -rf ./bin/
+
+.PHONY: houyi
+# local run houyi
+houyi:
+	go run cmd/server/houyi/houyi/cmd.go -c cmd/server/houyi/configs
+
+.PHONY: rabbit
+# local run rabbit
+rabbit:
+	go run cmd/server/rabbit/rabbit/cmd.go -c cmd/server/rabbit/configs
+
+.PHONY: palace
+# local run palace
+palace:
+	go run cmd/server/palace/palace/cmd.go -c cmd/server/palace/configs
 
 # show help
 help:

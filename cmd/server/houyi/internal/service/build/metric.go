@@ -3,8 +3,8 @@ package build
 import (
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/cmd/server/houyi/internal/biz/bo"
-	"github.com/aide-family/moon/pkg/datasource/metric"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/houyi/datasource/metric"
+	"github.com/aide-family/moon/pkg/util/types"
 )
 
 func NewMetricBuilder(metricDetail *bo.MetricDetail) *MetricBuilder {

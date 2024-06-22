@@ -5,22 +5,22 @@ import (
 
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
-	"github.com/aide-family/moon/pkg/helper/model"
-	"github.com/aide-family/moon/pkg/helper/model/bizmodel"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/palace/model"
+	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
+	"github.com/aide-family/moon/pkg/util/types"
 )
 
-type ResourceBuild struct {
+type ResourceBuilder struct {
 	*model.SysAPI
 }
 
-func NewResourceBuild(resource *model.SysAPI) *ResourceBuild {
-	return &ResourceBuild{
+func NewResourceBuilder(resource *model.SysAPI) *ResourceBuilder {
+	return &ResourceBuilder{
 		SysAPI: resource,
 	}
 }
 
-func (b *ResourceBuild) ToApi() *admin.ResourceItem {
+func (b *ResourceBuilder) ToApi() *admin.ResourceItem {
 	if types.IsNil(b) || types.IsNil(b.SysAPI) {
 		return nil
 	}
@@ -39,17 +39,17 @@ func (b *ResourceBuild) ToApi() *admin.ResourceItem {
 	}
 }
 
-type TeamResourceBuild struct {
+type TeamResourceBuilder struct {
 	*bizmodel.SysTeamAPI
 }
 
-func NewTeamResourceBuild(resource *bizmodel.SysTeamAPI) *TeamResourceBuild {
-	return &TeamResourceBuild{
+func NewTeamResourceBuilder(resource *bizmodel.SysTeamAPI) *TeamResourceBuilder {
+	return &TeamResourceBuilder{
 		SysTeamAPI: resource,
 	}
 }
 
-func (b *TeamResourceBuild) ToApi() *admin.ResourceItem {
+func (b *TeamResourceBuilder) ToApi() *admin.ResourceItem {
 	if types.IsNil(b) || types.IsNil(b.SysTeamAPI) {
 		return nil
 	}

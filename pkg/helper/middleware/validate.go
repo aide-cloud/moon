@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/aide-family/moon/api/merr"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/util/types"
 
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/go-kratos/kratos/v2/middleware"

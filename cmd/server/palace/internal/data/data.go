@@ -8,12 +8,12 @@ import (
 
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/palaceconf"
-	"github.com/aide-family/moon/pkg/conn"
-	"github.com/aide-family/moon/pkg/conn/cacher/nutsdbcacher"
-	"github.com/aide-family/moon/pkg/conn/cacher/rediscacher"
-	"github.com/aide-family/moon/pkg/conn/rbac"
-	"github.com/aide-family/moon/pkg/helper/model/query"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/palace/model/query"
+	"github.com/aide-family/moon/pkg/util/conn"
+	"github.com/aide-family/moon/pkg/util/conn/cacher/nutsdbcacher"
+	"github.com/aide-family/moon/pkg/util/conn/cacher/rediscacher"
+	"github.com/aide-family/moon/pkg/util/conn/rbac"
+	"github.com/aide-family/moon/pkg/util/types"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/go-kratos/kratos/v2/log"

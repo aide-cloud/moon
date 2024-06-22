@@ -6,23 +6,23 @@ import (
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
-	"github.com/aide-family/moon/pkg/helper/model/bizmodel"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
+	"github.com/aide-family/moon/pkg/util/types"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-type DatasourceBuild struct {
+type DatasourceBuilder struct {
 	*bizmodel.Datasource
 }
 
-func NewDatasourceBuild(datasource *bizmodel.Datasource) *DatasourceBuild {
-	return &DatasourceBuild{
+func NewDatasourceBuilder(datasource *bizmodel.Datasource) *DatasourceBuilder {
+	return &DatasourceBuilder{
 		Datasource: datasource,
 	}
 }
 
-func (b *DatasourceBuild) ToApi() *admin.Datasource {
+func (b *DatasourceBuilder) ToApi() *admin.Datasource {
 	if types.IsNil(b) || types.IsNil(b.Datasource) {
 		return nil
 	}
@@ -44,18 +44,18 @@ func (b *DatasourceBuild) ToApi() *admin.Datasource {
 	}
 }
 
-type DatasourceQueryDataBuild struct {
+type DatasourceQueryDataBuilder struct {
 	*bo.DatasourceQueryData
 }
 
-func NewDatasourceQueryDataBuild(data *bo.DatasourceQueryData) *DatasourceQueryDataBuild {
-	return &DatasourceQueryDataBuild{
+func NewDatasourceQueryDataBuilder(data *bo.DatasourceQueryData) *DatasourceQueryDataBuilder {
+	return &DatasourceQueryDataBuilder{
 		DatasourceQueryData: data,
 	}
 }
 
 // ToApi 转换为api
-func (b *DatasourceQueryDataBuild) ToApi() *api.MetricQueryResult {
+func (b *DatasourceQueryDataBuilder) ToApi() *api.MetricQueryResult {
 	if types.IsNil(b) || types.IsNil(b.DatasourceQueryData) {
 		return nil
 	}
