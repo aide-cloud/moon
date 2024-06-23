@@ -4,7 +4,7 @@ import (
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
 	"github.com/aide-family/moon/pkg/helper/model/palace"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/util/types"
 )
 
 type DictBuild struct {

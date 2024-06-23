@@ -9,7 +9,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
 	"github.com/aide-family/moon/pkg/helper/model/palace"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
@@ -92,7 +92,7 @@ func (s *Service) ListDict(ctx context.Context, req *pb.GetDictSelectListRequest
 		return nil, err
 	}
 	return &pb.ListDictReply{
-		Pagination: build.NewPageBuild(queryParams.Page).ToApi(),
+		Pagination: build.NewPageBuilder(queryParams.Page).ToApi(),
 		List: types.SliceTo(dictPage, func(dict *palace.SysDict) *admin.Dict {
 			return build.NewDictBuild(dict).ToApi()
 		}),

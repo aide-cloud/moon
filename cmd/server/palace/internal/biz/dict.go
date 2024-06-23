@@ -7,7 +7,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
 	"github.com/aide-family/moon/pkg/helper/model/palace"
-	"github.com/aide-family/moon/pkg/types"
+	"github.com/aide-family/moon/pkg/util/types"
 )
 
 func NewDictBiz(dictRepo repository.Dict) *DictBiz {
