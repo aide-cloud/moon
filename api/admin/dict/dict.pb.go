@@ -217,7 +217,7 @@ type GetDictSelectListRequest struct {
 	Status api.Status `protobuf:"varint,3,opt,name=status,proto3,enum=api.Status" json:"status,omitempty"`
 	// 字典类型
 	DictType     api.DictType `protobuf:"varint,4,opt,name=dict_type,json=dictType,proto3,enum=api.DictType" json:"dict_type,omitempty"`
-	LanguageCode string       `protobuf:"bytes,5,opt,name=languageCode,proto3" json:"languageCode,omitempty"`
+	LanguageCode string       `protobuf:"bytes,5,opt,name=language_code,proto3" json:"language_code,omitempty"`
 }
 
 func (x *GetDictSelectListRequest) Reset() {

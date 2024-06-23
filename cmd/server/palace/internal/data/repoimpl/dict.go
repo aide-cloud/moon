@@ -92,7 +92,7 @@ func (l *dictRepositoryImpl) BatchCreate(ctx context.Context, users []*bo.Create
 }
 
 func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32) (*palace.SysDict, error) {
-	return palacequery.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysUser.ID.Eq(id)).First()
+	return palacequery.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(palacequery.SysDict.ID.Eq(id)).First()
 }
 
 func (l *dictRepositoryImpl) UpdateByID(ctx context.Context, dict *bo.UpdateDictParams) error {

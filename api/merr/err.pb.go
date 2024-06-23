@@ -98,6 +98,9 @@ const (
 	ErrorReason_PARAMS_VALIDATE_ERR ErrorReason = 35
 	// 请创建您的团队
 	ErrorReason_NO_TEAM_ERR ErrorReason = 36
+
+	//字典不存在
+	ErrorReason_DICT_NOT_FOUND_ERR ErrorReason = 37
 )
 
 // Enum value maps for ErrorReason.
@@ -140,6 +143,7 @@ var (
 		34: "NO_PERMISSION_TO_OPERATE_ERR",
 		35: "PARAMS_VALIDATE_ERR",
 		36: "NO_TEAM_ERR",
+		37: "DICT_NOT_FOUND_ERR",
 	}
 	ErrorReason_value = map[string]int32{
 		"ALERT":                           0,
@@ -179,6 +183,7 @@ var (
 		"NO_PERMISSION_TO_OPERATE_ERR":    34,
 		"PARAMS_VALIDATE_ERR":             35,
 		"NO_TEAM_ERR":                     36,
+		"DICT_NOT_FOUND_ERR":              37,
 	}
 )
 

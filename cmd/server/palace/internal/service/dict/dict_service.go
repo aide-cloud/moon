@@ -109,6 +109,14 @@ func (s *Service) DeleteDict(context.Context, *pb.DeleteDictRequest) (*pb.Delete
 	return &pb.DeleteDictReply{}, nil
 }
 
-func (s *Service) GetDict(context.Context, *pb.GetDictRequest) (*pb.GetDictReply, error) {
-	return &pb.GetDictReply{}, nil
+func (s *Service) GetDict(ctx context.Context, req *pb.GetDictRequest) (*pb.GetDictReply, error) {
+
+	dictDO, err := s.dictBiz.GetDict(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	resDict := build.NewDictBuild(dictDO).ToApi()
+	return &pb.GetDictReply{
+		Dict: resDict,
+	}, nil
 }

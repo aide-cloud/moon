@@ -46,3 +46,11 @@ func (b *DictBiz) ListDict(ctx context.Context, listParam *bo.QueryDictListParam
 	return dictDos, nil
 
 }
+
+func (b *DictBiz) GetDict(ctx context.Context, dictId uint32) (*palace.SysDict, error) {
+	if dictId == 0 {
+		return nil, merr.ErrorI18nDictNotFoundErr(ctx)
+	}
+	dictDo, err := b.dictRepo.GetByID(ctx, dictId)
+	return dictDo, err
+}

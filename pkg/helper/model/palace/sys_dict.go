@@ -8,7 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-const TableNameSysUser = "sys_dict"
+// 字典数据表
+const TableNameSysDict = "sys_dict"
 
 // SysDict 字典数据表
 type SysDict struct {
@@ -20,7 +21,7 @@ type SysDict struct {
 	Icon         string        `gorm:"column:icon;type:varchar(500);default:'';comment:图标"`
 	ImageUrl     string        `gorm:"column:image_url;type:varchar(500);default:'';comment:图片url"`
 	Status       vobj.Status   `gorm:"column:status;type:tinyint;not null;default:1;comment:状态 0:关闭1：开启"`
-	LanguageCode string        `gorm:"column:status;type:varchar(10);not null;default:zh;comment:语言：zh:中文 en:英文"`
+	LanguageCode string        `gorm:"column:language_code;type:varchar(10);not null;default:zh;comment:语言：zh:中文 en:英文"`
 	Remark       string        `gorm:"column:remark;type:varchar(500);not null;comment:字典备注"`
 	base.BaseModel
 	base.BaseModelID
@@ -43,5 +44,5 @@ func (c *SysDict) Delete(ctx context.Context, tx *gorm.DB, conds []gen.Condition
 
 // TableName SysDict's table name
 func (*SysDict) TableName() string {
-	return TableNameSysUser
+	return TableNameSysDict
 }
