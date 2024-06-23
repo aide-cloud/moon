@@ -590,6 +590,129 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.admin.team.DeleteDepartmentReply'
+    /v1/dict/create:
+        post:
+            tags:
+                - Dict
+            operationId: Dict_CreateDict
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.admin.dict.CreateDictRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.CreateDictReply'
+    /v1/dict/delete/{id}:
+        delete:
+            tags:
+                - Dict
+            operationId: Dict_DeleteDict
+            parameters:
+                - name: id
+                  in: path
+                  description: 字典id
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.DeleteDictReply'
+    /v1/dict/get/{id}:
+        get:
+            tags:
+                - Dict
+            operationId: Dict_GetDict
+            parameters:
+                - name: id
+                  in: path
+                  description: 字典id
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.GetDictReply'
+    /v1/dict/list:
+        post:
+            tags:
+                - Dict
+            description: 字典列表
+            operationId: Dict_ListDict
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.admin.dict.GetDictSelectListRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.ListDictReply'
+    /v1/dict/status:
+        put:
+            tags:
+                - Dict
+            description: 批量修改字典状态
+            operationId: Dict_BatchUpdateDictStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.admin.dict.BatchUpdateDictStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.BatchUpdateDictStatusReply'
+    /v1/dict/update/{id}:
+        put:
+            tags:
+                - Dict
+            description: 更新用户
+            operationId: Dict_UpdateDict
+            parameters:
+                - name: id
+                  in: path
+                  description: 字典id
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.admin.dict.UpdateDictRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.admin.dict.UpdateDictReply'
     /v1/hello:
         post:
             tags:
@@ -1702,6 +1825,48 @@ components:
                     description: 存储器类型
                     format: enum
             description: 数据源模块
+        api.admin.Dict:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: ID
+                    format: uint32
+                name:
+                    type: string
+                    description: 字典名称
+                dictType:
+                    type: integer
+                    description: 字典类型
+                    format: enum
+                colorType:
+                    type: string
+                    description: 颜色类型
+                value:
+                    type: string
+                    description: 字典值
+                icon:
+                    type: string
+                    description: 图标
+                imageUrl:
+                    type: string
+                    description: 图片url
+                status:
+                    type: integer
+                    description: 状态
+                    format: enum
+                languageCode:
+                    type: string
+                    description: 语言
+                remark:
+                    type: string
+                    description: 字典备注
+                createdAt:
+                    type: string
+                    description: 创建时间
+                updatedAt:
+                    type: string
+                    description: 更新时间
         api.admin.Menu:
             type: object
             properties:
@@ -2363,6 +2528,108 @@ components:
                 remark:
                     type: string
                     description: 指标描述
+        api.admin.dict.BatchUpdateDictStatusReply:
+            type: object
+            properties: {}
+        api.admin.dict.BatchUpdateDictStatusRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 字典id列表
+                status:
+                    type: integer
+                    description: 状态
+                    format: enum
+        api.admin.dict.CreateDictReply:
+            type: object
+            properties: {}
+        api.admin.dict.CreateDictRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 字典名称
+                value:
+                    type: string
+                    description: 字典值
+                dictType:
+                    type: integer
+                    description: 字典类型
+                    format: enum
+                colorType:
+                    type: string
+                cssClass:
+                    type: string
+                icon:
+                    type: string
+                imageUrl:
+                    type: string
+                status:
+                    type: integer
+                    description: 状态
+                    format: enum
+                languageCode:
+                    type: string
+                remark:
+                    type: string
+        api.admin.dict.DeleteDictReply:
+            type: object
+            properties: {}
+        api.admin.dict.GetDictReply:
+            type: object
+            properties:
+                dict:
+                    $ref: '#/components/schemas/api.admin.Dict'
+        api.admin.dict.GetDictSelectListRequest:
+            type: object
+            properties:
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/api.PaginationReq'
+                    description: 分页参数
+                keyword:
+                    type: string
+                    description: 关键字模糊查询
+                status:
+                    type: integer
+                    description: 状态查询
+                    format: enum
+                dictType:
+                    type: integer
+                    description: 字典类型
+                    format: enum
+                languageCode:
+                    type: string
+        api.admin.dict.ListDictReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.admin.Dict'
+                    description: 字典列表
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/api.PaginationReply'
+                    description: 分页信息
+        api.admin.dict.UpdateDictReply:
+            type: object
+            properties: {}
+        api.admin.dict.UpdateDictRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 字典id
+                    format: uint32
+                data:
+                    allOf:
+                        - $ref: '#/components/schemas/api.admin.dict.CreateDictRequest'
+                    description: 更新的数据
         api.admin.resource.BatchUpdateResourceStatusReply:
             type: object
             properties: {}
@@ -3072,6 +3339,8 @@ tags:
       description: 数据源管理模块
     - name: Department
       description: 部门管理模块
+    - name: Dict
+      description: 字典服务
     - name: Greeter
       description: The greeting service definition.
     - name: Health
@@ -3083,9 +3352,9 @@ tags:
     - name: Menu
       description: 系统菜单管理模块
     - name: Metric
-      description: metric数据源数据查询模块
-    - name: Metric
       description: metric类型数据源元数据同步接口， 子服务需要实现该接口, 支持http和rpc两种同步方式
+    - name: Metric
+      description: metric数据源数据查询模块
     - name: Resource
       description: 系统公共API资源管理模块
     - name: Role
