@@ -1,4 +1,4 @@
-package palace
+package model
 
 import (
 	"context"

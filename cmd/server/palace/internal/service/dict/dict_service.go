@@ -4,11 +4,12 @@ import (
 	"context"
 	"github.com/aide-family/moon/api/admin"
 	pb "github.com/aide-family/moon/api/admin/dict"
+	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
-	"github.com/aide-family/moon/pkg/helper/model/palace"
+	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -93,19 +94,32 @@ func (s *Service) ListDict(ctx context.Context, req *pb.GetDictSelectListRequest
 	}
 	return &pb.ListDictReply{
 		Pagination: build.NewPageBuilder(queryParams.Page).ToApi(),
-		List: types.SliceTo(dictPage, func(dict *palace.SysDict) *admin.Dict {
+		List: types.SliceTo(dictPage, func(dict *model.SysDict) *admin.Dict {
 			return build.NewDictBuild(dict).ToApi()
 		}),
 	}, nil
 }
 
-func (s *Service) BatchUpdateDictStatus(context.Context, *pb.BatchUpdateDictStatusRequest) (*pb.BatchUpdateDictStatusReply, error) {
+func (s *Service) BatchUpdateDictStatus(ctx context.Context, params *pb.BatchUpdateDictStatusRequest) (*pb.BatchUpdateDictStatusReply, error) {
 
+	updateParams := bo.UpdateDictStatusParams{
+		IDs:    params.Ids,
+		Status: vobj.Status(params.Status),
+	}
+
+	err := s.dictBiz.UpdateDictStatusByIds(ctx, &updateParams)
+	if err != nil {
+		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
+	}
 	return &pb.BatchUpdateDictStatusReply{}, nil
 }
 
-func (s *Service) DeleteDict(context.Context, *pb.DeleteDictRequest) (*pb.DeleteDictReply, error) {
+func (s *Service) DeleteDict(ctx context.Context, params *pb.DeleteDictRequest) (*pb.DeleteDictReply, error) {
 
+	err := s.dictBiz.DeleteDictById(ctx, params.Id)
+	if err != nil {
+		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
+	}
 	return &pb.DeleteDictReply{}, nil
 }
 

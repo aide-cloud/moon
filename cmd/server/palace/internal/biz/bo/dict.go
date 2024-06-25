@@ -31,6 +31,11 @@ type (
 		UpdateParam CreateDictParams
 	}
 
+	UpdateDictStatusParams struct {
+		IDs    []uint32    `json:"ids"`
+		Status vobj.Status `json:"status"`
+	}
+
 	QueryDictListParams struct {
 		Keyword  string           `json:"keyword"`
 		Page     types.Pagination `json:"page"`

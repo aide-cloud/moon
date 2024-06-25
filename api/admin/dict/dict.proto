@@ -27,7 +27,7 @@ service Dict {
   // 更新用户
   rpc UpdateDict (UpdateDictRequest) returns (UpdateDictReply) {
     option (google.api.http) = {
-      put: "/v1/dict/update/{id}"
+      put: "/v1/dict/update"
       body: "*"
     };
   }
@@ -77,8 +77,8 @@ message BatchUpdateDictStatusRequest{
   }];
   // 状态
   Status status = 2 [(buf.validate.field).cel = {
-    expression: "(this in [0, 1])",
-    message: "状态值必须在[启用(1), 禁用(0)]之间",
+    expression: "(this in [1, 2])",
+    message: "状态值必须在[启用(1), 禁用(2)]之间",
   }];
 }
 

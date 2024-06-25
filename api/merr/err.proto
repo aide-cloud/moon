@@ -264,4 +264,13 @@ enum ErrorReason {
     (errors.message) = "请创建您的团队",
     (errors.id) = "NO_TEAM_ERR"
   ];
+
+
+  // 字典不存在
+  DICT_NOT_FOUND_ERR = 37 [
+    (errors.code) = 405,
+    (errors.message) = "字典不存在!",
+    (errors.id) = "DICT_NOT_FOUND_ERR"
+  ];
+
 }

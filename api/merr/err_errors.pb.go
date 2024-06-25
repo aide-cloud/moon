@@ -930,30 +930,6 @@ func ErrorI18nTeamNotFoundErr(ctx context.Context, args ...interface{}) *errors.
 	return err
 }
 
-const ErrorI18nDictNotFoundErrID = "DICT_NOT_FOUND_ERR"
-
-// ErrorI18nDictNotFoundErrID  字典不存在
-func ErrorI18nDictNotFoundErr(ctx context.Context, args ...interface{}) *errors.Error {
-	config := &i18n.LocalizeConfig{
-		MessageID: ErrorI18nDictNotFoundErrID,
-	}
-	if len(args) > 0 {
-		config.TemplateData = args[0]
-	}
-	err := errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf("字典不存在", args...))
-	local, ok := FromContext(ctx)
-	if ok {
-		localize, err1 := local.Localize(config)
-		if err1 != nil {
-			err = errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf("字典不存在", args...)).WithCause(err1)
-		} else {
-			err = errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), localize)
-		}
-	}
-
-	return err
-}
-
 // IsTeamRoleNotFoundErr 团队角色不存在
 func IsTeamRoleNotFoundErr(err error) bool {
 	if err == nil {
@@ -1875,6 +1851,53 @@ func ErrorI18nNoTeamErr(ctx context.Context, args ...interface{}) *errors.Error 
 			err = errors.New(200, ErrorReason_NO_TEAM_ERR.String(), fmt.Sprintf("请创建您的团队", args...)).WithCause(err1)
 		} else {
 			err = errors.New(200, ErrorReason_NO_TEAM_ERR.String(), localize)
+		}
+	}
+
+	return err
+}
+
+// IsDictNotFoundErr 字典不存在
+func IsDictNotFoundErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DICT_NOT_FOUND_ERR.String() && e.Code == 405
+}
+
+// ErrorDictNotFoundErr 字典不存在
+func ErrorDictNotFoundErr(format string, args ...interface{}) *errors.Error {
+	return errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf(format, args...))
+}
+
+// ErrorDictNotFoundErrWithContext 字典不存在
+//
+//	带上下文，支持国际化输出元数据
+func ErrorDictNotFoundErrWithContext(_ context.Context, format string, args ...interface{}) *errors.Error {
+	return errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf(format, args...))
+}
+
+const ErrorI18nDictNotFoundErrID = "DICT_NOT_FOUND_ERR"
+
+// ErrorI18nDictNotFoundErr 字典不存在
+//
+//	支持国际化输出
+func ErrorI18nDictNotFoundErr(ctx context.Context, args ...interface{}) *errors.Error {
+	config := &i18n.LocalizeConfig{
+		MessageID: ErrorI18nDictNotFoundErrID,
+	}
+	if len(args) > 0 {
+		config.TemplateData = args[0]
+	}
+	err := errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf("字典不存在!", args...))
+	local, ok := FromContext(ctx)
+	if ok {
+		localize, err1 := local.Localize(config)
+		if err1 != nil {
+			err = errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), fmt.Sprintf("字典不存在!", args...)).WithCause(err1)
+		} else {
+			err = errors.New(405, ErrorReason_DICT_NOT_FOUND_ERR.String(), localize)
 		}
 	}
 
