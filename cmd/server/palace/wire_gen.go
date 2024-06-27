@@ -20,6 +20,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/datasource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/resource"
+	"github.com/aide-family/moon/cmd/server/palace/internal/service/strategy"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/team"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/user"
 	"github.com/go-kratos/kratos/v2"
@@ -90,6 +91,8 @@ func wireApp(bootstrap *palaceconf.Bootstrap, logger log.Logger) (*kratos.App, f
 	metricBiz := biz.NewMetricBiz(metric)
 	metricService := datasource.NewMetricService(metricBiz)
 	serverServer := server.RegisterService(grpcServer, httpServer, greeterService, healthService, userService, authorizationService, resourceService, teamService, roleService, datasourceService, menuService, metricService,dictService)
+	strategyService := strategy.NewStrategyService()
+	serverServer := server.RegisterService(grpcServer, httpServer, greeterService, healthService, userService, authorizationService, resourceService, teamService, roleService, datasourceService, menuService, metricService, strategyService)
 	app := newApp(bootstrap, serverServer, logger)
 	return app, func() {
 		cleanup3()

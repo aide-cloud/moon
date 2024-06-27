@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package api.admin;
 
+import "google/protobuf/duration.proto";
 import "enum.proto";
 
 option go_package = "github.com/aide-family/moon/api/admin;admin";
@@ -254,4 +255,146 @@ message Dict{
   string created_at = 11;
   // 更新时间
   string updated_at = 12;
+}
+
+message StrategyLevel {
+  // 策略持续时间
+  google.protobuf.Duration for = 3;
+  // 持续次数
+  uint32 count = 4;
+  // 持续的类型
+  SustainType sustainType = 5;
+  // 执行频率
+  google.protobuf.Duration interval = 8;
+  // 状态
+  Status status = 9;
+  // 数据主键
+  uint32 id = 10;
+  // 告警等级ID
+  uint32 level_id = 11;
+  // 告警等级明细
+  Select level = 12;
+  // 告警页面
+  repeated Select alarmPages = 13;
+  // 阈值
+  double threshold = 14;
+  // 所属策略
+  uint32 strategy_id = 15;
+  // 条件
+  string condition = 16;
+  // TODO 通知对象
+}
+
+message Strategy {
+  // 策略名称
+  string alert = 1;
+  // 策略语句
+  string expr = 2;
+  // 根据策略等级配置的详细策略， key为策略等级ID
+  map<uint32, StrategyLevel> level = 3;
+  // 策略标签
+  map<string, string> labels = 6;
+  // 策略注解
+  map<string, string> annotations = 7;
+  // 数据源
+  repeated Datasource datasource = 9;
+  // 策略ID
+  uint32 id = 10;
+  // 策略状态
+  Status status = 11;
+  // 创建时间
+  string created_at = 12;
+  // 更新时间
+  string updated_at = 13;
+  // 策略说明信息
+  string remark = 14;
+  // 所属策略组
+  uint32 group_id = 15;
+  // 策略组信息
+  StrategyGroup group = 16;
+  // 告警页面
+  repeated Select alarmPages = 17;
+  // TODO 公共通知对象
+}
+
+message StrategyGroup {
+  // 策略组ID
+  uint32 id = 1;
+  // 策略组名称
+  string name = 2;
+  // 策略组状态
+  Status status = 3;
+  // 创建时间
+  string created_at = 4;
+  // 更新时间
+  string updated_at = 5;
+  // 策略组说明信息
+  string remark = 6;
+  // 策略组创建人
+  User creator = 7;
+  uint32 creator_id = 8;
+}
+
+message StrategyLevelTemplate {
+  // ID
+  uint32 id = 1;
+  // 持续时间
+  google.protobuf.Duration duration = 3;
+  // 持续次数
+  uint32 count = 4;
+  // 持续类型
+  SustainType sustainType = 5;
+  // 执行频率
+  google.protobuf.Duration interval = 8;
+  // 状态
+  Status status = 9;
+  // 告警等级ID
+  uint32 level_id = 10;
+  // 告警等级
+  Select level = 11;
+  // 阈值
+  double threshold = 12;
+  // 条件
+  string condition = 13;
+  // 所属策略
+  uint32 strategy_id = 14;
+}
+
+message StrategyTemplate {
+  // 策略模板ID
+  uint32 id = 1;
+  // 策略模板名称
+  string Alert = 2;
+  // 策略语句
+  string expr = 3;
+  repeated StrategyLevelTemplate levels = 4;
+  // 策略标签
+  map<string, string> labels = 5;
+  // 策略注解
+  map<string, string> annotations = 6;
+  // 策略模板状态
+  Status status = 7;
+  // 创建时间
+  string created_at = 8;
+  // 更新时间
+  string updated_at = 9;
+  // 策略模板说明信息
+  string remark = 10;
+}
+
+message StrategyAlarmLevel {
+  // ID
+  uint32 id = 1;
+  // 告警等级名称
+  string name = 2;
+  // 告警等级颜色
+  string color = 3;
+  // 状态
+  Status status = 4;
+  // 创建时间
+  string created_at = 5;
+  // 更新时间
+  string updated_at = 6;
+  // 等级
+  int32 level = 7;
 }

@@ -8,5 +8,8 @@ func Models() []any {
 		&SysTeam{},
 		&SysUser{},
 		&SysDict{},
+		&StrategyTemplate{},
+		&StrategyLevelTemplate{},
+		&StrategyAlarmLevel{},
 	}
 }

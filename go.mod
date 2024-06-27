@@ -27,7 +27,6 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.6.0
 	golang.org/x/text v0.15.0
-	golang.org/x/tools v0.19.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240401170217-c3f982113cda
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.34.1
@@ -39,7 +38,8 @@ require (
 	gorm.io/gorm v1.25.9
 	gorm.io/plugin/dbresolver v1.5.0
 	gorm.io/plugin/soft_delete v1.2.1
-	k8s.io/client-go v0.30.1
+	k8s.io/apimachinery v0.30.1
+	k8s.io/client-go v0.23.5
 	k8s.io/klog/v2 v2.120.1
 )
 
@@ -112,6 +112,7 @@ require (
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240401170217-c3f982113cda // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
@@ -121,7 +122,6 @@ require (
 	gorm.io/driver/postgres v1.5.7 // indirect
 	gorm.io/driver/sqlserver v1.5.3 // indirect
 	gorm.io/hints v1.1.0 // indirect
-	k8s.io/apimachinery v0.30.1 // indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	modernc.org/libc v1.22.2 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
