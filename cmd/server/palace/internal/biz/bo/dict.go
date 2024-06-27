@@ -15,13 +15,15 @@ type (
 		Value string `json:"value"`
 		// 字典类型
 		DictType vobj.DictType `json:"dict_type"`
-		//颜色样式
+		// 颜色样式
 		ColorType string `json:"color_type"`
-		//css样式
+		// css样式
 		CssClass string `json:"css_class"`
-		//icon
-		Icon         string      `json:"icon"`
-		ImageUrl     string      `json:"image_url"`
+		// icon
+		Icon string `json:"icon"`
+		// 图片
+		ImageUrl string `json:"image_url"`
+		// 状态
 		Status       vobj.Status `json:"status"`
 		LanguageCode string      `json:"language_code"`
 	}

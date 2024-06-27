@@ -141,27 +141,27 @@ enum MetricType {
 // 分类, 区分字典中的各个模块数据
 enum DictType {
 	// UNKNOWN 未知, 用于默认值
-	CATEGORY_UNKNOWN = 0;
+	DICT_TYPE_UNKNOWN = 0;
 
 	// PromLabel 标签
-	CATEGORY_PROM_LABEL = 1;
+	DICT_TYPE_PROM_LABEL = 1;
 
 	// PromAnnotation 注解
-	CATEGORY_PROM_ANNOTATION = 2;
+	DICT_TYPE_PROM_ANNOTATION = 2;
 
 	// PromStrategy 策略
-	CATEGORY_PROM_STRATEGY = 3;
+	DICT_TYPE_PROM_STRATEGY = 3;
 
 	// PromStrategyGroup 策略组
-	CATEGORY_PROM_STRATEGY_GROUP = 4;
+	DICT_TYPE_PROM_STRATEGY_GROUP = 4;
 
 	// AlarmLevel 告警级别
-	CATEGORY_ALARM_LEVEL = 5;
+	DICT_TYPE_ALARM_LEVEL = 5;
 
 	// AlarmStatus 告警状态
-	CATEGORY_ALARM_STATUS = 6;
+	DICT_TYPE_ALARM_STATUS = 6;
 
 	// NotifyType 通知类型
-	CATEGORY_NOTIFY_TYPE = 7;
+	DICT_TYPE_NOTIFY_TYPE = 7;
 }
 

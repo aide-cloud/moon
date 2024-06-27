@@ -7,7 +7,6 @@ import (
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
-	"github.com/aide-family/moon/cmd/server/palace/internal/data"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
@@ -24,10 +23,6 @@ func NewDictService(dictBiz *biz.DictBiz) *Service {
 	return &Service{
 		dictBiz: dictBiz,
 	}
-}
-
-type dictRepositoryImpl struct {
-	data *data.Data
 }
 
 func (s *Service) CreateDict(ctx context.Context, req *pb.CreateDictRequest) (*pb.CreateDictReply, error) {
@@ -73,7 +68,7 @@ func (s *Service) UpdateDict(ctx context.Context, req *pb.UpdateDictRequest) (*p
 		ID:          req.Id,
 		UpdateParam: createParams,
 	}
-	if _, err := s.dictBiz.UpdateDict(ctx, &updateParams); !types.IsNil(err) {
+	if err := s.dictBiz.UpdateDict(ctx, &updateParams); !types.IsNil(err) {
 		return nil, err
 	}
 	return &pb.UpdateDictReply{}, nil

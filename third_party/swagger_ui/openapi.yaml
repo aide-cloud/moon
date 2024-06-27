@@ -594,6 +594,7 @@ paths:
         post:
             tags:
                 - Dict
+            description: 创建字典
             operationId: Dict_CreateDict
             requestBody:
                 content:
@@ -612,6 +613,7 @@ paths:
         delete:
             tags:
                 - Dict
+            description: 删除字典
             operationId: Dict_DeleteDict
             parameters:
                 - name: id
@@ -632,6 +634,7 @@ paths:
         get:
             tags:
                 - Dict
+            description: 获取字典
             operationId: Dict_GetDict
             parameters:
                 - name: id
@@ -686,20 +689,12 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.admin.dict.BatchUpdateDictStatusReply'
-    /v1/dict/update/{id}:
+    /v1/dict/update:
         put:
             tags:
                 - Dict
             description: 更新用户
             operationId: Dict_UpdateDict
-            parameters:
-                - name: id
-                  in: path
-                  description: 字典id
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
             requestBody:
                 content:
                     application/json:
@@ -2562,20 +2557,26 @@ components:
                     format: enum
                 colorType:
                     type: string
+                    description: 颜色类型
                 cssClass:
                     type: string
+                    description: css样式
                 icon:
                     type: string
+                    description: 图标
                 imageUrl:
                     type: string
+                    description: 图片地址
                 status:
                     type: integer
                     description: 状态
                     format: enum
                 languageCode:
                     type: string
+                    description: 语言编码
                 remark:
                     type: string
+                    description: 备注
         api.admin.dict.DeleteDictReply:
             type: object
             properties: {}

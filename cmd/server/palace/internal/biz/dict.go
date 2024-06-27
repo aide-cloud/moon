@@ -2,7 +2,6 @@ package biz
 
 import (
 	"context"
-	pb "github.com/aide-family/moon/api/admin/dict"
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
@@ -30,11 +29,11 @@ func (b *DictBiz) CreateDict(ctx context.Context, dictParam *bo.CreateDictParams
 }
 
 // UpdateDict 更新字典
-func (b *DictBiz) UpdateDict(ctx context.Context, updateParam *bo.UpdateDictParams) (*pb.UpdateDictReply, error) {
+func (b *DictBiz) UpdateDict(ctx context.Context, updateParam *bo.UpdateDictParams) error {
 	if err := b.dictRepo.UpdateByID(ctx, updateParam); !types.IsNil(err) {
-		return nil, err
+		return err
 	}
-	return &pb.UpdateDictReply{}, nil
+	return nil
 }
 
 // ListDict 列表字典
@@ -47,26 +46,17 @@ func (b *DictBiz) ListDict(ctx context.Context, listParam *bo.QueryDictListParam
 
 }
 
+// GetDict 获取字典
 func (b *DictBiz) GetDict(ctx context.Context, dictId uint32) (*model.SysDict, error) {
-	if dictId == 0 {
-		return nil, merr.ErrorI18nDictNotFoundErr(ctx)
-	}
-	dictDo, err := b.dictRepo.GetByID(ctx, dictId)
-	return dictDo, err
+	return b.dictRepo.GetByID(ctx, dictId)
 }
 
+// UpdateDictStatusByIds 更新字典状态
 func (b *DictBiz) UpdateDictStatusByIds(ctx context.Context, updateParams *bo.UpdateDictStatusParams) error {
-	err := b.dictRepo.UpdateStatusByIds(ctx, updateParams.Status, updateParams.IDs...)
-	if err != nil {
-		return err
-	}
-	return nil
+	return b.dictRepo.UpdateStatusByIds(ctx, updateParams.Status, updateParams.IDs...)
 }
 
+// DeleteDictById 删除字典
 func (b *DictBiz) DeleteDictById(ctx context.Context, dictId uint32) error {
-	err := b.dictRepo.DeleteByID(ctx, dictId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return b.dictRepo.DeleteByID(ctx, dictId)
 }

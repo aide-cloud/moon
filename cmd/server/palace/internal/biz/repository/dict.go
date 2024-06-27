@@ -18,13 +18,13 @@ type (
 		// GetByID get dict by id
 		GetByID(ctx context.Context, id uint32) (*model.SysDict, error)
 
-		//FindByPage
+		// FindByPage
 		FindByPage(ctx context.Context, page *bo.QueryDictListParams) ([]*model.SysDict, error)
 
-		//DeleteByID
+		// DeleteByID
 		DeleteByID(ctx context.Context, id uint32) error
 
-		//UpdateStatusByIds
+		// UpdateStatusByIds
 		UpdateStatusByIds(ctx context.Context, status vobj.Status, ids ...uint32) error
 
 		// UpdateByID update dict by id

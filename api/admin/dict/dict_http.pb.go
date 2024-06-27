@@ -29,8 +29,11 @@ const OperationDictUpdateDict = "/api.admin.dict.Dict/UpdateDict"
 type DictHTTPServer interface {
 	// BatchUpdateDictStatus 批量修改字典状态
 	BatchUpdateDictStatus(context.Context, *BatchUpdateDictStatusRequest) (*BatchUpdateDictStatusReply, error)
+	// CreateDict 创建字典
 	CreateDict(context.Context, *CreateDictRequest) (*CreateDictReply, error)
+	// DeleteDict 删除字典
 	DeleteDict(context.Context, *DeleteDictRequest) (*DeleteDictReply, error)
+	// GetDict 获取字典
 	GetDict(context.Context, *GetDictRequest) (*GetDictReply, error)
 	// ListDict 字典列表
 	ListDict(context.Context, *GetDictSelectListRequest) (*ListDictReply, error)

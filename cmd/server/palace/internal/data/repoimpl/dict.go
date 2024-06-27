@@ -79,9 +79,9 @@ func (l *dictRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryDic
 	return queryWrapper.Order(query.SysDict.ID.Desc()).Find()
 }
 
-func (l *dictRepositoryImpl) BatchCreate(ctx context.Context, users []*bo.CreateDictParams) error {
+func (l *dictRepositoryImpl) BatchCreate(ctx context.Context, createDicts []*bo.CreateDictParams) error {
 
-	dictModels := types.SliceToWithFilter(users, func(item *bo.CreateDictParams) (*model.SysDict, bool) {
+	dictModels := types.SliceToWithFilter(createDicts, func(item *bo.CreateDictParams) (*model.SysDict, bool) {
 		if types.IsNil(item) || types.TextIsNull(item.Name) {
 			return nil, false
 		}
