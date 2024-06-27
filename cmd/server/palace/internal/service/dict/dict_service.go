@@ -27,16 +27,16 @@ func NewDictService(dictBiz *biz.DictBiz) *Service {
 
 func (s *Service) CreateDict(ctx context.Context, req *pb.CreateDictRequest) (*pb.CreateDictReply, error) {
 	createParams := bo.CreateDictParams{
-		Name:         req.Name,
-		Value:        req.Value,
+		Name:         req.GetName(),
+		Value:        req.GetValue(),
 		DictType:     vobj.DictType(req.GetDictType()),
-		ColorType:    req.ColorType,
-		CssClass:     req.CssClass,
-		Icon:         req.Icon,
-		ImageUrl:     req.ImageUrl,
+		ColorType:    req.GetColorType(),
+		CssClass:     req.GetCssClass(),
+		Icon:         req.GetIcon(),
+		ImageUrl:     req.GetImageUrl(),
 		Status:       vobj.Status(req.GetStatus()),
-		Remark:       req.Remark,
-		LanguageCode: req.LanguageCode,
+		Remark:       req.GetRemark(),
+		LanguageCode: req.GetLanguageCode(),
 	}
 
 	_, err := s.dictBiz.CreateDict(ctx, &createParams)
@@ -52,20 +52,20 @@ func (s *Service) CreateDict(ctx context.Context, req *pb.CreateDictRequest) (*p
 func (s *Service) UpdateDict(ctx context.Context, req *pb.UpdateDictRequest) (*pb.UpdateDictReply, error) {
 	data := req.GetData()
 	createParams := bo.CreateDictParams{
-		Name:         data.Name,
-		Value:        data.Value,
+		Name:         data.GetName(),
+		Value:        data.GetValue(),
 		DictType:     vobj.DictType(data.GetDictType()),
-		ColorType:    data.ColorType,
-		CssClass:     data.CssClass,
-		Icon:         data.Icon,
-		ImageUrl:     data.ImageUrl,
+		ColorType:    data.GetColorType(),
+		CssClass:     data.GetCssClass(),
+		Icon:         data.GetIcon(),
+		ImageUrl:     data.GetImageUrl(),
 		Status:       vobj.Status(data.GetStatus()),
-		Remark:       data.Remark,
-		LanguageCode: data.LanguageCode,
+		Remark:       data.GetRemark(),
+		LanguageCode: data.GetLanguageCode(),
 	}
 
 	updateParams := bo.UpdateDictParams{
-		ID:          req.Id,
+		ID:          req.GetId(),
 		UpdateParam: createParams,
 	}
 	if err := s.dictBiz.UpdateDict(ctx, &updateParams); !types.IsNil(err) {
@@ -75,7 +75,6 @@ func (s *Service) UpdateDict(ctx context.Context, req *pb.UpdateDictRequest) (*p
 }
 
 func (s *Service) ListDict(ctx context.Context, req *pb.GetDictSelectListRequest) (*pb.ListDictReply, error) {
-
 	queryParams := &bo.QueryDictListParams{
 		Keyword:  req.GetKeyword(),
 		Page:     types.NewPagination(req.GetPagination()),
@@ -96,9 +95,8 @@ func (s *Service) ListDict(ctx context.Context, req *pb.GetDictSelectListRequest
 }
 
 func (s *Service) BatchUpdateDictStatus(ctx context.Context, params *pb.BatchUpdateDictStatusRequest) (*pb.BatchUpdateDictStatusReply, error) {
-
 	updateParams := bo.UpdateDictStatusParams{
-		IDs:    params.Ids,
+		IDs:    params.GetIds(),
 		Status: vobj.Status(params.Status),
 	}
 
@@ -111,7 +109,7 @@ func (s *Service) BatchUpdateDictStatus(ctx context.Context, params *pb.BatchUpd
 
 func (s *Service) DeleteDict(ctx context.Context, params *pb.DeleteDictRequest) (*pb.DeleteDictReply, error) {
 
-	err := s.dictBiz.DeleteDictById(ctx, params.Id)
+	err := s.dictBiz.DeleteDictById(ctx, params.GetId())
 	if err != nil {
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}

@@ -239,22 +239,24 @@ message Dict{
   DictType dict_type = 3;
   // 颜色类型
   string color_type =4;
+  // css样式
+  string css_class =5;
   // 字典值
-  string value = 5;
+  string value = 6;
   // 图标
-  string icon=6;
+  string icon=7;
   //图片url
-  string image_url=7;
+  string image_url=8;
   // 状态
-  Status status = 8;
+  Status status = 9;
   // 语言
-  string language_code=9;
+  string language_code=10;
   // 字典备注
-  string remark=10;
+  string remark=11;
   // 创建时间
-  string created_at = 11;
+  string created_at = 12;
   // 更新时间
-  string updated_at = 12;
+  string updated_at = 13;
 }
 
 message StrategyLevel {
