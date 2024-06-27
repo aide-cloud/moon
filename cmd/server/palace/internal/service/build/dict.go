@@ -3,15 +3,15 @@ package build
 import (
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
-	"github.com/aide-family/moon/pkg/helper/model/palace"
+	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
 )
 
 type DictBuild struct {
-	*palace.SysDict
+	*model.SysDict
 }
 
-func NewDictBuild(dict *palace.SysDict) *DictBuild {
+func NewDictBuild(dict *model.SysDict) *DictBuild {
 	return &DictBuild{
 		SysDict: dict,
 	}

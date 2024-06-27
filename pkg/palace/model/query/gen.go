@@ -18,6 +18,7 @@ import (
 var (
 	Q       = new(Query)
 	SysAPI  *sysAPI
+	SysDict *sysDict
 	SysMenu *sysMenu
 	SysTeam *sysTeam
 	SysUser *sysUser
@@ -26,6 +27,7 @@ var (
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	SysAPI = &Q.SysAPI
+	SysDict = &Q.SysDict
 	SysMenu = &Q.SysMenu
 	SysTeam = &Q.SysTeam
 	SysUser = &Q.SysUser
@@ -35,6 +37,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:      db,
 		SysAPI:  newSysAPI(db, opts...),
+		SysDict: newSysDict(db, opts...),
 		SysMenu: newSysMenu(db, opts...),
 		SysTeam: newSysTeam(db, opts...),
 		SysUser: newSysUser(db, opts...),
@@ -45,6 +48,7 @@ type Query struct {
 	db *gorm.DB
 
 	SysAPI  sysAPI
+	SysDict sysDict
 	SysMenu sysMenu
 	SysTeam sysTeam
 	SysUser sysUser
@@ -56,6 +60,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:      db,
 		SysAPI:  q.SysAPI.clone(db),
+		SysDict: q.SysDict.clone(db),
 		SysMenu: q.SysMenu.clone(db),
 		SysTeam: q.SysTeam.clone(db),
 		SysUser: q.SysUser.clone(db),
@@ -74,6 +79,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:      db,
 		SysAPI:  q.SysAPI.replaceDB(db),
+		SysDict: q.SysDict.replaceDB(db),
 		SysMenu: q.SysMenu.replaceDB(db),
 		SysTeam: q.SysTeam.replaceDB(db),
 		SysUser: q.SysUser.replaceDB(db),
@@ -82,6 +88,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 
 type queryCtx struct {
 	SysAPI  ISysAPIDo
+	SysDict ISysDictDo
 	SysMenu ISysMenuDo
 	SysTeam ISysTeamDo
 	SysUser ISysUserDo
@@ -90,6 +97,7 @@ type queryCtx struct {
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		SysAPI:  q.SysAPI.WithContext(ctx),
+		SysDict: q.SysDict.WithContext(ctx),
 		SysMenu: q.SysMenu.WithContext(ctx),
 		SysTeam: q.SysTeam.WithContext(ctx),
 		SysUser: q.SysUser.WithContext(ctx),

@@ -7,5 +7,6 @@ func Models() []any {
 		&SysMenu{},
 		&SysTeam{},
 		&SysUser{},
+		&SysDict{},
 	}
 }

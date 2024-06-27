@@ -33,6 +33,7 @@ const (
 //
 // 字典服务
 type DictClient interface {
+	// 创建字典
 	CreateDict(ctx context.Context, in *CreateDictRequest, opts ...grpc.CallOption) (*CreateDictReply, error)
 	// 更新用户
 	UpdateDict(ctx context.Context, in *UpdateDictRequest, opts ...grpc.CallOption) (*UpdateDictReply, error)
@@ -40,7 +41,9 @@ type DictClient interface {
 	ListDict(ctx context.Context, in *GetDictSelectListRequest, opts ...grpc.CallOption) (*ListDictReply, error)
 	// 批量修改字典状态
 	BatchUpdateDictStatus(ctx context.Context, in *BatchUpdateDictStatusRequest, opts ...grpc.CallOption) (*BatchUpdateDictStatusReply, error)
+	// 删除字典
 	DeleteDict(ctx context.Context, in *DeleteDictRequest, opts ...grpc.CallOption) (*DeleteDictReply, error)
+	// 获取字典
 	GetDict(ctx context.Context, in *GetDictRequest, opts ...grpc.CallOption) (*GetDictReply, error)
 }
 
@@ -118,6 +121,7 @@ func (c *dictClient) GetDict(ctx context.Context, in *GetDictRequest, opts ...gr
 //
 // 字典服务
 type DictServer interface {
+	// 创建字典
 	CreateDict(context.Context, *CreateDictRequest) (*CreateDictReply, error)
 	// 更新用户
 	UpdateDict(context.Context, *UpdateDictRequest) (*UpdateDictReply, error)
@@ -125,7 +129,9 @@ type DictServer interface {
 	ListDict(context.Context, *GetDictSelectListRequest) (*ListDictReply, error)
 	// 批量修改字典状态
 	BatchUpdateDictStatus(context.Context, *BatchUpdateDictStatusRequest) (*BatchUpdateDictStatusReply, error)
+	// 删除字典
 	DeleteDict(context.Context, *DeleteDictRequest) (*DeleteDictReply, error)
+	// 获取字典
 	GetDict(context.Context, *GetDictRequest) (*GetDictReply, error)
 	mustEmbedUnimplementedDictServer()
 }

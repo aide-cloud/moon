@@ -29,8 +29,11 @@ const OperationDictUpdateDict = "/api.admin.dict.Dict/UpdateDict"
 type DictHTTPServer interface {
 	// BatchUpdateDictStatus 批量修改字典状态
 	BatchUpdateDictStatus(context.Context, *BatchUpdateDictStatusRequest) (*BatchUpdateDictStatusReply, error)
+	// CreateDict 创建字典
 	CreateDict(context.Context, *CreateDictRequest) (*CreateDictReply, error)
+	// DeleteDict 删除字典
 	DeleteDict(context.Context, *DeleteDictRequest) (*DeleteDictReply, error)
+	// GetDict 获取字典
 	GetDict(context.Context, *GetDictRequest) (*GetDictReply, error)
 	// ListDict 字典列表
 	ListDict(context.Context, *GetDictSelectListRequest) (*ListDictReply, error)
@@ -41,7 +44,7 @@ type DictHTTPServer interface {
 func RegisterDictHTTPServer(s *http.Server, srv DictHTTPServer) {
 	r := s.Route("/")
 	r.POST("/v1/dict/create", _Dict_CreateDict0_HTTP_Handler(srv))
-	r.PUT("/v1/dict/update/{id}", _Dict_UpdateDict0_HTTP_Handler(srv))
+	r.PUT("/v1/dict/update", _Dict_UpdateDict0_HTTP_Handler(srv))
 	r.POST("/v1/dict/list", _Dict_ListDict0_HTTP_Handler(srv))
 	r.PUT("/v1/dict/status", _Dict_BatchUpdateDictStatus0_HTTP_Handler(srv))
 	r.DELETE("/v1/dict/delete/{id}", _Dict_DeleteDict0_HTTP_Handler(srv))
@@ -77,9 +80,6 @@ func _Dict_UpdateDict0_HTTP_Handler(srv DictHTTPServer) func(ctx http.Context) e
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationDictUpdateDict)
@@ -267,7 +267,7 @@ func (c *DictHTTPClientImpl) ListDict(ctx context.Context, in *GetDictSelectList
 
 func (c *DictHTTPClientImpl) UpdateDict(ctx context.Context, in *UpdateDictRequest, opts ...http.CallOption) (*UpdateDictReply, error) {
 	var out UpdateDictReply
-	pattern := "/v1/dict/update/{id}"
+	pattern := "/v1/dict/update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationDictUpdateDict))
 	opts = append(opts, http.PathTemplate(pattern))
