@@ -12,13 +12,15 @@ type (
 	}
 
 	UpdateTemplateStrategyParams struct {
-		*model.StrategyTemplate
+		ID   uint32                       `json:"id"`
+		Data CreateTemplateStrategyParams `json:"data"`
 	}
 
 	QueryTemplateStrategyListParams struct {
-		Page   types.Pagination
-		Alert  string
-		Status vobj.Status
+		Keyword string `json:"keyword"`
+		Page    types.Pagination
+		Alert   string
+		Status  vobj.Status
 	}
 
 	CreateStrategyAlarmLevel struct {
@@ -33,5 +35,9 @@ type (
 		Page    types.Pagination
 		Keyword string
 		Status  vobj.Status
+	}
+
+	CreateStrategyLevelTemplate struct {
+		*model.StrategyLevelTemplate
 	}
 )
