@@ -93,8 +93,8 @@ func (d *Duration) Scan(src any) error {
 }
 
 func (d *Duration) GetDuration() *durationpb.Duration {
-	if d.Duration != nil {
-		return d.Duration
+	if d == nil || d.Duration == nil {
+		return nil
 	}
-	return nil
+	return d.Duration
 }

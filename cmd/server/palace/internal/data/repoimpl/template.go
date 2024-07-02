@@ -33,10 +33,7 @@ func (l *templateRepositoryImpl) CreateTemplateStrategy(ctx context.Context, cre
 			return err
 		}
 		StrategyTemplateID := templateStrategy.ID
-		strategyLevelTemplates := types.SliceTo(createParam.StrategyLevelTemplates, func(item *model.StrategyLevelTemplate) *model.StrategyLevelTemplate {
-			item.StrategyTemplateID = StrategyTemplateID
-			return item
-		})
+		strategyLevelTemplates := createTemplateLevelParamsToModel(ctx, createParam.StrategyLevelTemplates, StrategyTemplateID)
 		// 创建子数据
 		if err := tx.StrategyLevelTemplate.WithContext(ctx).Create(strategyLevelTemplates...); err != nil {
 			return err
@@ -51,8 +48,8 @@ func (l *templateRepositoryImpl) UpdateTemplateStrategy(ctx context.Context, upd
 		if _, err := tx.StrategyLevelTemplate.WithContext(ctx).Where(query.StrategyLevelTemplate.StrategyTemplateID.Eq(updateParam.ID)).Delete(); err != nil {
 			return err
 		}
-
-		if err := tx.StrategyLevelTemplate.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(updateParam.Data.StrategyLevelTemplates...); err != nil {
+		strategyLevelTemplates := createTemplateLevelParamsToModel(ctx, updateParam.Data.StrategyLevelTemplates, updateParam.ID)
+		if err := tx.StrategyLevelTemplate.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(strategyLevelTemplates...); err != nil {
 			return err
 		}
 		_, err := tx.StrategyTemplate.WithContext(ctx).
@@ -132,4 +129,23 @@ func createTemplateStrategy(createParam *bo.CreateTemplateStrategyParams) *model
 		Labels:      createParam.Labels,
 		Annotations: createParam.Annotations,
 	}
+}
+
+func createTemplateLevelParamsToModel(ctx context.Context, params []*bo.CreateStrategyLevelTemplate, templateID uint32) []*model.StrategyLevelTemplate {
+	strategyLevelTemplates := types.SliceTo(params, func(item *bo.CreateStrategyLevelTemplate) *model.StrategyLevelTemplate {
+		templateLevel := &model.StrategyLevelTemplate{
+			StrategyTemplateID: templateID,
+			Duration:           item.Duration,
+			Count:              item.Count,
+			SustainType:        item.SustainType,
+			Interval:           item.Interval,
+			Condition:          item.Condition,
+			Threshold:          item.Threshold,
+			LevelID:            item.LevelID,
+			Status:             item.Status,
+		}
+		templateLevel.WithContext(ctx)
+		return templateLevel
+	})
+	return strategyLevelTemplates
 }

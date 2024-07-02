@@ -18,7 +18,7 @@ service Template {
   // 创建策略模版
   rpc CreateTemplateStrategy(CreateTemplateStrategyRequest) returns (CreateTemplateStrategyReply) {
     option (google.api.http) = {
-      post: "/v1/template/create"
+      post: "/v1/template/strategy/create"
       body: "*"
     };
   }
@@ -26,7 +26,7 @@ service Template {
   // 更新策略模版
   rpc UpdateTemplateStrategy(UpdateTemplateStrategyRequest) returns (UpdateTemplateStrategyReply) {
     option (google.api.http) = {
-      put: "/v1/template/strategy/{id}"
+      put: "/v1/template/strategy/update/{id}"
       body: "*"
     };
   }
@@ -34,14 +34,14 @@ service Template {
   // 删除策略模版
   rpc DeleteTemplateStrategy(DeleteTemplateStrategyRequest) returns (DeleteTemplateStrategyReply) {
     option (google.api.http) = {
-      delete: "/v1/template/strategy/{id}"
+      delete: "/v1/template/strategy/delete/{id}"
     };
   }
 
   // 获取策略模版详情
   rpc GetTemplateStrategy(GetTemplateStrategyRequest) returns (GetTemplateStrategyReply) {
     option (google.api.http) = {
-      get: "/v1/template/strategy/{id}"
+      get: "/v1/template/strategy/get/{id}"
     };
   }
 
