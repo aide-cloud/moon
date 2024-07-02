@@ -29,10 +29,10 @@ func (s *TemplateService) CreateTemplateStrategy(ctx context.Context, req *strat
 	strategyLevelTemplates := make([]*model.StrategyLevelTemplate, 0, len(req.GetLevel()))
 	for levelID, mutationStrategyLevelTemplate := range req.GetLevel() {
 		strategyLevelTemplates = append(strategyLevelTemplates, &model.StrategyLevelTemplate{
-			Duration:    types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
+			Duration:    &types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
 			Count:       mutationStrategyLevelTemplate.GetCount(),
 			SustainType: vobj.Sustain(mutationStrategyLevelTemplate.GetSustainType()),
-			Interval:    types.Duration{Duration: mutationStrategyLevelTemplate.Interval},
+			Interval:    &types.Duration{Duration: mutationStrategyLevelTemplate.Interval},
 			Condition:   mutationStrategyLevelTemplate.GetCondition(),
 			Threshold:   mutationStrategyLevelTemplate.GetThreshold(),
 			LevelID:     levelID,
@@ -62,10 +62,10 @@ func (s *TemplateService) UpdateTemplateStrategy(ctx context.Context, req *strat
 	for levelID, mutationStrategyLevelTemplate := range req.GetLevel() {
 		strategyLevelTemplates = append(strategyLevelTemplates, &model.StrategyLevelTemplate{
 			StrategyTemplateID: req.GetId(),
-			Duration:           types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
+			Duration:           &types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
 			Count:              mutationStrategyLevelTemplate.GetCount(),
 			SustainType:        vobj.Sustain(mutationStrategyLevelTemplate.GetSustainType()),
-			Interval:           types.Duration{Duration: mutationStrategyLevelTemplate.Interval},
+			Interval:           &types.Duration{Duration: mutationStrategyLevelTemplate.Interval},
 			Condition:          mutationStrategyLevelTemplate.GetCondition(),
 			Threshold:          mutationStrategyLevelTemplate.GetThreshold(),
 			LevelID:            levelID,

@@ -48,25 +48,11 @@ func (l *templateRepositoryImpl) CreateTemplateStrategy(ctx context.Context, cre
 func (l *templateRepositoryImpl) UpdateTemplateStrategy(ctx context.Context, updateParam *bo.UpdateTemplateStrategyParams) error {
 	return query.Use(l.data.GetMainDB(ctx)).Transaction(func(tx *query.Query) error {
 		// 删除全部关联模板等级数据
-		if _, err := tx.StrategyLevelTemplate.WithContext(ctx).Where(query.StrategyLevelTemplate.StrategyID.Eq(updateParam.ID)).Delete(); err != nil {
+		if _, err := tx.StrategyLevelTemplate.WithContext(ctx).Where(query.StrategyLevelTemplate.StrategyTemplateID.Eq(updateParam.ID)).Delete(); err != nil {
 			return err
 		}
 
-		strategyLevelTemplates := types.SliceTo(updateParam.Data.StrategyLevelTemplates, func(item *model.StrategyLevelTemplate) *model.StrategyLevelTemplate {
-			return &model.StrategyLevelTemplate{
-				StrategyTemplateID: updateParam.ID,
-				Duration:           item.Duration,
-				LevelID:            item.LevelID,
-				Count:              item.Count,
-				SustainType:        item.SustainType,
-				Interval:           item.Interval,
-				Condition:          item.Condition,
-				Threshold:          item.Threshold,
-				Status:             item.Status,
-			}
-		})
-
-		if err := tx.StrategyLevelTemplate.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(strategyLevelTemplates...); err != nil {
+		if err := tx.StrategyLevelTemplate.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(updateParam.Data.StrategyLevelTemplates...); err != nil {
 			return err
 		}
 		_, err := tx.StrategyTemplate.WithContext(ctx).
@@ -86,7 +72,7 @@ func (l *templateRepositoryImpl) UpdateTemplateStrategy(ctx context.Context, upd
 func (l *templateRepositoryImpl) DeleteTemplateStrategy(ctx context.Context, id uint32) error {
 	return query.Use(l.data.GetMainDB(ctx)).Transaction(func(tx *query.Query) error {
 		// 删除关联数据
-		if _, err := tx.StrategyLevelTemplate.WithContext(ctx).Where(query.StrategyLevelTemplate.StrategyID.Eq(id)).Delete(); err != nil {
+		if _, err := tx.StrategyLevelTemplate.WithContext(ctx).Where(query.StrategyLevelTemplate.StrategyTemplateID.Eq(id)).Delete(); err != nil {
 			return err
 		}
 		// 删除策略
@@ -100,7 +86,7 @@ func (l *templateRepositoryImpl) DeleteTemplateStrategy(ctx context.Context, id 
 
 func (l *templateRepositoryImpl) GetTemplateStrategy(ctx context.Context, id uint32) (*model.StrategyTemplate, error) {
 	q := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).StrategyTemplate
-	return q.Preload(field.Associations).
+	return q.Preload(field.Associations).Preload(query.StrategyTemplate.StrategyLevelTemplates.Level).
 		Where(query.StrategyTemplate.ID.Eq(id)).
 		First()
 }
@@ -122,7 +108,7 @@ func (l *templateRepositoryImpl) ListTemplateStrategy(ctx context.Context, param
 		queryWrapper = queryWrapper.Or(query.StrategyTemplate.Remark.Like(params.Keyword))
 	}
 
-	queryWrapper = queryWrapper.Where(wheres...)
+	queryWrapper = queryWrapper.Where(wheres...).Preload(query.StrategyTemplate.StrategyLevelTemplates.Level)
 	if err := types.WithPageQuery[query.IStrategyTemplateDo](queryWrapper, params.Page); err != nil {
 		return nil, err
 	}
@@ -146,23 +132,4 @@ func createTemplateStrategy(createParam *bo.CreateTemplateStrategyParams) *model
 		Labels:      createParam.Labels,
 		Annotations: createParam.Annotations,
 	}
-}
-
-func transitionStrategyLevelTemplate(params []*bo.CreateStrategyLevelTemplate, StrategyID uint32) []*model.StrategyLevelTemplate {
-	return types.SliceToWithFilter(params, func(item *bo.CreateStrategyLevelTemplate) (*model.StrategyLevelTemplate, bool) {
-		if types.IsNil(item) || types.TextIsNull(item.Condition) {
-			return nil, false
-		}
-		return &model.StrategyLevelTemplate{
-			StrategyTemplateID: StrategyID,
-			Duration:           item.Duration,
-			Count:              item.Count,
-			SustainType:        item.SustainType,
-			Interval:           item.Interval,
-			Condition:          item.Condition,
-			Threshold:          item.Threshold,
-			LevelID:            item.LevelID,
-			Status:             item.Status,
-		}, true
-	})
 }
