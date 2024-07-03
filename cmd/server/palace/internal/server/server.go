@@ -14,6 +14,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/authorization"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/datasource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/dict"
+	"github.com/aide-family/moon/cmd/server/palace/internal/service/menu"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/resource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/strategy"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/team"
@@ -62,7 +63,7 @@ func RegisterService(
 	teamService *team.Service,
 	teamRoleService *team.RoleService,
 	datasourceService *datasource.Service,
-	teamMenuService *resource.MenuService,
+	teamMenuService *menu.MenuService,
 	metricService *datasource.MetricService,
 	dictService *dict.Service,
 	strategyService *strategy.Service,

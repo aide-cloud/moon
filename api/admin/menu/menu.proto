@@ -1,0 +1,205 @@
+syntax = "proto3";
+
+package api.admin.resource;
+
+import "google/api/annotations.proto";
+import "buf/validate/validate.proto";
+import "admin/model.proto";
+import "enum.proto";
+
+option go_package = "github.com/aide-family/moon/api/admin/menu;menu";
+option java_multiple_files = true;
+option java_package = "api.admin.menu";
+
+// 系统菜单管理模块
+service Menu {
+  // 获取菜单树
+  rpc TreeMenu (TreeMenuRequest) returns (TreeMenuReply) {
+    option (google.api.http) = {
+      get: "/v1/admin/menu/tree"
+    };
+  }
+
+  // 创建菜单
+  rpc CreateMenu(CreateMenuRequest)returns (CreateMenuReply){
+    option (google.api.http) = {
+      post: "/v1/menu/create"
+      body: "*"
+    };
+  }
+
+  // 更新菜单
+  rpc UpdateMenu(UpdateMenuRequest)returns (UpdateMenuReply){
+    option (google.api.http) = {
+      put: "/v1/menu/update/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除菜单
+  rpc DeleteMenu(DeleteMenuRequest)returns (DeleteMenuReply){
+    option (google.api.http) = {
+      delete: "/v1/menu/delete/{id}"
+    };
+  }
+
+  // 通过id获取菜单
+  rpc GetMenu(GetMenuRequest)returns (GetMenuReply){
+    option (google.api.http) = {
+      get: "/v1/menu/get/{id}"
+    };
+  }
+
+  // 获取菜单列表
+  rpc ListMenu(ListMenuRequest)returns (ListMenuReply){
+    option (google.api.http) = {
+      post: "/v1/menu/list"
+      body: "*"
+    };
+  }
+
+  // 批量修改菜单状态
+  rpc BatchUpdateDictStatus (BatchUpdateMenuStatusRequest) returns (BatchUpdateMenuStatusReply) {
+    option (google.api.http) = {
+      put: "/v1/menu/status"
+      body: "*"
+    };
+  }
+
+  // 批量修改菜单状态
+  rpc BatchUpdateMenuType (BatchUpdateMenuTypeRequest) returns (BatchUpdateMenuTypeReply) {
+    option (google.api.http) = {
+      put: "/v1/menu/type"
+      body: "*"
+    };
+  }
+}
+
+
+message CreateMenuRequest{
+  // 菜单名称
+  string name = 1 [(buf.validate.field).cel = {
+    message: "菜单名称不允许为空!",
+    expression: "this.size() != 0"
+  }];
+  // 菜单类型
+  MenuType menuType = 2 [(buf.validate.field).cel = {
+    expression: "(this in [0, 1, 2, 3])",
+    message: "类型值必须在[未知(0), 菜单(1), 按钮(2), 文件夹(3)]之间",
+  }];
+  // 权限标识
+  string permission = 3 ;
+  // 图标
+  string icon = 4 [(buf.validate.field).cel = {
+    message: "图标不允许为空!",
+    expression: "this.size() != 0"
+  }];
+  // 组件路径
+  string component = 5;
+  // 级别
+  int32 level = 6;
+  // 排序
+  int32 sort = 7[(buf.validate.field).cel = {
+    message: "序号不允许为空!",
+    expression: "this.size() != 0"
+  }];
+  // 路径
+  string  path = 8[(buf.validate.field).cel = {
+    message: "api路径不允许为空!",
+    expression: "this.size() != 0"
+  }];
+  // 英文名称
+  string  enName = 9[(buf.validate.field).cel = {
+    message: "菜单英文名称不能为空",
+    expression: "this.size() != 0"
+  }];
+  // 父级id
+  uint32 parentId = 10 [(buf.validate.field).cel = {
+    message: "父级id不能为空",
+    expression: "this.size() != 0"
+  }];
+}
+
+message CreateMenuReply{}
+
+message UpdateMenuRequest{
+  // 菜单id
+  uint32 id = 1 [(buf.validate.field).cel = {
+    message: "菜单id不能为空！",
+    expression: "this > 0"
+  }];
+  CreateMenuRequest data = 2 [(buf.validate.field).required = true];
+}
+
+message UpdateMenuReply{}
+
+message BatchUpdateMenuTypeRequest{
+  // 菜单id列表
+  uint32 ids = 1 [(buf.validate.field).cel = {
+    message: "请选择要更新的菜单id",
+    expression: "this.size() > 0"
+  }, (buf.validate.field).cel = {
+    message: "必须保证修改对象数据唯一",
+    expression: "this.unique()"
+  }];
+  // 类型
+  MenuType type = 2 [(buf.validate.field).cel = {
+    expression: "(this in [1, 2, 3])",
+    message: "状态值必须在[菜单(1), 按钮(2),文件夹(3)]之间",
+  }];
+}
+
+message BatchUpdateMenuTypeReply{}
+
+message BatchUpdateMenuStatusRequest{
+  // 菜单id列表
+  uint32 ids = 1 [(buf.validate.field).cel = {
+    message: "请选择要更新的菜单id",
+    expression: "this.size() > 0"
+  }, (buf.validate.field).cel = {
+    message: "必须保证修改对象数据唯一",
+    expression: "this.unique()"
+  }];
+  // 状态
+  Status status = 2 [(buf.validate.field).cel = {
+    expression: "(this in [1, 2])",
+    message: "状态值必须在[启用(1), 禁用(2)]之间",
+  }];
+}
+
+message BatchUpdateMenuStatusReply{}
+
+
+message DeleteMenuRequest {
+  // 菜单id
+  uint32 id = 1 [(buf.validate.field).cel = {
+    message: "菜单id不能为空！",
+    expression: "this > 0"
+  }];
+}
+message DeleteMenuReply {}
+
+message GetMenuRequest{
+  // 菜单id
+  uint32 id = 1 [(buf.validate.field).cel = {
+    message: "菜单id不能为空！",
+    expression: "this > 0"
+  }];
+}
+message GetMenuReply{
+  Menu menu = 1;
+}
+
+message ListMenuRequest{
+
+}
+
+message ListMenuReply{
+  repeated Menu menu = 1;
+}
+
+message TreeMenuRequest {
+}
+message TreeMenuReply {
+  repeated MenuTree menuTree = 1;
+}
