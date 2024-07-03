@@ -56,7 +56,7 @@ func (b *MenuTreeBuilder) ToTree() []*admin.Menu {
 				CreatedAt: menu.CreatedAt.String(),
 				UpdatedAt: menu.UpdatedAt.String(),
 				Level:     menu.Level,
-				Children:  NewMenuTreeBuilder(b.menuMap[menu.ID], menu.ID).ToTree(),
+				//Children:  NewMenuTreeBuilder(b.menuMap[menu.ID], menu.ID).ToTree(),
 			})
 		}
 	}

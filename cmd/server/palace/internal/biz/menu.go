@@ -19,6 +19,7 @@ func NewMenuBiz(teamMenuRepo repository.TeamMenu, msgRepo repository.Msg) *MenuB
 
 type MenuBiz struct {
 	teamMenuRepo repository.TeamMenu
+	menuRepo     repository.Menu
 	msgRepo      repository.Msg
 }
 
@@ -29,4 +30,9 @@ func (b *MenuBiz) MenuList(ctx context.Context) ([]*bizmodel.SysTeamMenu, error)
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
 	return b.teamMenuRepo.GetTeamMenuList(ctx, &bo.QueryTeamMenuListParams{TeamID: claims.GetTeam()})
+}
+
+func (b *MenuBiz) CreateMenu(ctx context.Context, params *bo.CreateMenuParams) (*bizmodel.SysTeamMenu, error) {
+
+	return nil, nil
 }
