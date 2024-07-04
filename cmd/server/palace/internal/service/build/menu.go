@@ -3,17 +3,40 @@ package build
 import (
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
+	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
 )
 
 type MenuBuilder struct {
-	*bizmodel.SysTeamMenu
+	Menu *model.SysMenu
 }
 
-func NewMenuBuilder(menu *bizmodel.SysTeamMenu) *MenuBuilder {
+func NewMenuBuilder(menu *model.SysMenu) *MenuBuilder {
 	return &MenuBuilder{
-		SysTeamMenu: menu,
+		Menu: menu,
+	}
+}
+
+func (b *MenuBuilder) ToApi() *admin.Menu {
+	if types.IsNil(b) || types.IsNil(b.Menu) {
+		return nil
+	}
+	return &admin.Menu{
+		Id:         b.Menu.ID,
+		Name:       b.Menu.Name,
+		Path:       b.Menu.Path,
+		Icon:       b.Menu.Icon,
+		Status:     api.Status(b.Menu.Status),
+		ParentId:   b.Menu.ParentID,
+		Sort:       b.Menu.Sort,
+		Type:       api.MenuType(b.Menu.Type),
+		Level:      b.Menu.Level,
+		Component:  b.Menu.Component,
+		Permission: b.Menu.Permission,
+		EnName:     b.Menu.EnName,
+		CreatedAt:  b.Menu.CreatedAt.String(),
+		UpdatedAt:  b.Menu.UpdatedAt.String(),
 	}
 }
 
@@ -61,22 +84,4 @@ func (b *MenuTreeBuilder) ToTree() []*admin.Menu {
 		}
 	}
 	return list
-}
-
-func (b *MenuBuilder) ToApi() *admin.Menu {
-	if types.IsNil(b) || types.IsNil(b.SysTeamMenu) {
-		return nil
-	}
-	menu := b.SysTeamMenu
-	return &admin.Menu{
-		Id:        menu.ID,
-		Name:      menu.Name,
-		Path:      menu.Path,
-		Icon:      menu.Icon,
-		Status:    api.Status(menu.Status),
-		ParentId:  menu.ParentID,
-		CreatedAt: menu.CreatedAt.String(),
-		UpdatedAt: menu.UpdatedAt.String(),
-		Level:     menu.Level,
-	}
 }
