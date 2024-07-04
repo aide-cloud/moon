@@ -75,7 +75,7 @@ service Menu {
     };
   }
 
-  // 批量修改菜单状态
+  // 批量修改菜单类型
   rpc BatchUpdateMenuType (BatchUpdateMenuTypeRequest) returns (BatchUpdateMenuTypeReply) {
     option (google.api.http) = {
       put: "/v1/menu/type"
@@ -88,8 +88,8 @@ service Menu {
 message CreateMenuRequest{
   // 菜单名称
   string name = 1 [(buf.validate.field).cel = {
-    message: "菜单名称不允许为空",
-    expression: "this.size() != 0"
+    message: "菜单名称长度必须在3到20个字符之间",
+    expression: "this.size() >= 3 && this.size() <= 20"
   }];
   // 菜单类型
   MenuType menuType = 2 [(buf.validate.field).cel = {
@@ -112,7 +112,10 @@ message CreateMenuRequest{
   // 路径
   string  path = 8;
   // 英文名称
-  string  enName = 9;
+  string  enName = 9[(buf.validate.field).cel = {
+    message: "英文名称长度必须在3到20个字符之间",
+    expression: "this.size() >= 3 && this.size() <= 20"
+  }];;
   // 父级id
   uint32 parentId = 10[(buf.validate.field).cel = {
     message: "父级id不允许为空!",

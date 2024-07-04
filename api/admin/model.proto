@@ -142,7 +142,7 @@ message MenuTree {
   // 菜单层级
   int32 level = 9;
   // 菜单子级数据
-  repeated Menu children = 10;
+  repeated MenuTree children = 10;
   // 菜单类型
   MenuType type = 11;
   // 组件路径
