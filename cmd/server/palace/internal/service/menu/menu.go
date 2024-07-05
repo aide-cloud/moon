@@ -96,8 +96,8 @@ func (m *MenuService) TreeMenu(ctx context.Context, req *menuapi.TreeMenuRequest
 	if err != nil {
 		return nil, err
 	}
-	menus := types.SliceTo(dbMenuList, func(menu *model.SysMenu) *admin.MenuTree {
-		return build.NewMenuBuilder(menu).ToTreeApi()
+	menus := types.SliceTo(dbMenuList, func(menu *model.SysMenu) *admin.Menu {
+		return build.NewMenuBuilder(menu).ToApi()
 	})
 	menuTrees := build.NewMenuTreeBuilder(menus, 0).ToTree()
 	return &menuapi.TreeMenuReply{MenuTree: menuTrees}, nil
