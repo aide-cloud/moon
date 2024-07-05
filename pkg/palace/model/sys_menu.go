@@ -15,7 +15,7 @@ type SysMenu struct {
 	EnName     string        `gorm:"column:en_name;type:varchar(64);not null;uniqueIndex:idx__sa__name,priority:1;comment:菜单英文名称" json:"en_name"`
 	Path       string        `gorm:"column:path;type:varchar(255);not null;uniqueIndex:idx__sa__path,priority:1;comment:api路径" json:"path"`
 	Status     vobj.Status   `gorm:"column:status;type:tinyint;not null;comment:状态" json:"status"`
-	Type       vobj.MenuType `gorm:"column:status;type:tinyint;not null;comment:状态" json:"type"`
+	Type       vobj.MenuType `gorm:"column:status;type:tinyint;not null;comment:菜单类型" json:"type"`
 	Icon       string        `gorm:"column:icon;type:varchar(255);not null;comment:图标" json:"icon"`
 	Component  string        `gorm:"column:component;type:varchar(255);not null;comment:组件路径" json:"component"`
 	Permission string        `gorm:"column:permission;type:varchar(255);not null;comment:权限标识" json:"permission"`

@@ -39,6 +39,28 @@ func (b *MenuBuilder) ToApi() *admin.Menu {
 	}
 }
 
+func (b *MenuBuilder) ToTreeApi() *admin.MenuTree {
+	if types.IsNil(b) || types.IsNil(b.Menu) {
+		return nil
+	}
+	return &admin.MenuTree{
+		Id:         b.Menu.ID,
+		Name:       b.Menu.Name,
+		Path:       b.Menu.Path,
+		Icon:       b.Menu.Icon,
+		Status:     api.Status(b.Menu.Status),
+		ParentId:   b.Menu.ParentID,
+		Sort:       b.Menu.Sort,
+		Type:       api.MenuType(b.Menu.Type),
+		Level:      b.Menu.Level,
+		Component:  b.Menu.Component,
+		Permission: b.Menu.Permission,
+		EnName:     b.Menu.EnName,
+		CreatedAt:  b.Menu.CreatedAt.String(),
+		UpdatedAt:  b.Menu.UpdatedAt.String(),
+	}
+}
+
 type MenuTreeBuilder struct {
 	menuMap  map[uint32][]*admin.MenuTree
 	parentID uint32
@@ -78,6 +100,8 @@ func (b *MenuTreeBuilder) ToTree() []*admin.MenuTree {
 				CreatedAt: menu.GetCreatedAt(),
 				UpdatedAt: menu.GetUpdatedAt(),
 				Level:     menu.GetLevel(),
+				Sort:      menu.GetSort(),
+				EnName:    menu.GetEnName(),
 				Children:  NewMenuTreeBuilder(b.menuMap[menu.GetId()], menu.GetId()).ToTree(),
 			})
 		}

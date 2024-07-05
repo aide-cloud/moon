@@ -39,22 +39,12 @@ func (b *MenuBiz) MenuList(ctx context.Context) ([]*bizmodel.SysTeamMenu, error)
 func (b *MenuBiz) GetMenu(ctx context.Context, menuId uint32) (*model.SysMenu, error) {
 	menuDetail, err := b.menuRepo.GetById(ctx, menuId)
 	if !types.IsNil(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, merr.ErrorI18nMenuNotFoundErr(ctx)
+		}
 		return nil, err
 	}
 	return menuDetail, nil
-}
-
-// CreateMenu 创建菜单
-func (b *MenuBiz) CreateMenu(ctx context.Context, params *bo.CreateMenuParams) (*model.SysMenu, error) {
-
-	menuDo, err := b.menuRepo.Create(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	if !types.IsNil(err) {
-		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
-	}
-	return menuDo, nil
 }
 
 // BatchCreateMenu 批量创建菜单
@@ -110,4 +100,13 @@ func (b *MenuBiz) DeleteMenu(ctx context.Context, menuId uint32) error {
 		return merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
 	return b.menuRepo.DeleteById(ctx, menuId)
+}
+
+// MenuAllList 获取所有菜单
+func (b *MenuBiz) MenuAllList(ctx context.Context) ([]*model.SysMenu, error) {
+	menus, err := b.menuRepo.ListAll(ctx)
+	if !types.IsNil(err) {
+		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
+	}
+	return menus, nil
 }

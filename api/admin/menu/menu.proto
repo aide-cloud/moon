@@ -21,13 +21,6 @@ service Menu {
     };
   }
 
-  // 创建菜单
-  rpc CreateMenu(CreateMenuRequest)returns (CreateMenuReply){
-    option (google.api.http) = {
-      post: "/v1/menu/create"
-      body: "*"
-    };
-  }
 
   // 批量创建菜单
   rpc BatchCreateMenu(BatchCreateMenuRequest) returns(BatchCreateMenuReply) {
@@ -105,22 +98,16 @@ message CreateMenuRequest{
   // 级别
   int32 level = 6;
   // 排序
-  int32 sort = 7[(buf.validate.field).cel = {
-    message: "排序不允许为空!",
-    expression: "this > 0"
-  }];
+  optional int32 sort = 7;
   // 路径
   string  path = 8;
   // 英文名称
   string  enName = 9[(buf.validate.field).cel = {
     message: "英文名称长度必须在3到20个字符之间",
     expression: "this.size() >= 3 && this.size() <= 20"
-  }];;
+  }];
   // 父级id
-  uint32 parentId = 10[(buf.validate.field).cel = {
-    message: "父级id不允许为空!",
-    expression: "this > 0"
-  }];;
+  optional uint32 parentId = 10;
   // 状态
   Status status = 11 [(buf.validate.field).cel = {
     expression: "(this in [1,2])",
@@ -144,7 +131,7 @@ message UpdateMenuReply{}
 message BatchUpdateMenuTypeRequest{
   // 菜单id列表
   repeated  uint32 ids = 1 [(buf.validate.field).cel = {
-    message: "请选择要更新的菜单id",
+    message: "请选择要更新的菜单",
     expression: "this.size() > 0"
   }, (buf.validate.field).cel = {
     message: "必须保证修改对象数据唯一",
@@ -162,7 +149,7 @@ message BatchUpdateMenuTypeReply{}
 message BatchUpdateMenuStatusRequest{
   // 菜单id列表
   repeated  uint32 ids = 1 [(buf.validate.field).cel = {
-    message: "请选择要更新的菜单id",
+    message: "请选择要更新的菜单",
     expression: "this.size() > 0"
   }, (buf.validate.field).cel = {
     message: "必须保证修改对象数据唯一",
@@ -221,7 +208,7 @@ message ListMenuRequest{
 }
 
 message ListMenuReply{
-  repeated Menu menu = 1;
+  repeated Menu list = 1;
   // 分页信息
   PaginationReply pagination = 2;
 }

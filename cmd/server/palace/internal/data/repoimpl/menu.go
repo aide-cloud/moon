@@ -2,6 +2,7 @@ package repoimpl
 
 import (
 	"context"
+
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
@@ -9,6 +10,7 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/query"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
 	"gorm.io/gen"
 )
 
@@ -22,29 +24,29 @@ type menuRepositoryImpl struct {
 	data *data.Data
 }
 
-func (m menuRepositoryImpl) Create(cxt context.Context, menu *bo.CreateMenuParams) (*model.SysMenu, error) {
-	menuModel := createMenuParamsToModel(menu)
-	menuModel.WithContext(cxt)
-	queryWrapper := query.Use(m.data.GetMainDB(cxt)).WithContext(cxt).SysMenu
+func (m *menuRepositoryImpl) Create(ctx context.Context, menu *bo.CreateMenuParams) (*model.SysMenu, error) {
+	menuModel := createMenuParamsToModel(ctx, menu)
+	menuModel.WithContext(ctx)
+	queryWrapper := query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysMenu
 	if err := queryWrapper.Create(menuModel); !types.IsNil(err) {
 		return nil, err
 	}
 	return menuModel, nil
 }
 
-func (m menuRepositoryImpl) BatchCreate(ctx context.Context, menus []*bo.CreateMenuParams) error {
+func (m *menuRepositoryImpl) BatchCreate(ctx context.Context, menus []*bo.CreateMenuParams) error {
 	menuModels := types.SliceToWithFilter(menus, func(item *bo.CreateMenuParams) (*model.SysMenu, bool) {
 		if types.IsNil(item) || types.TextIsNull(item.Name) {
 			return nil, false
 		}
-		return createMenuParamsToModel(item), true
+		return createMenuParamsToModel(ctx, item), true
 	})
 	return query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysMenu.CreateInBatches(menuModels, 10)
 }
 
-func (m menuRepositoryImpl) UpdateById(cxt context.Context, menu *bo.UpdateMenuParams) error {
+func (m *menuRepositoryImpl) UpdateById(ctx context.Context, menu *bo.UpdateMenuParams) error {
 	updateParam := menu.UpdateParam
-	_, err := query.Use(m.data.GetMainDB(cxt)).WithContext(cxt).SysMenu.Where(query.SysMenu.ID.Eq(menu.ID)).UpdateSimple(
+	_, err := query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysMenu.Where(query.SysMenu.ID.Eq(menu.ID)).UpdateSimple(
 		query.SysMenu.Name.Value(updateParam.Name),
 		query.SysMenu.Component.Value(updateParam.Component),
 		query.SysMenu.Path.Value(updateParam.Path),
@@ -55,24 +57,24 @@ func (m menuRepositoryImpl) UpdateById(cxt context.Context, menu *bo.UpdateMenuP
 	return err
 }
 
-func (m menuRepositoryImpl) DeleteById(cxt context.Context, id uint32) error {
-	_, err := query.Use(m.data.GetMainDB(cxt)).WithContext(cxt).SysDict.Where(query.SysMenu.ID.Eq(id)).Delete()
+func (m *menuRepositoryImpl) DeleteById(ctx context.Context, id uint32) error {
+	_, err := query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysMenu.ID.Eq(id)).Delete()
 	return err
 }
 
-func (m menuRepositoryImpl) GetById(cxt context.Context, id uint32) (*model.SysMenu, error) {
-	return query.Use(m.data.GetMainDB(cxt)).SysMenu.WithContext(cxt).Where(query.SysMenu.ID.Eq(id)).First()
+func (m *menuRepositoryImpl) GetById(ctx context.Context, id uint32) (*model.SysMenu, error) {
+	return query.Use(m.data.GetMainDB(ctx)).SysMenu.WithContext(ctx).Where(query.SysMenu.ID.Eq(id)).First()
 }
 
-func (m menuRepositoryImpl) ListAll(cxt context.Context) ([]*model.SysMenu, error) {
-	menus, err := query.Use(m.data.GetMainDB(cxt)).SysMenu.WithContext(cxt).Find()
+func (m *menuRepositoryImpl) ListAll(ctx context.Context) ([]*model.SysMenu, error) {
+	menus, err := query.Use(m.data.GetMainDB(ctx)).SysMenu.WithContext(ctx).Order(query.SysMenu.Sort.Asc()).Find()
 	if err != nil {
 		return nil, err
 	}
 	return menus, nil
 }
 
-func (m menuRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryMenuListParams) ([]*model.SysMenu, error) {
+func (m *menuRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryMenuListParams) ([]*model.SysMenu, error) {
 	queryWrapper := query.Use(m.data.GetMainDB(ctx)).SysMenu.WithContext(ctx)
 	var wheres []gen.Condition
 	if !params.Status.IsUnknown() {
@@ -97,29 +99,32 @@ func (m menuRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryMenu
 	return queryWrapper.Order(query.SysMenu.ID.Desc()).Find()
 }
 
-func (m menuRepositoryImpl) UpdateStatusByIds(ctx context.Context, status vobj.Status, ids ...uint32) error {
+func (m *menuRepositoryImpl) UpdateStatusByIds(ctx context.Context, status vobj.Status, ids ...uint32) error {
 	_, err := query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysMenu.Where(query.SysMenu.ID.In(ids...)).Update(query.SysMenu.Status, status)
 	return err
 }
 
-func (m menuRepositoryImpl) UpdateTypeByIds(ctx context.Context, menuType vobj.MenuType, ids ...uint32) error {
+func (m *menuRepositoryImpl) UpdateTypeByIds(ctx context.Context, menuType vobj.MenuType, ids ...uint32) error {
 	_, err := query.Use(m.data.GetMainDB(ctx)).WithContext(ctx).SysMenu.Where(query.SysMenu.ID.In(ids...)).Update(query.SysMenu.Type, menuType)
 	return err
 }
 
-func createMenuParamsToModel(menu *bo.CreateMenuParams) *model.SysMenu {
-	if types.IsNil(menu) {
+func createMenuParamsToModel(ctx context.Context, param *bo.CreateMenuParams) *model.SysMenu {
+	if types.IsNil(param) {
 		return nil
 	}
-	return &model.SysMenu{
-		Name:       menu.Name,
-		Path:       menu.Path,
-		Icon:       menu.Icon,
-		Type:       menu.Type,
-		Sort:       menu.Sort,
-		ParentID:   menu.ParentId,
-		Status:     menu.Status,
-		Permission: menu.Permission,
-		EnName:     menu.EnName,
+
+	menu := model.SysMenu{
+		Name:       param.Name,
+		Path:       param.Path,
+		Icon:       param.Icon,
+		Type:       param.Type,
+		Sort:       param.Sort,
+		ParentID:   param.ParentId,
+		Status:     param.Status,
+		Permission: param.Permission,
+		EnName:     param.EnName,
 	}
+	menu.WithContext(ctx)
+	return &menu
 }
