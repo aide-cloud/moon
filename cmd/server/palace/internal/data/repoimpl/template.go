@@ -38,6 +38,12 @@ func (l *templateRepositoryImpl) CreateTemplateStrategy(ctx context.Context, cre
 		if err := tx.StrategyLevelTemplate.WithContext(ctx).Create(strategyLevelTemplates...); err != nil {
 			return err
 		}
+		// 创建关联策略类型
+		strategyTemplateCategories := createTemplateCategoriesToModel(ctx, createParam.CategoriesIDs, StrategyTemplateID)
+
+		if err := tx.StrategyTemplateCategories.WithContext(ctx).Create(strategyTemplateCategories...); err != nil {
+			return err
+		}
 		return nil
 	})
 }
@@ -62,6 +68,16 @@ func (l *templateRepositoryImpl) UpdateTemplateStrategy(ctx context.Context, upd
 				query.StrategyTemplate.Alert.Value(updateParam.Data.Alert),
 				query.StrategyTemplate.Status.Value(updateParam.Data.Status.GetValue()),
 			)
+		// 删除全部关联模板类型数据
+		if _, err = tx.StrategyTemplateCategories.WithContext(ctx).Where(query.StrategyTemplateCategories.StrategyTemplateID.Eq(updateParam.ID)).Delete(); err != nil {
+			return err
+		}
+
+		strategyTemplateCategories := createTemplateCategoriesToModel(ctx, updateParam.Data.CategoriesIDs, updateParam.ID)
+
+		if err := tx.StrategyTemplateCategories.WithContext(ctx).Create(strategyTemplateCategories...); err != nil {
+			return err
+		}
 		return err
 	})
 }
@@ -148,4 +164,15 @@ func createTemplateLevelParamsToModel(ctx context.Context, params []*bo.CreateSt
 		return templateLevel
 	})
 	return strategyLevelTemplates
+}
+
+func createTemplateCategoriesToModel(ctx context.Context, categoriesIds []uint32, templateID uint32) []*model.StrategyTemplateCategories {
+	return types.SliceTo(categoriesIds, func(id uint32) *model.StrategyTemplateCategories {
+		templateCategories := &model.StrategyTemplateCategories{
+			CategoriesID:       id,
+			StrategyTemplateID: templateID,
+		}
+		templateCategories.WithContext(ctx)
+		return templateCategories
+	})
 }

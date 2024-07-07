@@ -48,6 +48,7 @@ func (s *TemplateService) CreateTemplateStrategy(ctx context.Context, req *strat
 		Labels:                 req.GetLabels(),
 		Annotations:            req.GetAnnotations(),
 		StrategyLevelTemplates: strategyLevelTemplates,
+		CategoriesIDs:          req.GetCategoriesIds(),
 	}
 	if err := s.templateBiz.CreateTemplateStrategy(ctx, params); err != nil {
 		return nil, err
