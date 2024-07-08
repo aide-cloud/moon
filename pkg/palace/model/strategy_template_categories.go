@@ -6,8 +6,8 @@ const TableNameStrategyTemplateCategories = "strategy_template_categories"
 
 type StrategyTemplateCategories struct {
 	AllFieldModel
-	StrategyTemplateID uint32 `gorm:"column:strategy_template_id;type:int;not null;comment:策略模板ID" json:"strategy_template_id"`
-	CategoriesID       uint32 `gorm:"column:categories_id;type:int;not null;comment:模板类型ID" json:"categories_id"`
+	StrategyTemplateID uint32 `gorm:"primaryKey"`
+	CategoriesID       uint32 `gorm:"primaryKey"`
 }
 
 // String json string
