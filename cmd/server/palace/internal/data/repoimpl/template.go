@@ -126,19 +126,23 @@ func (l *templateRepositoryImpl) ListTemplateStrategy(ctx context.Context, param
 		strategyWrapper = strategyWrapper.Or(query.StrategyTemplate.Expr.Like(params.Keyword))
 		strategyWrapper = strategyWrapper.Or(query.StrategyTemplate.Remark.Like(params.Keyword))
 
-		dictWrapper := query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Or(query.SysDict.Name.Like(params.Keyword))
-		dictWrapper = query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Or(query.SysDict.Value.Like(params.Keyword))
-		dictWrapper = query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Or(query.SysDict.Remark.Like(params.Keyword))
+		dictWrapper := query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx)
+
+		dictWrapper = dictWrapper.Or(query.SysDict.Name.Like(params.Keyword))
+		dictWrapper = dictWrapper.Or(query.SysDict.Value.Like(params.Keyword))
+		dictWrapper = dictWrapper.Or(query.SysDict.Remark.Like(params.Keyword))
 
 		sysDicts, err := dictWrapper.Find()
 		if err != nil {
 			return nil, err
 		}
 
-		_ = types.SliceTo(sysDicts, func(item *model.SysDict) uint32 {
+		categoriesIds := types.SliceTo(sysDicts, func(item *model.SysDict) uint32 {
 			return item.ID
 		})
-		strategyWrapper = strategyWrapper.Where(wheres...).Preload(query.StrategyTemplate.Categories)
+
+		strategyWrapper = strategyWrapper.Join(query.StrategyTemplateCategories, query.StrategyTemplateCategories.CategoriesID.In(categoriesIds...))
+
 	}
 
 	strategyWrapper = strategyWrapper.Where(wheres...).Preload(query.StrategyTemplate.StrategyLevelTemplates.Level)
