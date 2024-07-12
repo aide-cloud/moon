@@ -143,13 +143,60 @@ message UpdateStrategyGroupReply {}
 
 message CreateStrategyRequest {
   // 策略组ID
-  uint32 group_id = 1;
+  uint32 group_id = 1 [(buf.validate.field).cel = {
+    message: "策略组不能为空！",
+    expression: "this > 0"
+  }];
+  // 策略模板id
+  uint32 template_id = 2 [(buf.validate.field).cel = {
+    message: "模板不能为空！",
+    expression: "this > 0"
+  }];
+  // 备注
+  string remark = 3 [(buf.validate.field).cel = {
+    message: "字典备注长度限制在0-500个字符",
+    expression: "this.size() <= 500"
+    id: "CreateStrategyRequestRemark"
+  }];
+  // 状态
+  Status status = 4 [(buf.validate.field).cel = {
+    expression: "(this in [1,2])",
+    message: "状态值必须在[ 启用(1), 禁用(2)]之间",
+  }];
+
+  // 采样率
+  uint32 step = 5 [(buf.validate.field).cel = {
+    message: "采样率不能为空！",
+    expression: "this > 0"
+  }];
+
+  // 数据源id
+  repeated uint32 datasource_ids = 6 [(buf.validate.field).cel = {
+    message: "请选择数据源类型",
+    expression: "this.size() > 0"
+  }, (buf.validate.field).cel = {
+    message: "必须保证修改对象数据唯一",
+    expression: "this.unique()"
+  }];
+
+  // 模板来源
+    TemplateSourceType source_type = 7 [(buf.validate.field).cel = {
+      expression: "(this in [1,2])",
+      message: "模板来源必须在[ 系统(1), 团队(2)]之间",
+    }];
+
+    // 策略名称
+    string name = 8 [(buf.validate.field).cel = {
+      expression: "this.size() > 0 && this.size() <= 50"
+      message: "策略名称长度必须大于0且小于50"
+      id: "CreateStrategyRequestName"
+    }];
 }
 message CreateStrategyReply {}
 
 message UpdateStrategyRequest {
   uint32 id = 1;
-  string name = 2;
+  CreateStrategyRequest data = 2 [(buf.validate.field).required = true];
 }
 message UpdateStrategyReply {}
 

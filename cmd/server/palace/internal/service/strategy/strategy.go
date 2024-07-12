@@ -2,12 +2,14 @@ package strategy
 
 import (
 	"context"
+	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 
 	strategyapi "github.com/aide-family/moon/api/admin/strategy"
 )
 
 type Service struct {
 	strategyapi.UnimplementedStrategyServer
+	templateBiz *biz.TemplateBiz
 }
 
 func NewStrategyService() *Service {
@@ -35,6 +37,7 @@ func (s *Service) UpdateStrategyGroup(ctx context.Context, req *strategyapi.Upda
 }
 
 func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStrategyRequest) (*strategyapi.CreateStrategyReply, error) {
+
 	return &strategyapi.CreateStrategyReply{}, nil
 }
 
