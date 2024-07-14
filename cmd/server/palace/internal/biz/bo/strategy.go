@@ -14,16 +14,20 @@ type (
 		// 备注
 		Remark string `json:"remark"`
 		// 状态
-		Status *vobj.Status `json:"status"`
+		Status vobj.Status `json:"status"`
 		// 采样率
 		Step uint32 `json:"step"`
 		// 数据源id
 		DatasourceIds []uint32 `json:"datasource_ids"`
 		// 模板来源
-		SourceType *vobj.TemplateSourceType `json:"source_type"`
+		SourceType vobj.TemplateSourceType `json:"source_type"`
 		// 策略名称
 		Name   string `json:"name"`
 		TeamID uint32 `json:"teamID"`
+		// 条件
+		Condition string `json:"condition"`
+		// 阈值
+		Threshold float64 `json:"threshold"`
 	}
 
 	UpdateStrategyParams struct {
@@ -39,5 +43,21 @@ type (
 		Status     vobj.Status
 		SourceType vobj.TemplateSourceType
 		TeamID     uint32 `json:"teamID"`
+	}
+
+	GetStrategyDetailParams struct {
+		ID     uint32 `json:"id"`
+		TeamID uint32 `json:"teamID"`
+	}
+
+	DelStrategyParams struct {
+		ID     uint32 `json:"id"`
+		TeamID uint32 `json:"teamID"`
+	}
+
+	UpdateStrategyStatusParams struct {
+		Ids    []uint32 `json:"ids"`
+		TeamID uint32   `json:"teamID"`
+		Status vobj.Status
 	}
 )

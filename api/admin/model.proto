@@ -112,13 +112,13 @@ message Menu {
   // 菜单类型
   MenuType type = 10;
   // 组件路径
-  string component=11;
+  string component = 11;
   // 权限
-  string permission=12;
+  string permission = 12;
   // 排序
-  int32 sort=13;
+  int32 sort = 13;
   // 英文名称
-  string en_name=14;
+  string en_name = 14;
 }
 
 // 系统菜单树
@@ -146,13 +146,13 @@ message MenuTree {
   // 菜单类型
   MenuType type = 11;
   // 组件路径
-  string component=12;
+  string component = 12;
   // 权限
-  string permission=13;
+  string permission = 13;
   // 排序
-  int32 sort=14;
+  int32 sort = 14;
   // 英文名称
-  string en_name=15;
+  string en_name = 15;
 }
 
 
@@ -363,7 +363,16 @@ message Strategy {
   StrategyGroup group = 16;
   // 告警页面
   repeated Select alarmPages = 17;
-  // TODO 公共通知对象
+
+  // 阈值
+  double threshold = 18;
+  // 条件
+  string condition = 19;
+  // 模板id
+  uint32 strategy_template_id = 20;
+
+  string name = 21;
+
 }
 
 message StrategyGroup {

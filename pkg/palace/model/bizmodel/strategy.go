@@ -19,7 +19,7 @@ type Strategy struct {
 	Name                   string                      `gorm:"column:alert;type:varchar(64);not null;comment:模板名称" json:"name"`
 	Alert                  string                      `gorm:"column:alert;type:varchar(64);not null;comment:策略模板名称" json:"alert"`
 	Expr                   string                      `gorm:"column:expr;type:text;not null;comment:告警表达式" json:"expr"`
-	Labels                 vobj.Labels                 `gorm:"column:labels;type:JSON;not null;comment:标签" json:"labels"`
+	Labels                 *vobj.Labels                `gorm:"column:labels;type:JSON;not null;comment:标签" json:"labels"`
 	Annotations            vobj.Annotations            `gorm:"column:annotations;type:JSON;not null;comment:注解" json:"annotations"`
 	Remark                 string                      `gorm:"column:remark;type:varchar(255);not null;comment:备注" json:"remark"`
 	Status                 vobj.Status                 `gorm:"column:status;type:int;not null;comment:策略状态" json:"status"`
@@ -29,6 +29,10 @@ type Strategy struct {
 	Datasource []*Datasource `gorm:"many2many:strategy_datasource;" json:"datasource"`
 	// 策略类型
 	Categories []*SysDict `gorm:"many2many:strategy_categories"`
+	// 条件
+	Condition string `gorm:"column:condition;type:varchar(2);not null;comment:条件" json:"condition"`
+	// 阈值
+	Threshold float64 `gorm:"column:threshold;type:text;not null;comment:阈值" json:"threshold"`
 }
 
 // String json string
