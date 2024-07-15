@@ -145,19 +145,19 @@ message UpdateStrategyGroupReply {}
 
 message CreateStrategyRequest {
   // 策略组ID
-  uint32 group_id = 1 [(buf.validate.field).cel = {
+  uint32 groupId = 1 [(buf.validate.field).cel = {
     message: "策略组不能为空！",
     expression: "this > 0"
   }];
   // 策略模板id
-  uint32 template_id = 2 [(buf.validate.field).cel = {
+  uint32 templateId = 2 [(buf.validate.field).cel = {
     message: "模板不能为空！",
     expression: "this > 0"
   }];
   // 备注
   string remark = 3 [(buf.validate.field).cel = {
-    message: "字典备注长度限制在0-500个字符",
-    expression: "this.size() <= 500"
+    message: "字典备注长度限制在0-200个字符",
+    expression: "this.size() <= 200"
     id: "CreateStrategyRequestRemark"
   }];
   // 状态

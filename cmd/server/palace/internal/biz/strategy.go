@@ -45,9 +45,6 @@ func (b *StrategyBiz) GetStrategy(ctx context.Context, param *bo.GetStrategyDeta
 // CreateStrategy 创建策略
 func (b *StrategyBiz) CreateStrategy(ctx context.Context, param *bo.CreateStrategyParams) (*bizmodel.Strategy, error) {
 	_, err := b.strategyRepo.CreateStrategy(ctx, param)
-	if err != nil {
-		return nil, err
-	}
 	if !types.IsNil(err) {
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}

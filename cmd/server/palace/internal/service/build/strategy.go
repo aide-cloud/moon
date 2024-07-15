@@ -24,12 +24,10 @@ func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
+	strategyLevels := types.SliceToWithFilter(b.StrategyLevel, func(level *bizmodel.StrategyLevel) (*admin.StrategyLevel, bool) {
+		return NewStrategyLevelBuilder(level).ToApi(ctx), true
+	})
 
-	strategyLevelMap := make(map[uint32]*admin.StrategyLevel)
-
-	for _, level := range b.StrategyLevel {
-		strategyLevelMap[level.ID] = NewStrategyLevelBuilder(level).ToApi(ctx)
-	}
 	return &admin.Strategy{
 		Name:        b.Name,
 		Id:          b.ID,
@@ -41,8 +39,9 @@ func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 			return NewDatasourceBuilder(datasource).ToApi(ctx)
 		}),
 		StrategyTemplateId: b.StrategyTemplateID,
-		Level:              strategyLevelMap,
+		Levels:             strategyLevels,
 		Status:             api.Status(b.Status),
 		Step:               b.Step,
+		SourceType:         api.TemplateSourceType(b.StrategyTemplateSource),
 	}
 }

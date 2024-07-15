@@ -33,11 +33,12 @@ func (s *strategyRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.Up
 		return err
 	}
 	queryWrapper := bizquery.Use(bizDB)
-	_, err = queryWrapper.WithContext(ctx).Strategy.Where(queryWrapper.Strategy.ID.In(params.Ids...)).Update(queryWrapper.Strategy.Status, params.Status)
-	if err != nil {
-		return err
-	}
-	return nil
+	return bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
+		if _, err = queryWrapper.WithContext(ctx).Strategy.Where(queryWrapper.Strategy.ID.In(params.Ids...)).Update(queryWrapper.Strategy.Status, params.Status); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DelStrategyParams) error {
@@ -46,15 +47,15 @@ func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DelS
 		return err
 	}
 	queryWrapper := bizquery.Use(bizDB)
-	_, err = queryWrapper.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).Delete()
-	if !types.IsNil(err) {
-		return err
-	}
-	_, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete()
-	if !types.IsNil(err) {
-		return err
-	}
-	return nil
+	return bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
+		if _, err = queryWrapper.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+			return err
+		}
+		if _, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+			return err
+		}
+		return nil
+	})
 }
 
 func (s *strategyRepositoryImpl) CreateStrategy(ctx context.Context, params *bo.CreateStrategyParams) (*bizmodel.Strategy, error) {
@@ -72,47 +73,20 @@ func (s *strategyRepositoryImpl) CreateStrategy(ctx context.Context, params *bo.
 		return nil, err
 	}
 
-	strategyModel := &bizmodel.Strategy{
-		Name:                   params.Name,
-		StrategyTemplateID:     templateId,
-		StrategyTemplateSource: vobj.StrategyTemplateSource(params.SourceType),
-		Alert:                  strategyTemplate.Alert,
-		Expr:                   strategyTemplate.Expr,
-		Labels:                 strategyTemplate.Labels,
-		Annotations:            strategyTemplate.Annotations,
-		Remark:                 params.Remark,
-		Step:                   params.Step,
-		Datasource: types.SliceToWithFilter(params.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
-			if datasourceId <= 0 {
-				return nil, false
-			}
-			return &bizmodel.Datasource{
-				AllFieldModel: model.AllFieldModel{ID: datasourceId},
-			}, true
-		}),
-		Categories: types.SliceToWithFilter(strategyTemplate.Categories, func(dict *model.SysDict) (*bizmodel.SysDict, bool) {
-			if dict.ID <= 0 {
-				return nil, false
-			}
-			return &bizmodel.SysDict{
-				AllFieldModel: model.AllFieldModel{ID: dict.ID},
-			}, true
-		}),
-	}
+	strategyModel := createStrategyParamsToModel(ctx, strategyTemplate, params)
 
 	err = bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
 		if err := tx.Strategy.WithContext(ctx).Create(strategyModel); !types.IsNil(err) {
 			return err
 		}
+		// Creating  Strategy levels
+		strategyLevels := createStrategyLevelParamsToModel(ctx, params.StrategyLevel, strategyModel.ID)
+		if err := bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...); !types.IsNil(err) {
+			return err
+		}
 		return nil
 	})
 	if !types.IsNil(err) {
-		return nil, err
-	}
-
-	// Creating  Strategy levels
-	strategyLevels := createStrategyLevelParamsToModel(ctx, params.StrategyLevel, strategyModel.ID)
-	if err := bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...); !types.IsNil(err) {
 		return nil, err
 	}
 	return strategyModel, nil
@@ -124,63 +98,55 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 		return err
 	}
 	updateParam := params.UpdateParam
-
 	queryWrapper := bizquery.Use(bizDB)
-
-	datasourceIds := types.SliceToWithFilter(updateParam.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
-		if datasourceId <= 0 {
-			return nil, false
-		}
-		return &bizmodel.Datasource{
-			AllFieldModel: model.AllFieldModel{ID: datasourceId},
-		}, true
-	})
-
-	err = queryWrapper.Strategy.Datasource.
-		Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(datasourceIds...)
-
-	if !types.IsNil(err) {
-		return err
-	}
-
-	strategyTemplate, err := queryWrapper.StrategyTemplate.Where(query.StrategyTemplate.ID.Eq(params.UpdateParam.TemplateId)).Preload(field.Associations).First()
-
-	if strategyTemplate != nil {
-		categories := types.SliceToWithFilter(strategyTemplate.Categories, func(dict *bizmodel.SysDict) (*bizmodel.SysDict, bool) {
-			if dict.ID <= 0 {
+	return queryWrapper.Transaction(func(tx *bizquery.Query) error {
+		datasourceIds := types.SliceToWithFilter(updateParam.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
+			if datasourceId <= 0 {
 				return nil, false
 			}
-			return &bizmodel.SysDict{
-				AllFieldModel: model.AllFieldModel{ID: dict.ID},
+			return &bizmodel.Datasource{
+				AllFieldModel: model.AllFieldModel{ID: datasourceId},
 			}, true
 		})
 
-		err = queryWrapper.Strategy.Categories.Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(categories...)
-		if !types.IsNil(err) {
+		if err = queryWrapper.Strategy.Datasource.
+			Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(datasourceIds...); !types.IsNil(err) {
 			return err
 		}
-	}
-	// 删除策略等级数据
-	_, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete()
-	if !types.IsNil(err) {
-		return err
-	}
-	// Creating  Strategy levels
-	strategyLevels := createStrategyLevelParamsToModel(ctx, updateParam.StrategyLevel, params.ID)
-	err = bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...)
-	if !types.IsNil(err) {
-		return err
-	}
 
-	return queryWrapper.Transaction(func(tx *bizquery.Query) error {
+		strategyTemplate, err := queryWrapper.StrategyTemplate.Where(query.StrategyTemplate.ID.Eq(params.UpdateParam.TemplateId)).Preload(field.Associations).First()
+
+		if strategyTemplate != nil {
+			categories := types.SliceToWithFilter(strategyTemplate.Categories, func(dict *bizmodel.SysDict) (*bizmodel.SysDict, bool) {
+				if dict.ID <= 0 {
+					return nil, false
+				}
+				return &bizmodel.SysDict{
+					AllFieldModel: model.AllFieldModel{ID: dict.ID},
+				}, true
+			})
+
+			if err = queryWrapper.Strategy.Categories.Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(categories...); !types.IsNil(err) {
+				return err
+			}
+		}
+		// 删除策略等级数据
+		if _, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+			return err
+		}
+		// Creating  Strategy levels
+		strategyLevels := createStrategyLevelParamsToModel(ctx, updateParam.StrategyLevel, params.ID)
+		if err = bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...); !types.IsNil(err) {
+			return err
+		}
+
 		// 更新策略
-		_, err = tx.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).UpdateSimple(
+		if _, err = tx.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).UpdateSimple(
 			queryWrapper.Strategy.Name.Value(updateParam.Name),
 			queryWrapper.Strategy.Name.Value(updateParam.Name),
 			queryWrapper.Strategy.Step.Value(updateParam.Step),
 			queryWrapper.Strategy.Remark.Value(updateParam.Remark),
-		)
-		if !types.IsNil(err) {
+		); !types.IsNil(err) {
 			return err
 		}
 		return nil
@@ -267,4 +233,36 @@ func createStrategyLevelParamsToModel(ctx context.Context, params []*bo.CreateSt
 		return templateLevel
 	})
 	return strategyLevel
+}
+
+func createStrategyParamsToModel(ctx context.Context, strategyTemplate *model.StrategyTemplate, params *bo.CreateStrategyParams) *bizmodel.Strategy {
+	strategyModel := &bizmodel.Strategy{
+		Name:                   params.Name,
+		StrategyTemplateID:     strategyTemplate.ID,
+		StrategyTemplateSource: vobj.StrategyTemplateSource(params.SourceType),
+		Alert:                  strategyTemplate.Alert,
+		Expr:                   strategyTemplate.Expr,
+		Labels:                 strategyTemplate.Labels,
+		Annotations:            strategyTemplate.Annotations,
+		Remark:                 params.Remark,
+		Step:                   params.Step,
+		Datasource: types.SliceToWithFilter(params.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
+			if datasourceId <= 0 {
+				return nil, false
+			}
+			return &bizmodel.Datasource{
+				AllFieldModel: model.AllFieldModel{ID: datasourceId},
+			}, true
+		}),
+		Categories: types.SliceToWithFilter(strategyTemplate.Categories, func(dict *model.SysDict) (*bizmodel.SysDict, bool) {
+			if dict.ID <= 0 {
+				return nil, false
+			}
+			return &bizmodel.SysDict{
+				AllFieldModel: model.AllFieldModel{ID: dict.ID},
+			}, true
+		}),
+	}
+	strategyModel.WithContext(ctx)
+	return strategyModel
 }

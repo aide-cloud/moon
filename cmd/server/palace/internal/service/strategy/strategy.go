@@ -19,13 +19,13 @@ import (
 type Service struct {
 	strategyapi.UnimplementedStrategyServer
 	templateBiz *biz.TemplateBiz
-	strategy    *biz.StrategyBiz
+	strategyBiz *biz.StrategyBiz
 }
 
 func NewStrategyService(templateBiz *biz.TemplateBiz, strategy *biz.StrategyBiz) *Service {
 	return &Service{
 		templateBiz: templateBiz,
-		strategy:    strategy,
+		strategyBiz: strategy,
 	}
 }
 
@@ -81,8 +81,7 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 		DatasourceIds: req.GetDatasourceIds(),
 		StrategyLevel: strategyLevels,
 	}
-	_, err := s.strategy.CreateStrategy(ctx, param)
-	if err != nil {
+	if _, err := s.strategyBiz.CreateStrategy(ctx, param); err != nil {
 		return nil, err
 	}
 	return &strategyapi.CreateStrategyReply{}, nil
@@ -123,8 +122,7 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 			StrategyLevel: strategyLevels,
 		},
 	}
-	err := s.strategy.UpdateByID(ctx, param)
-	if !types.IsNil(err) {
+	if err := s.strategyBiz.UpdateByID(ctx, param); !types.IsNil(err) {
 		return nil, err
 	}
 	return &strategyapi.UpdateStrategyReply{}, nil
@@ -139,8 +137,7 @@ func (s *Service) DeleteStrategy(ctx context.Context, req *strategyapi.DeleteStr
 		TeamID: claims.GetTeam(),
 		ID:     req.GetId(),
 	}
-	err := s.strategy.DeleteByID(ctx, param)
-	if !types.IsNil(err) {
+	if err := s.strategyBiz.DeleteByID(ctx, param); !types.IsNil(err) {
 		return nil, err
 	}
 	return &strategyapi.DeleteStrategyReply{}, nil
@@ -155,7 +152,7 @@ func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyR
 		TeamID: claims.GetTeam(),
 		ID:     req.GetId(),
 	}
-	strategy, err := s.strategy.GetStrategy(ctx, param)
+	strategy, err := s.strategyBiz.GetStrategy(ctx, param)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +173,7 @@ func (s *Service) ListStrategy(ctx context.Context, req *strategyapi.ListStrateg
 		Keyword:    req.GetKeyword(),
 		SourceType: vobj.TemplateSourceType(req.GetDatasourceType()),
 	}
-	strategies, err := s.strategy.StrategyPage(ctx, params)
+	strategies, err := s.strategyBiz.StrategyPage(ctx, params)
 	if err != nil {
 		return nil, err
 	}

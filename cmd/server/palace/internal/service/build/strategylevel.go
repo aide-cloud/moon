@@ -2,6 +2,7 @@ package build
 
 import (
 	"context"
+
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
@@ -22,7 +23,8 @@ func (b *StrategyLevelBuilder) ToApi(ctx context.Context) *admin.StrategyLevel {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
-	return &admin.StrategyLevel{
+
+	strategyLevel := &admin.StrategyLevel{
 		Duration:    b.Duration.GetDuration(),
 		Count:       b.Count,
 		SustainType: api.SustainType(b.SustainType),
@@ -34,4 +36,5 @@ func (b *StrategyLevelBuilder) ToApi(ctx context.Context) *admin.StrategyLevel {
 		StrategyId:  b.StrategyID,
 		Condition:   api.Condition(b.Condition),
 	}
+	return strategyLevel
 }
