@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+	"fmt"
 	"sort"
 )
 
@@ -174,4 +176,23 @@ func Filter[T any](list []T, f func(T) bool) []T {
 		}
 	}
 	return rs
+}
+
+// SlicesHasDuplicates 是否有重复元素
+func SlicesHasDuplicates[T any](list ...T) bool {
+	elementMap := make(map[string]bool)
+
+	for _, item := range list {
+		// 将结构体序列化为 JSON 字符串，以便可以在 map 中使用
+		jsonStr, err := json.Marshal(item)
+		if err != nil {
+			fmt.Println("Error marshaling JSON:", err)
+			continue
+		}
+		if _, exists := elementMap[string(jsonStr)]; exists {
+			return true
+		}
+		elementMap[string(jsonStr)] = true
+	}
+	return false
 }

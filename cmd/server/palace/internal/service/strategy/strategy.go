@@ -54,6 +54,10 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
+	// 校验数组是否有重复数据
+	if has := types.SlicesHasDuplicates(req.GetStrategyLevel()); has {
+		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
+	}
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(req.GetStrategyLevel()))
 	for _, strategyLevel := range req.GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
@@ -91,6 +95,11 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 	claims, ok := middleware.ParseJwtClaims(ctx)
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
+	}
+
+	// 校验数组是否有重复数据
+	if has := types.SlicesHasDuplicates(req.GetData().GetStrategyLevel()); has {
+		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
 	}
 
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(req.GetData().GetStrategyLevel()))
