@@ -172,7 +172,7 @@ message CreateStrategyRequest {
   }];
 
   // 数据源id
-  repeated uint32 datasource_ids = 6 [(buf.validate.field).cel = {
+  repeated uint32 datasourceIds = 6 [(buf.validate.field).cel = {
     message: "请选择数据源类型",
     expression: "this.size() > 0"
   }, (buf.validate.field).cel = {
@@ -181,7 +181,7 @@ message CreateStrategyRequest {
   }];
 
   // 模板来源
-  TemplateSourceType source_type = 7 [(buf.validate.field).cel = {
+  TemplateSourceType sourceType = 7 [(buf.validate.field).cel = {
     expression: "(this in [1,2])",
     message: "模板来源必须在[ 系统(1), 团队(2)]之间",
   }];
@@ -227,7 +227,7 @@ message ListStrategyRequest {
   }];
   // 状态查询
   Status status = 3;
-  DatasourceType datasource_type = 4 ;
+  DatasourceType datasourceType = 4 ;
 }
 message ListStrategyReply {
   // 分页信息
