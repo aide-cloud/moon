@@ -308,7 +308,7 @@ message Dict{
 
 message StrategyLevel {
   // 策略持续时间
-  google.protobuf.Duration for = 3;
+  google.protobuf.Duration duration = 3;
   // 持续次数
   uint32 count = 4;
   // 持续的类型
@@ -320,7 +320,7 @@ message StrategyLevel {
   // 数据主键
   uint32 id = 10;
   // 告警等级ID
-  uint32 level_id = 11;
+  uint32 levelId = 11;
   // 告警等级明细
   Select level = 12;
   // 告警页面
@@ -328,9 +328,9 @@ message StrategyLevel {
   // 阈值
   double threshold = 14;
   // 所属策略
-  uint32 strategy_id = 15;
+  uint32 strategyId = 15;
   // 条件
-  string condition = 16;
+  Condition condition = 16;
   // TODO 通知对象
 }
 
@@ -358,7 +358,7 @@ message Strategy {
   // 策略说明信息
   string remark = 14;
   // 所属策略组
-  uint32 group_id = 15;
+  uint32 groupId = 15;
   // 策略组信息
   StrategyGroup group = 16;
   // 告警页面
@@ -367,11 +367,16 @@ message Strategy {
   // 阈值
   double threshold = 18;
   // 条件
-  string condition = 19;
+  Condition condition = 19;
   // 模板id
-  uint32 strategy_template_id = 20;
+  uint32 strategyTemplateId = 20;
 
   string name = 21;
+
+  // 持续时间
+  google.protobuf.Duration duration = 22;
+
+  uint32 step =23;
 
 }
 
@@ -407,15 +412,15 @@ message StrategyLevelTemplate {
   // 状态
   Status status = 9;
   // 告警等级ID
-  uint32 level_id = 10;
+  uint32 levelId = 10;
   // 告警等级
   Select level = 11;
   // 阈值
   double threshold = 12;
   // 条件
-  string condition = 13;
+  Condition condition = 13;
   // 所属策略
-  uint32 strategy_id = 14;
+  uint32 strategyId = 14;
 }
 
 message StrategyTemplate {

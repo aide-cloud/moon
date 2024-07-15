@@ -70,6 +70,6 @@ func (b *TemplateStrategyLevelBuilder) ToApi() *admin.StrategyLevelTemplate {
 		Level:       NewDictBuild(b.Level).ToApiSelect(),
 		Threshold:   b.Threshold,
 		StrategyId:  b.StrategyTemplateID,
-		Condition:   b.Condition,
+		Condition:   api.Condition(b.Condition),
 	}
 }

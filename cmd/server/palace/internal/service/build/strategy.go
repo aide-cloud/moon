@@ -3,6 +3,7 @@ package build
 import (
 	"context"
 
+	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
@@ -23,17 +24,25 @@ func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
+
+	strategyLevelMap := make(map[uint32]*admin.StrategyLevel)
+
+	for _, level := range b.StrategyLevel {
+		strategyLevelMap[level.ID] = NewStrategyLevelBuilder(level).ToApi(ctx)
+	}
 	return &admin.Strategy{
-		Id:    b.ID,
-		Alert: b.Alert,
-		Expr:  b.Expr,
-		//Labels: b.Labels,
+		Name:        b.Name,
+		Id:          b.ID,
+		Alert:       b.Alert,
+		Expr:        b.Expr,
+		Labels:      b.Labels.Map(),
 		Annotations: b.Annotations,
 		Datasource: types.SliceTo(b.Datasource, func(datasource *bizmodel.Datasource) *admin.Datasource {
 			return NewDatasourceBuilder(datasource).ToApi(ctx)
 		}),
 		StrategyTemplateId: b.StrategyTemplateID,
-		Threshold:          b.Threshold,
-		Condition:          b.Condition,
+		Level:              strategyLevelMap,
+		Status:             api.Status(b.Status),
+		Step:               b.Step,
 	}
 }

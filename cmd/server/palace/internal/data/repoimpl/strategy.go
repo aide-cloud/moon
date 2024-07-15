@@ -45,8 +45,13 @@ func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DelS
 	if err != nil {
 		return err
 	}
-	_, err = bizquery.Use(bizDB).Strategy.WithContext(ctx).Where(bizquery.Strategy.ID.Eq(params.ID)).Delete()
-	if err != nil {
+	queryWrapper := bizquery.Use(bizDB)
+	_, err = queryWrapper.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).Delete()
+	if !types.IsNil(err) {
+		return err
+	}
+	_, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete()
+	if !types.IsNil(err) {
 		return err
 	}
 	return nil
@@ -77,8 +82,6 @@ func (s *strategyRepositoryImpl) CreateStrategy(ctx context.Context, params *bo.
 		Annotations:            strategyTemplate.Annotations,
 		Remark:                 params.Remark,
 		Step:                   params.Step,
-		Condition:              params.Condition,
-		Threshold:              params.Threshold,
 		Datasource: types.SliceToWithFilter(params.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
 			if datasourceId <= 0 {
 				return nil, false
@@ -104,6 +107,12 @@ func (s *strategyRepositoryImpl) CreateStrategy(ctx context.Context, params *bo.
 		return nil
 	})
 	if !types.IsNil(err) {
+		return nil, err
+	}
+
+	// Creating  Strategy levels
+	strategyLevels := createStrategyLevelParamsToModel(ctx, params.StrategyLevel, strategyModel.ID)
+	if err := bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...); !types.IsNil(err) {
 		return nil, err
 	}
 	return strategyModel, nil
@@ -151,6 +160,17 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 			return err
 		}
 	}
+	// 删除策略等级数据
+	_, err = queryWrapper.StrategyLevel.WithContext(ctx).Where(queryWrapper.StrategyLevel.StrategyID.Eq(params.ID)).Delete()
+	if !types.IsNil(err) {
+		return err
+	}
+	// Creating  Strategy levels
+	strategyLevels := createStrategyLevelParamsToModel(ctx, updateParam.StrategyLevel, params.ID)
+	err = bizquery.Use(bizDB).StrategyLevel.WithContext(ctx).Create(strategyLevels...)
+	if !types.IsNil(err) {
+		return err
+	}
 
 	return queryWrapper.Transaction(func(tx *bizquery.Query) error {
 		// 更新策略
@@ -159,8 +179,6 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 			queryWrapper.Strategy.Name.Value(updateParam.Name),
 			queryWrapper.Strategy.Step.Value(updateParam.Step),
 			queryWrapper.Strategy.Remark.Value(updateParam.Remark),
-			queryWrapper.Strategy.Threshold.Value(updateParam.Threshold),
-			queryWrapper.Strategy.Condition.Value(updateParam.Condition),
 		)
 		if !types.IsNil(err) {
 			return err
@@ -194,7 +212,6 @@ func (s *strategyRepositoryImpl) FindByPage(ctx context.Context, params *bo.Quer
 	}
 
 	if !types.TextIsNull(params.Keyword) {
-
 		strategyWrapper = strategyWrapper.Or(bizquery.Use(bizDB).Strategy.Name.Like(params.Keyword))
 		strategyWrapper = strategyWrapper.Or(bizquery.Use(bizDB).Strategy.Remark.Like(params.Keyword))
 		strategyWrapper = strategyWrapper.Or(bizquery.Use(bizDB).Strategy.Alert.Like(params.Keyword))
@@ -231,4 +248,23 @@ func (s *strategyRepositoryImpl) FindByPage(ctx context.Context, params *bo.Quer
 	}
 
 	return strategyWrapper.Order(bizquery.Use(bizDB).Strategy.ID.Desc()).Find()
+}
+
+func createStrategyLevelParamsToModel(ctx context.Context, params []*bo.CreateStrategyLevel, strategyId uint32) []*bizmodel.StrategyLevel {
+	strategyLevel := types.SliceTo(params, func(item *bo.CreateStrategyLevel) *bizmodel.StrategyLevel {
+		templateLevel := &bizmodel.StrategyLevel{
+			StrategyID:  strategyId,
+			Duration:    item.Duration,
+			Count:       item.Count,
+			SustainType: item.SustainType,
+			Interval:    item.Interval,
+			Condition:   item.Condition,
+			Threshold:   item.Threshold,
+			LevelID:     item.LevelID,
+			Status:      item.Status,
+		}
+		templateLevel.WithContext(ctx)
+		return templateLevel
+	})
+	return strategyLevel
 }

@@ -66,7 +66,7 @@ type (
 		// 执行频率
 		Interval *types.Duration `json:"interval"`
 		// 条件
-		Condition string `json:"condition"`
+		Condition vobj.Condition `json:"condition"`
 		// 阈值
 		Threshold float64 `json:"threshold"`
 		// 告警等级 对应sys_dict字典id

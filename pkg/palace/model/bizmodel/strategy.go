@@ -14,6 +14,7 @@ type Strategy struct {
 	model.AllFieldModel
 	// 模板ID, 用于标记是否从模板创建而来
 	StrategyTemplateID uint32 `gorm:"column:strategy_template_id;type:int unsigned;not null;comment:策略模板ID" json:"strategy_template_id"`
+	StrategyLevelID    uint32 `gorm:"column:strategy_level_id;type:int unsigned;not null;comment:策略等级ID" json:"strategy_level_id"`
 	// 策略模板来源（系统、团队）
 	StrategyTemplateSource vobj.StrategyTemplateSource `gorm:"column:strategy_template_source;type:tinyint;not null;comment:策略模板来源（系统、团队）" json:"strategy_template_source"`
 	Name                   string                      `gorm:"column:alert;type:varchar(64);not null;comment:模板名称" json:"name"`
@@ -28,11 +29,8 @@ type Strategy struct {
 
 	Datasource []*Datasource `gorm:"many2many:strategy_datasource;" json:"datasource"`
 	// 策略类型
-	Categories []*SysDict `gorm:"many2many:strategy_categories"`
-	// 条件
-	Condition string `gorm:"column:condition;type:varchar(2);not null;comment:条件" json:"condition"`
-	// 阈值
-	Threshold float64 `gorm:"column:threshold;type:text;not null;comment:阈值" json:"threshold"`
+	Categories    []*SysDict       `gorm:"many2many:strategy_categories" json:"categories"`
+	StrategyLevel []*StrategyLevel `gorm:"foreignKey:StrategyID" json:"strategyLevel"`
 }
 
 // String json string

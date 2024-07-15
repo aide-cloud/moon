@@ -24,10 +24,8 @@ type (
 		// 策略名称
 		Name   string `json:"name"`
 		TeamID uint32 `json:"teamID"`
-		// 条件
-		Condition string `json:"condition"`
-		// 阈值
-		Threshold float64 `json:"threshold"`
+		// 策略等级
+		StrategyLevel []*CreateStrategyLevel `json:"strategyLevel"`
 	}
 
 	UpdateStrategyParams struct {
@@ -59,5 +57,27 @@ type (
 		Ids    []uint32 `json:"ids"`
 		TeamID uint32   `json:"teamID"`
 		Status vobj.Status
+	}
+
+	CreateStrategyLevel struct {
+		// 所属策略模板id
+		StrategyTemplateID uint32 `json:"strategyTemplateID"`
+		// 持续时间
+		Duration *types.Duration `json:"duration"`
+		// 持续次数
+		Count uint32 `json:"count"`
+		// 持续事件类型
+		SustainType vobj.Sustain `json:"sustainType"`
+
+		// 执行频率
+		Interval *types.Duration `json:"interval"`
+		// 条件
+		Condition vobj.Condition `json:"condition"`
+		// 阈值
+		Threshold float64 `json:"threshold"`
+		// 告警等级 对应sys_dict字典id
+		LevelID uint32 `json:"LevelID"`
+		// 状态
+		Status vobj.Status `json:"status"`
 	}
 )

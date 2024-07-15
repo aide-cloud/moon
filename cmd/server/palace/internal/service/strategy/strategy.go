@@ -54,6 +54,21 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
+	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(req.GetStrategyLevel()))
+	for _, strategyLevel := range req.GetStrategyLevel() {
+		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
+			StrategyTemplateID: req.TemplateId,
+			Count:              strategyLevel.GetCount(),
+			Duration:           types.NewDuration(strategyLevel.GetDuration()),
+			SustainType:        vobj.Sustain(strategyLevel.SustainType),
+			Interval:           types.NewDuration(strategyLevel.GetInterval()),
+			Condition:          vobj.Condition(strategyLevel.GetCondition()),
+			Threshold:          strategyLevel.GetThreshold(),
+			Status:             vobj.Status(strategyLevel.Status),
+		})
+
+	}
+
 	param := &bo.CreateStrategyParams{
 		TeamID:        claims.GetTeam(),
 		TemplateId:    req.GetTemplateId(),
@@ -64,8 +79,7 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 		Step:          req.GetStep(),
 		SourceType:    vobj.TemplateSourceType(req.GetSourceType()),
 		DatasourceIds: req.GetDatasourceIds(),
-		Threshold:     req.GetThreshold(),
-		Condition:     req.GetCondition(),
+		StrategyLevel: strategyLevels,
 	}
 	_, err := s.strategy.CreateStrategy(ctx, param)
 	if err != nil {
@@ -79,6 +93,21 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
+
+	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(req.GetData().GetStrategyLevel()))
+	for _, strategyLevel := range req.GetData().GetStrategyLevel() {
+		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
+			StrategyTemplateID: req.GetData().TemplateId,
+			Count:              strategyLevel.GetCount(),
+			Duration:           types.NewDuration(strategyLevel.GetDuration()),
+			SustainType:        vobj.Sustain(strategyLevel.SustainType),
+			Interval:           types.NewDuration(strategyLevel.GetInterval()),
+			Condition:          vobj.Condition(strategyLevel.GetCondition()),
+			Threshold:          strategyLevel.GetThreshold(),
+			Status:             vobj.Status(strategyLevel.Status),
+		})
+	}
+
 	param := &bo.UpdateStrategyParams{
 		TeamID: claims.GetTeam(),
 		ID:     req.GetId(),
@@ -91,8 +120,7 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 			Step:          req.GetData().GetStep(),
 			SourceType:    vobj.TemplateSourceType(req.GetData().GetSourceType()),
 			DatasourceIds: req.GetData().GetDatasourceIds(),
-			Threshold:     req.GetData().GetThreshold(),
-			Condition:     req.GetData().GetCondition(),
+			StrategyLevel: strategyLevels,
 		},
 	}
 	err := s.strategy.UpdateByID(ctx, param)

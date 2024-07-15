@@ -3,6 +3,7 @@ syntax = "proto3";
 package api.admin.strategy;
 
 import "google/api/annotations.proto";
+import "google/protobuf/duration.proto";
 import "buf/validate/validate.proto";
 import "admin/model.proto";
 import "enum.proto";
@@ -192,10 +193,12 @@ message CreateStrategyRequest {
     message: "策略名称长度必须大于0且小于50"
     id: "CreateStrategyRequestName"
   }];
-  // 条件
-  string condition = 9;
-  // 阈值
-  double threshold = 10;
+
+  // 策略等级
+  repeated CreateStrategyLevelRequest strategyLevel = 9 [(buf.validate.field).cel = {
+    message: "请填写策略等级数据",
+    expression: "this.size() > 0"
+  }];
 }
 message CreateStrategyReply {}
 
@@ -236,3 +239,21 @@ message ListStrategyReply {
   repeated Strategy list = 2;
 }
 
+message CreateStrategyLevelRequest{
+  // 策略持续时间
+  google.protobuf.Duration duration = 1;
+  // 持续次数
+  uint32 count = 2;
+  // 持续的类型
+  SustainType sustainType = 3;
+  // 执行频率
+  google.protobuf.Duration interval = 4;
+  // 状态
+  Status status = 5;
+  // 告警等级ID
+  uint32 levelId = 6;
+  // 阈值
+  double threshold = 7;
+  // 条件
+  Condition condition = 8;
+}

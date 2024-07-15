@@ -73,7 +73,7 @@ message MutationStrategyLevelTemplate {
   // 执行频率
   google.protobuf.Duration interval = 4;
   // 条件
-  string condition = 5;
+  Condition condition = 5;
   // 阈值
   double threshold = 6;
   // ID
