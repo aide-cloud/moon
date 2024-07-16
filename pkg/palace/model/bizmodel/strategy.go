@@ -17,8 +17,7 @@ type Strategy struct {
 	StrategyLevelID    uint32 `gorm:"column:strategy_level_id;type:int unsigned;not null;comment:策略等级ID" json:"strategy_level_id"`
 	// 策略模板来源（系统、团队）
 	StrategyTemplateSource vobj.StrategyTemplateSource `gorm:"column:strategy_template_source;type:tinyint;not null;comment:策略模板来源（系统、团队）" json:"strategy_template_source"`
-	Name                   string                      `gorm:"column:alert;type:varchar(64);not null;comment:模板名称" json:"name"`
-	Alert                  string                      `gorm:"column:alert;type:varchar(64);not null;comment:策略模板名称" json:"alert"`
+	Name                   string                      `gorm:"column:alert;type:varchar(64);not null;comment:策略名称" json:"name"`
 	Expr                   string                      `gorm:"column:expr;type:text;not null;comment:告警表达式" json:"expr"`
 	Labels                 *vobj.Labels                `gorm:"column:labels;type:JSON;not null;comment:标签" json:"labels"`
 	Annotations            vobj.Annotations            `gorm:"column:annotations;type:JSON;not null;comment:注解" json:"annotations"`

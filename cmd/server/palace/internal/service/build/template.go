@@ -64,7 +64,6 @@ func (b *TemplateStrategyLevelBuilder) ToApi() *admin.StrategyLevelTemplate {
 		Duration:    b.Duration.GetDuration(),
 		Count:       b.Count,
 		SustainType: api.SustainType(b.SustainType),
-		Interval:    b.Interval.GetDuration(),
 		Status:      api.Status(b.Status),
 		LevelId:     b.LevelID,
 		Level:       NewDictBuild(b.Level).ToApiSelect(),

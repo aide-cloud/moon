@@ -31,7 +31,6 @@ func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 	return &admin.Strategy{
 		Name:        b.Name,
 		Id:          b.ID,
-		Alert:       b.Alert,
 		Expr:        b.Expr,
 		Labels:      b.Labels.Map(),
 		Annotations: b.Annotations,

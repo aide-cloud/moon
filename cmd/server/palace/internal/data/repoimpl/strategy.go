@@ -99,16 +99,15 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 	}
 	updateParam := params.UpdateParam
 	queryWrapper := bizquery.Use(bizDB)
+	datasourceIds := types.SliceToWithFilter(updateParam.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
+		if datasourceId <= 0 {
+			return nil, false
+		}
+		return &bizmodel.Datasource{
+			AllFieldModel: model.AllFieldModel{ID: datasourceId},
+		}, true
+	})
 	return queryWrapper.Transaction(func(tx *bizquery.Query) error {
-		datasourceIds := types.SliceToWithFilter(updateParam.DatasourceIds, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
-			if datasourceId <= 0 {
-				return nil, false
-			}
-			return &bizmodel.Datasource{
-				AllFieldModel: model.AllFieldModel{ID: datasourceId},
-			}, true
-		})
-
 		if err = queryWrapper.Strategy.Datasource.
 			Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(datasourceIds...); !types.IsNil(err) {
 			return err
@@ -142,7 +141,6 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 
 		// 更新策略
 		if _, err = tx.Strategy.WithContext(ctx).Where(queryWrapper.Strategy.ID.Eq(params.ID)).UpdateSimple(
-			queryWrapper.Strategy.Name.Value(updateParam.Name),
 			queryWrapper.Strategy.Name.Value(updateParam.Name),
 			queryWrapper.Strategy.Step.Value(updateParam.Step),
 			queryWrapper.Strategy.Remark.Value(updateParam.Remark),
@@ -240,7 +238,6 @@ func createStrategyParamsToModel(ctx context.Context, strategyTemplate *model.St
 		Name:                   params.Name,
 		StrategyTemplateID:     strategyTemplate.ID,
 		StrategyTemplateSource: vobj.StrategyTemplateSource(params.SourceType),
-		Alert:                  strategyTemplate.Alert,
 		Expr:                   strategyTemplate.Expr,
 		Labels:                 strategyTemplate.Labels,
 		Annotations:            strategyTemplate.Annotations,

@@ -336,7 +336,7 @@ message StrategyLevel {
 
 message Strategy {
   // 策略名称
-  string alert = 1;
+  string name = 1;
   // 策略语句
   string expr = 2;
   // 根据策略等级配置的详细策略， key为策略等级ID
@@ -363,21 +363,18 @@ message Strategy {
   StrategyGroup group = 16;
   // 告警页面
   repeated Select alarmPages = 17;
-
   // 阈值
   double threshold = 18;
   // 条件
   Condition condition = 19;
   // 模板id
   uint32 strategyTemplateId = 20;
-  // 名称
-  string name = 21;
   // 持续时间
-  google.protobuf.Duration duration = 22;
+  google.protobuf.Duration duration = 21;
 
-  uint32 step =23;
+  uint32 step =22;
   // 模板来源
-  TemplateSourceType sourceType = 24;
+  TemplateSourceType sourceType = 23;
 
 }
 
