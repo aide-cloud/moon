@@ -2,6 +2,8 @@ package strategy
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/aide-family/moon/api/admin"
 	"github.com/aide-family/moon/api/merr"
@@ -55,9 +57,14 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
 	// 校验数组是否有重复数据
-	if has := types.SlicesHasDuplicates(req.GetStrategyLevel()); has {
+	if has := types.SlicesHasDuplicates(req.GetStrategyLevel(), func(request *strategyapi.CreateStrategyLevelRequest) string {
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%d-", request.GetLevelId()))
+		return sb.String()
+	}); has {
 		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
 	}
+
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(req.GetStrategyLevel()))
 	for _, strategyLevel := range req.GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
@@ -69,8 +76,8 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 			Condition:          vobj.Condition(strategyLevel.GetCondition()),
 			Threshold:          strategyLevel.GetThreshold(),
 			Status:             vobj.Status(strategyLevel.Status),
+			LevelID:            strategyLevel.GetLevelId(),
 		})
-
 	}
 
 	param := &bo.CreateStrategyParams{
@@ -96,9 +103,12 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
-
 	// 校验数组是否有重复数据
-	if has := types.SlicesHasDuplicates(req.GetData().GetStrategyLevel()); has {
+	if has := types.SlicesHasDuplicates(req.GetData().GetStrategyLevel(), func(request *strategyapi.CreateStrategyLevelRequest) string {
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%d-", request.GetLevelId()))
+		return sb.String()
+	}); has {
 		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
 	}
 
@@ -113,6 +123,7 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 			Condition:          vobj.Condition(strategyLevel.GetCondition()),
 			Threshold:          strategyLevel.GetThreshold(),
 			Status:             vobj.Status(strategyLevel.Status),
+			LevelID:            strategyLevel.GetLevelId(),
 		})
 	}
 

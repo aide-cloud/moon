@@ -20,7 +20,7 @@ func NewStrategyLevelBuilder(strategyLevel *bizmodel.StrategyLevel) *StrategyLev
 }
 
 func (b *StrategyLevelBuilder) ToApi(ctx context.Context) *admin.StrategyLevel {
-	if types.IsNil(b) || types.IsNil(b.Strategy) {
+	if types.IsNil(b) || types.IsNil(b.StrategyLevel) {
 		return nil
 	}
 
