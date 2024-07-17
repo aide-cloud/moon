@@ -5,13 +5,18 @@ import (
 
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
+	strategyapi "github.com/aide-family/moon/api/admin/strategy"
+	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data/runtimecache"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
+	"github.com/aide-family/moon/pkg/vobj"
 )
 
 type TemplateStrategyBuilder struct {
 	*model.StrategyTemplate
+	CreateStrategy *strategyapi.CreateTemplateStrategyRequest
+	UpdateStrategy *strategyapi.UpdateTemplateStrategyRequest
 }
 
 func NewTemplateStrategyBuilder(templateStrategy *model.StrategyTemplate) *TemplateStrategyBuilder {
@@ -42,6 +47,72 @@ func (b *TemplateStrategyBuilder) ToApi(ctx context.Context) *admin.StrategyTemp
 		Categories: types.SliceTo(b.Categories, func(item *model.SysDict) *admin.Select {
 			return NewDictBuild(item).ToApiSelect()
 		}),
+	}
+}
+
+func NewCreateTemplateRequestBuilder(createTemplateRequest *strategyapi.CreateTemplateStrategyRequest) *TemplateStrategyBuilder {
+	return &TemplateStrategyBuilder{
+		CreateStrategy: createTemplateRequest,
+	}
+}
+
+func (b *TemplateStrategyBuilder) ToCreateStrategyBO() *bo.CreateTemplateStrategyParams {
+	strategyLevelTemplates := make([]*bo.CreateStrategyLevelTemplate, 0, len(b.CreateStrategy.GetLevel()))
+	for levelID, mutationStrategyLevelTemplate := range b.CreateStrategy.GetLevel() {
+		strategyLevelTemplates = append(strategyLevelTemplates, &bo.CreateStrategyLevelTemplate{
+			Duration:    &types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
+			Count:       mutationStrategyLevelTemplate.GetCount(),
+			SustainType: vobj.Sustain(mutationStrategyLevelTemplate.GetSustainType()),
+			Condition:   vobj.Condition(mutationStrategyLevelTemplate.GetCondition()),
+			Threshold:   mutationStrategyLevelTemplate.GetThreshold(),
+			LevelID:     levelID,
+			Status:      vobj.StatusEnable,
+		})
+	}
+
+	return &bo.CreateTemplateStrategyParams{
+		Alert:                  b.CreateStrategy.GetAlert(),
+		Expr:                   b.CreateStrategy.GetExpr(),
+		Status:                 vobj.StatusEnable,
+		Remark:                 b.CreateStrategy.GetRemark(),
+		Labels:                 vobj.NewLabels(b.CreateStrategy.GetLabels()),
+		Annotations:            b.CreateStrategy.GetAnnotations(),
+		StrategyLevelTemplates: strategyLevelTemplates,
+		CategoriesIDs:          b.CreateStrategy.GetCategoriesIds(),
+	}
+}
+
+func NewUpdateTemplateRequestBuilder(updateStrategy *strategyapi.UpdateTemplateStrategyRequest) *TemplateStrategyBuilder {
+	return &TemplateStrategyBuilder{
+		UpdateStrategy: updateStrategy,
+	}
+}
+
+func (b *TemplateStrategyBuilder) ToUpdateStrategyBO() *bo.UpdateTemplateStrategyParams {
+	strategyLevelTemplates := make([]*bo.CreateStrategyLevelTemplate, 0, len(b.UpdateStrategy.GetLevel()))
+	for levelID, mutationStrategyLevelTemplate := range b.UpdateStrategy.GetLevel() {
+		strategyLevelTemplates = append(strategyLevelTemplates, &bo.CreateStrategyLevelTemplate{
+			StrategyTemplateID: b.UpdateStrategy.GetId(),
+			Duration:           &types.Duration{Duration: mutationStrategyLevelTemplate.Duration},
+			Count:              mutationStrategyLevelTemplate.GetCount(),
+			SustainType:        vobj.Sustain(mutationStrategyLevelTemplate.GetSustainType()),
+			Condition:          vobj.Condition(mutationStrategyLevelTemplate.GetCondition()),
+			Threshold:          mutationStrategyLevelTemplate.GetThreshold(),
+			LevelID:            levelID,
+			Status:             vobj.StatusEnable,
+		})
+	}
+	return &bo.UpdateTemplateStrategyParams{
+		Data: bo.CreateTemplateStrategyParams{
+			Alert:                  b.UpdateStrategy.GetAlert(),
+			Expr:                   b.UpdateStrategy.GetExpr(),
+			Status:                 vobj.StatusEnable,
+			Remark:                 b.UpdateStrategy.GetRemark(),
+			Labels:                 vobj.NewLabels(b.UpdateStrategy.GetLabels()),
+			Annotations:            b.UpdateStrategy.GetAnnotations(),
+			StrategyLevelTemplates: strategyLevelTemplates,
+		},
+		ID: b.UpdateStrategy.Id,
 	}
 }
 
