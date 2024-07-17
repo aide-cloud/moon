@@ -37,7 +37,7 @@ type (
 	QueryStrategyListParams struct {
 		Keyword    string `json:"keyword"`
 		Page       types.Pagination
-		Alert      string
+		Name       string
 		Status     vobj.Status
 		SourceType vobj.TemplateSourceType
 		TeamID     uint32 `json:"teamID"`
