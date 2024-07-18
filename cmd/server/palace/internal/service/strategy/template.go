@@ -59,7 +59,7 @@ func (s *TemplateService) GetTemplateStrategy(ctx context.Context, req *strategy
 		return nil, err
 	}
 	return &strategyapi.GetTemplateStrategyReply{
-		Detail: build.NewTemplateStrategyBuilder(detail).ToTemplateApi(ctx),
+		Detail: build.NewTemplateStrategyBuilder(detail).ToApi(ctx),
 	}, nil
 }
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
-	strategyapi "github.com/aide-family/moon/api/admin/strategy"
+	templateapi "github.com/aide-family/moon/api/admin/strategy"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data/runtimecache"
 	"github.com/aide-family/moon/pkg/palace/model"
@@ -13,31 +13,31 @@ import (
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
-type ToTemplateApi interface {
-	ToTemplateApi(ctx context.Context) *admin.StrategyTemplate
-}
-
-type ToCreateTemplateBO interface {
-	ToCreateTemplateBO() *bo.CreateTemplateStrategyParams
-}
-
-type ToUpdateTemplateBO interface {
-	ToUpdateTemplateBO() *bo.UpdateTemplateStrategyParams
-}
-
-type templateStrategyBuilder struct {
-	*model.StrategyTemplate
-	CreateStrategy *strategyapi.CreateTemplateStrategyRequest
-	UpdateStrategy *strategyapi.UpdateTemplateStrategyRequest
-}
-
-func NewTemplateStrategyBuilder(templateStrategy *model.StrategyTemplate) ToTemplateApi {
-	return &templateStrategyBuilder{
-		StrategyTemplate: templateStrategy,
+type (
+	TemplateBuilder interface {
+		ToApi(ctx context.Context) *admin.StrategyTemplate
+		ToCreateTemplateBO() *bo.CreateTemplateStrategyParams
+		ToUpdateTemplateBO() *bo.UpdateTemplateStrategyParams
 	}
-}
 
-func (b *templateStrategyBuilder) ToTemplateApi(ctx context.Context) *admin.StrategyTemplate {
+	templateStrategyBuilder struct {
+		*model.StrategyTemplate
+		CreateStrategy *templateapi.CreateTemplateStrategyRequest
+		UpdateStrategy *templateapi.UpdateTemplateStrategyRequest
+		ctx            context.Context
+	}
+
+	TemplateLevelBuilder interface {
+		ToApi() *admin.StrategyLevelTemplate
+	}
+
+	templateStrategyLevelBuilder struct {
+		*model.StrategyLevelTemplate
+		ctx context.Context
+	}
+)
+
+func (b *templateStrategyBuilder) ToApi(ctx context.Context) *admin.StrategyTemplate {
 	if types.IsNil(b) || types.IsNil(b.StrategyTemplate) {
 		return nil
 	}
@@ -47,7 +47,7 @@ func (b *templateStrategyBuilder) ToTemplateApi(ctx context.Context) *admin.Stra
 		Alert: b.Alert,
 		Expr:  b.Expr,
 		Levels: types.SliceTo(b.StrategyLevelTemplates, func(item *model.StrategyLevelTemplate) *admin.StrategyLevelTemplate {
-			return NewTemplateStrategyLevelBuilder(item).ToApi()
+			return NewBuilder().WithApiTemplateStrategyLevel(item).ToApi()
 		}),
 		Labels:      b.Labels.Map(),
 		Annotations: b.Annotations,
@@ -57,14 +57,8 @@ func (b *templateStrategyBuilder) ToTemplateApi(ctx context.Context) *admin.Stra
 		Remark:      b.Remark,
 		Creator:     NewUserBuilder(cache.GetUser(ctx, b.CreatorID)).ToApi(),
 		Categories: types.SliceTo(b.Categories, func(item *model.SysDict) *admin.Select {
-			return NewDictBuild(item).ToApiSelect()
+			return NewBuilder().WithApiDictSelect(item).ToApiSelect()
 		}),
-	}
-}
-
-func NewCreateTemplateRequestBuilder(createTemplateRequest *strategyapi.CreateTemplateStrategyRequest) ToCreateTemplateBO {
-	return &templateStrategyBuilder{
-		CreateStrategy: createTemplateRequest,
 	}
 }
 
@@ -91,12 +85,6 @@ func (b *templateStrategyBuilder) ToCreateTemplateBO() *bo.CreateTemplateStrateg
 		Annotations:            b.CreateStrategy.GetAnnotations(),
 		StrategyLevelTemplates: strategyLevelTemplates,
 		CategoriesIDs:          b.CreateStrategy.GetCategoriesIds(),
-	}
-}
-
-func NewUpdateTemplateRequestBuilder(updateStrategy *strategyapi.UpdateTemplateStrategyRequest) ToUpdateTemplateBO {
-	return &templateStrategyBuilder{
-		UpdateStrategy: updateStrategy,
 	}
 }
 
@@ -128,17 +116,7 @@ func (b *templateStrategyBuilder) ToUpdateTemplateBO() *bo.UpdateTemplateStrateg
 	}
 }
 
-type TemplateStrategyLevelBuilder struct {
-	*model.StrategyLevelTemplate
-}
-
-func NewTemplateStrategyLevelBuilder(level *model.StrategyLevelTemplate) *TemplateStrategyLevelBuilder {
-	return &TemplateStrategyLevelBuilder{
-		StrategyLevelTemplate: level,
-	}
-}
-
-func (b *TemplateStrategyLevelBuilder) ToApi() *admin.StrategyLevelTemplate {
+func (b *templateStrategyLevelBuilder) ToApi() *admin.StrategyLevelTemplate {
 	if types.IsNil(b) || types.IsNil(b.StrategyLevelTemplate) {
 		return nil
 	}
@@ -149,7 +127,7 @@ func (b *TemplateStrategyLevelBuilder) ToApi() *admin.StrategyLevelTemplate {
 		SustainType: api.SustainType(b.SustainType),
 		Status:      api.Status(b.Status),
 		LevelId:     b.LevelID,
-		Level:       NewDictBuild(b.Level).ToApiSelect(),
+		Level:       NewBuilder().WithApiDictSelect(b.Level).ToApiSelect(),
 		Threshold:   b.Threshold,
 		StrategyId:  b.StrategyTemplateID,
 		Condition:   api.Condition(b.Condition),

@@ -122,7 +122,7 @@ func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyR
 		return nil, err
 	}
 	return &strategyapi.GetStrategyReply{
-		Detail: build.NewStrategyBuilder(strategy).ToStrategyApi(ctx),
+		Detail: build.NewStrategyBuilder(strategy).ToApi(ctx),
 	}, nil
 }
 
