@@ -31,7 +31,7 @@ func NewTemplateService(templateBiz *biz.TemplateBiz, datasourceBiz *biz.Datasou
 }
 
 func (s *TemplateService) CreateTemplateStrategy(ctx context.Context, req *strategyapi.CreateTemplateStrategyRequest) (*strategyapi.CreateTemplateStrategyReply, error) {
-	params := build.NewCreateTemplateRequestBuilder(req).ToCreateStrategyBO()
+	params := build.NewCreateTemplateRequestBuilder(req).ToCreateTemplateBO()
 	if err := s.templateBiz.CreateTemplateStrategy(ctx, params); err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (s *TemplateService) CreateTemplateStrategy(ctx context.Context, req *strat
 }
 
 func (s *TemplateService) UpdateTemplateStrategy(ctx context.Context, req *strategyapi.UpdateTemplateStrategyRequest) (*strategyapi.UpdateTemplateStrategyReply, error) {
-	params := build.NewUpdateTemplateRequestBuilder(req).ToUpdateStrategyBO()
+	params := build.NewUpdateTemplateRequestBuilder(req).ToUpdateTemplateBO()
 	if err := s.templateBiz.UpdateTemplateStrategy(ctx, params); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *TemplateService) GetTemplateStrategy(ctx context.Context, req *strategy
 		return nil, err
 	}
 	return &strategyapi.GetTemplateStrategyReply{
-		Detail: build.NewTemplateStrategyBuilder(detail).ToApi(ctx),
+		Detail: build.NewTemplateStrategyBuilder(detail).ToTemplateApi(ctx),
 	}, nil
 }
 
@@ -76,7 +76,7 @@ func (s *TemplateService) ListTemplateStrategy(ctx context.Context, req *strateg
 	return &strategyapi.ListTemplateStrategyReply{
 		Pagination: build.NewPageBuilder(params.Page).ToApi(),
 		List: types.SliceTo(list, func(item *model.StrategyTemplate) *admin.StrategyTemplate {
-			return build.NewTemplateStrategyBuilder(item).ToApi(ctx)
+			return build.NewTemplateStrategyBuilder(item).ToTemplateApi(ctx)
 		}),
 	}, nil
 }

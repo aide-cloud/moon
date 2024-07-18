@@ -122,7 +122,7 @@ func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyR
 		return nil, err
 	}
 	return &strategyapi.GetStrategyReply{
-		Detail: build.NewStrategyBuilder(strategy).ToApi(ctx),
+		Detail: build.NewStrategyBuilder(strategy).ToStrategyApi(ctx),
 	}, nil
 }
 
@@ -145,7 +145,7 @@ func (s *Service) ListStrategy(ctx context.Context, req *strategyapi.ListStrateg
 	return &strategyapi.ListStrategyReply{
 		Pagination: build.NewPageBuilder(params.Page).ToApi(),
 		List: types.SliceTo(strategies, func(str *bizmodel.Strategy) *admin.Strategy {
-			return build.NewStrategyBuilder(str).ToApi(ctx)
+			return build.NewStrategyBuilder(str).ToStrategyApi(ctx)
 		}),
 	}, nil
 }

@@ -13,19 +13,31 @@ import (
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
-type TemplateStrategyBuilder struct {
+type ToTemplateApi interface {
+	ToTemplateApi(ctx context.Context) *admin.StrategyTemplate
+}
+
+type ToCreateTemplateBO interface {
+	ToCreateTemplateBO() *bo.CreateTemplateStrategyParams
+}
+
+type ToUpdateTemplateBO interface {
+	ToUpdateTemplateBO() *bo.UpdateTemplateStrategyParams
+}
+
+type templateStrategyBuilder struct {
 	*model.StrategyTemplate
 	CreateStrategy *strategyapi.CreateTemplateStrategyRequest
 	UpdateStrategy *strategyapi.UpdateTemplateStrategyRequest
 }
 
-func NewTemplateStrategyBuilder(templateStrategy *model.StrategyTemplate) *TemplateStrategyBuilder {
-	return &TemplateStrategyBuilder{
+func NewTemplateStrategyBuilder(templateStrategy *model.StrategyTemplate) ToTemplateApi {
+	return &templateStrategyBuilder{
 		StrategyTemplate: templateStrategy,
 	}
 }
 
-func (b *TemplateStrategyBuilder) ToApi(ctx context.Context) *admin.StrategyTemplate {
+func (b *templateStrategyBuilder) ToTemplateApi(ctx context.Context) *admin.StrategyTemplate {
 	if types.IsNil(b) || types.IsNil(b.StrategyTemplate) {
 		return nil
 	}
@@ -50,13 +62,13 @@ func (b *TemplateStrategyBuilder) ToApi(ctx context.Context) *admin.StrategyTemp
 	}
 }
 
-func NewCreateTemplateRequestBuilder(createTemplateRequest *strategyapi.CreateTemplateStrategyRequest) *TemplateStrategyBuilder {
-	return &TemplateStrategyBuilder{
+func NewCreateTemplateRequestBuilder(createTemplateRequest *strategyapi.CreateTemplateStrategyRequest) ToCreateTemplateBO {
+	return &templateStrategyBuilder{
 		CreateStrategy: createTemplateRequest,
 	}
 }
 
-func (b *TemplateStrategyBuilder) ToCreateStrategyBO() *bo.CreateTemplateStrategyParams {
+func (b *templateStrategyBuilder) ToCreateTemplateBO() *bo.CreateTemplateStrategyParams {
 	strategyLevelTemplates := make([]*bo.CreateStrategyLevelTemplate, 0, len(b.CreateStrategy.GetLevel()))
 	for levelID, mutationStrategyLevelTemplate := range b.CreateStrategy.GetLevel() {
 		strategyLevelTemplates = append(strategyLevelTemplates, &bo.CreateStrategyLevelTemplate{
@@ -82,13 +94,13 @@ func (b *TemplateStrategyBuilder) ToCreateStrategyBO() *bo.CreateTemplateStrateg
 	}
 }
 
-func NewUpdateTemplateRequestBuilder(updateStrategy *strategyapi.UpdateTemplateStrategyRequest) *TemplateStrategyBuilder {
-	return &TemplateStrategyBuilder{
+func NewUpdateTemplateRequestBuilder(updateStrategy *strategyapi.UpdateTemplateStrategyRequest) ToUpdateTemplateBO {
+	return &templateStrategyBuilder{
 		UpdateStrategy: updateStrategy,
 	}
 }
 
-func (b *TemplateStrategyBuilder) ToUpdateStrategyBO() *bo.UpdateTemplateStrategyParams {
+func (b *templateStrategyBuilder) ToUpdateTemplateBO() *bo.UpdateTemplateStrategyParams {
 	strategyLevelTemplates := make([]*bo.CreateStrategyLevelTemplate, 0, len(b.UpdateStrategy.GetLevel()))
 	for levelID, mutationStrategyLevelTemplate := range b.UpdateStrategy.GetLevel() {
 		strategyLevelTemplates = append(strategyLevelTemplates, &bo.CreateStrategyLevelTemplate{

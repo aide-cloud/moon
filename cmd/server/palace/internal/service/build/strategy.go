@@ -12,20 +12,32 @@ import (
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
-type StrategyBuilder struct {
+type ToStrategyApi interface {
+	ToStrategyApi(ctx context.Context) *admin.Strategy
+}
+
+type ToCreateStrategyBO interface {
+	ToCreateStrategyBO(teamID uint32) *bo.CreateStrategyParams
+}
+
+type ToUpdateStrategyBO interface {
+	ToUpdateStrategyBO(teamID uint32) *bo.UpdateStrategyParams
+}
+
+type strategyBuilder struct {
 	Strategy              *bizmodel.Strategy
 	CreateStrategyRequest *strategyapi.CreateStrategyRequest
 	UpdateStrategyRequest *strategyapi.UpdateStrategyRequest
 }
 
-func NewStrategyBuilder(strategy *bizmodel.Strategy) *StrategyBuilder {
-	return &StrategyBuilder{
+func NewStrategyBuilder(strategy *bizmodel.Strategy) ToStrategyApi {
+	return &strategyBuilder{
 		Strategy: strategy,
 	}
 }
 
-// ToApi 转换为API层数据
-func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
+// ToStrategyApi 转换为API层数据
+func (b *strategyBuilder) ToStrategyApi(ctx context.Context) *admin.Strategy {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
@@ -50,13 +62,13 @@ func (b *StrategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 	}
 }
 
-func NewCreateRequestBuilder(create *strategyapi.CreateStrategyRequest) *StrategyBuilder {
-	return &StrategyBuilder{
+func NewCreateRequestBuilder(create *strategyapi.CreateStrategyRequest) ToCreateStrategyBO {
+	return &strategyBuilder{
 		CreateStrategyRequest: create,
 	}
 }
 
-func (b *StrategyBuilder) ToCreateStrategyBO(teamID uint32) *bo.CreateStrategyParams {
+func (b *strategyBuilder) ToCreateStrategyBO(teamID uint32) *bo.CreateStrategyParams {
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(b.CreateStrategyRequest.GetStrategyLevel()))
 	for _, strategyLevel := range b.CreateStrategyRequest.GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
@@ -87,13 +99,13 @@ func (b *StrategyBuilder) ToCreateStrategyBO(teamID uint32) *bo.CreateStrategyPa
 	return params
 }
 
-func NewUpdateRequestBuilder(update *strategyapi.UpdateStrategyRequest) *StrategyBuilder {
-	return &StrategyBuilder{
+func NewUpdateRequestBuilder(update *strategyapi.UpdateStrategyRequest) ToUpdateStrategyBO {
+	return &strategyBuilder{
 		UpdateStrategyRequest: update,
 	}
 }
 
-func (b *StrategyBuilder) ToUpdateStrategyBO(teamID uint32) *bo.UpdateStrategyParams {
+func (b *strategyBuilder) ToUpdateStrategyBO(teamID uint32) *bo.UpdateStrategyParams {
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(b.UpdateStrategyRequest.GetData().GetStrategyLevel()))
 	for _, strategyLevel := range b.UpdateStrategyRequest.GetData().GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
