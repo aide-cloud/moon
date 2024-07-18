@@ -3,7 +3,9 @@ package build
 import (
 	"context"
 
+	"github.com/aide-family/moon/api/admin"
 	dictapi "github.com/aide-family/moon/api/admin/dict"
+	menuapi "github.com/aide-family/moon/api/admin/menu"
 	strategyapi "github.com/aide-family/moon/api/admin/strategy"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/pkg/palace/model"
@@ -46,6 +48,16 @@ type (
 		WithApiDict(dict *model.SysDict) DictBuilder
 
 		WithApiDictSelect(dict *model.SysDict) DictBuilder
+
+		WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuBuilder
+
+		WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuBuilder
+
+		WithApiMenu(menu *model.SysMenu) MenuBuilder
+
+		WithBatchCreateMenuBo(menus *menuapi.BatchCreateMenuRequest) MenuBuilder
+
+		WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuTreeBuilder
 	}
 )
 
@@ -136,6 +148,50 @@ func (b *builder) WithApiDictSelect(dict *model.SysDict) DictBuilder {
 	return &dictBuilder{
 		SysDict: dict,
 		ctx:     b.ctx,
+	}
+}
+
+func (b *builder) WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuBuilder {
+	return &menuBuilder{
+		CreateMenuRequest: menu,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuBuilder {
+	return &menuBuilder{
+		UpdateMenuRequest: menu,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithApiMenu(menu *model.SysMenu) MenuBuilder {
+	return &menuBuilder{
+		Menu: menu,
+		ctx:  b.ctx,
+	}
+}
+
+func (b *builder) WithBatchCreateMenuBo(menu *menuapi.BatchCreateMenuRequest) MenuBuilder {
+	return &menuBuilder{
+		BatchCreateMenuRequest: menu,
+		ctx:                    b.ctx,
+	}
+}
+
+func (b *builder) WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuTreeBuilder {
+	menuMap := make(map[uint32][]*admin.Menu)
+	// 按照父级ID分组
+	for _, menu := range menuList {
+		if _, ok := menuMap[menu.GetParentId()]; !ok {
+			menuMap[menu.GetParentId()] = make([]*admin.Menu, 0)
+		}
+		menuMap[menu.GetParentId()] = append(menuMap[menu.GetParentId()], menu)
+	}
+	return &menuTreeBuilder{
+		MenuMap:  menuMap,
+		ParentID: parentID,
+		ctx:      b.ctx,
 	}
 }
 
