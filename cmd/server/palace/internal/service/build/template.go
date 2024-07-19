@@ -55,7 +55,7 @@ func (b *templateStrategyBuilder) ToApi(ctx context.Context) *admin.StrategyTemp
 		CreatedAt:   b.CreatedAt.String(),
 		UpdatedAt:   b.UpdatedAt.String(),
 		Remark:      b.Remark,
-		Creator:     NewUserBuilder(cache.GetUser(ctx, b.CreatorID)).ToApi(),
+		Creator:     NewBuilder().WithApiUserBo(cache.GetUser(ctx, b.CreatorID)).ToApi(),
 		Categories: types.SliceTo(b.Categories, func(item *model.SysDict) *admin.Select {
 			return NewBuilder().WithApiDictSelect(item).ToApiSelect()
 		}),

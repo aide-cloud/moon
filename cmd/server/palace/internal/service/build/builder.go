@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/aide-family/moon/api/admin"
+	datasourceapi "github.com/aide-family/moon/api/admin/datasource"
 	dictapi "github.com/aide-family/moon/api/admin/dict"
 	menuapi "github.com/aide-family/moon/api/admin/menu"
 	strategyapi "github.com/aide-family/moon/api/admin/strategy"
+	teamapi "github.com/aide-family/moon/api/admin/team"
+	userapi "github.com/aide-family/moon/api/admin/user"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
@@ -58,6 +61,34 @@ type (
 		WithBatchCreateMenuBo(menus *menuapi.BatchCreateMenuRequest) MenuBuilder
 
 		WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuTreeBuilder
+
+		WithApiTeam(team *model.SysTeam) TeamBuilder
+
+		WithSelectTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder
+
+		WithApiTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder
+
+		WithCreateTeamBo(req *teamapi.CreateTeamRequest) TeamBuilder
+
+		WithUpdateTeamBo(req *teamapi.UpdateTeamRequest) TeamBuilder
+
+		WithListTeamBo(req *teamapi.ListTeamRequest) TeamBuilder
+
+		WithListTeamTeamMemberBo(req *teamapi.ListTeamMemberRequest) TeamBuilder
+
+		WithAddTeamMemberBo(req *teamapi.AddTeamMemberRequest) TeamBuilder
+
+		WithApiTeamMember(teamMember *bizmodel.SysTeamMember) TeamMemberBuilder
+
+		WithApiUserBo(user *model.SysUser) UserBuilder
+
+		WithCreateUserBo(req *userapi.CreateUserRequest) UserBuilder
+
+		WithUpdateUserBo(req *userapi.UpdateUserRequest) UserBuilder
+
+		WithCreateDatasourceBo(req *datasourceapi.CreateDatasourceRequest) DatasourceBuilder
+
+		WithListDatasourceBo(req *datasourceapi.ListDatasourceRequest) DatasourceBuilder
 	}
 )
 
@@ -192,6 +223,109 @@ func (b *builder) WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuT
 		MenuMap:  menuMap,
 		ParentID: parentID,
 		ctx:      b.ctx,
+	}
+}
+
+func (b *builder) WithApiTeam(team *model.SysTeam) TeamBuilder {
+	return &teamBuilder{
+		SysTeam: team,
+		ctx:     b.ctx,
+	}
+}
+
+func (b *builder) WithSelectTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder {
+	return &teamRoleBuilder{
+		SysTeamRole: team,
+		ctx:         b.ctx,
+	}
+}
+
+func (b *builder) WithApiTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder {
+	return &teamRoleBuilder{
+		SysTeamRole: team,
+		ctx:         b.ctx,
+	}
+}
+
+func (b *builder) WithCreateTeamBo(req *teamapi.CreateTeamRequest) TeamBuilder {
+	return &teamBuilder{
+		CreateRoleRequest: req,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithUpdateTeamBo(req *teamapi.UpdateTeamRequest) TeamBuilder {
+	return &teamBuilder{
+		UpdateTeamRequest: req,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithListTeamBo(req *teamapi.ListTeamRequest) TeamBuilder {
+	return &teamBuilder{
+		ListTeamRequest: req,
+		ctx:             b.ctx,
+	}
+}
+
+func (b *builder) WithListTeamTeamMemberBo(req *teamapi.ListTeamMemberRequest) TeamBuilder {
+	return &teamBuilder{
+		ListTeamMemberRequest: req,
+		ctx:                   b.ctx,
+	}
+}
+
+func (b *builder) WithAddTeamMemberBo(req *teamapi.AddTeamMemberRequest) TeamBuilder {
+	return &teamBuilder{
+		AddTeamMemberRequest: req,
+		ctx:                  b.ctx,
+	}
+}
+
+func (b *builder) WithApiTeamMember(teamMember *bizmodel.SysTeamMember) TeamMemberBuilder {
+	return &teamMemberBuilder{
+		SysTeamMember: teamMember,
+		ctx:           b.ctx,
+	}
+}
+
+func (b *builder) WithApiUserBo(user *model.SysUser) UserBuilder {
+	return &userBuilder{
+		SysUser: user,
+		ctx:     b.ctx,
+	}
+}
+
+func (b *builder) WithCreateUserBo(req *userapi.CreateUserRequest) UserBuilder {
+	return &userBuilder{
+		CreateUserRequest: req,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithUpdateUserBo(req *userapi.UpdateUserRequest) UserBuilder {
+	return &userBuilder{
+		UpdateUserRequest: req,
+		ctx:               b.ctx,
+	}
+}
+
+func (b *builder) WithCreateDatasourceBo(req *datasourceapi.CreateDatasourceRequest) DatasourceBuilder {
+	return &datasourceBuilder{
+		CreateDatasourceRequest: req, ctx: b.ctx}
+}
+
+func (b *builder) WithUpdateDatasourceBo(req *datasourceapi.UpdateDatasourceRequest) DatasourceBuilder {
+	return &datasourceBuilder{
+		UpdateDatasourceRequest: req,
+		ctx:                     b.ctx,
+	}
+}
+
+func (b *builder) WithListDatasourceBo(req *datasourceapi.ListDatasourceRequest) DatasourceBuilder {
+	return &datasourceBuilder{
+		ListDatasourceRequest: req,
+		ctx:                   b.ctx,
 	}
 }
 
