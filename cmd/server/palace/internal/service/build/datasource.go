@@ -17,9 +17,11 @@ import (
 )
 
 type (
-	DatasourceBuilder interface {
+	DatasourceModelBuilder interface {
 		ToApi() *admin.Datasource
+	}
 
+	DatasourceRequestBuilder interface {
 		ToCreateDatasourceBO(configBytes []byte) *bo.CreateDatasourceParams
 
 		ToUpdateDatasourceBO() *bo.UpdateDatasourceBaseInfoParams
@@ -32,11 +34,16 @@ type (
 	}
 
 	datasourceBuilder struct {
+		// model
 		*bizmodel.Datasource
+
+		// request
 		CreateDatasourceRequest *datasourceapi.CreateDatasourceRequest
 		UpdateDatasourceRequest *datasourceapi.UpdateDatasourceRequest
 		ListDatasourceRequest   *datasourceapi.ListDatasourceRequest
-		ctx                     context.Context
+
+		//context
+		ctx context.Context
 	}
 
 	datasourceQueryDataBuilder struct {

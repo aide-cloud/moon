@@ -13,9 +13,11 @@ import (
 )
 
 type (
-	MenuBuilder interface {
+	MenuModelBuilder interface {
 		ToApi() *admin.Menu
+	}
 
+	MenuRequestBuilder interface {
 		ToCreateMenuBO(menu *menuapi.CreateMenuRequest) *bo.CreateMenuParams
 
 		ToBatchCreateMenuBO() []*bo.CreateMenuParams

@@ -2,28 +2,45 @@ package build
 
 import (
 	"context"
-	strategyapi "github.com/aide-family/moon/api/admin/strategy"
-	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
-	"github.com/aide-family/moon/pkg/vobj"
 
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
+	strategyapi "github.com/aide-family/moon/api/admin/strategy"
+	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
+	"github.com/aide-family/moon/pkg/vobj"
 )
 
 type (
-	StrategyBuilder interface {
+	StrategyModelBuilder interface {
 		ToApi(ctx context.Context) *admin.Strategy
+	}
+
+	StrategyRequestBuilder interface {
 		ToCreateStrategyBO(teamID uint32) *bo.CreateStrategyParams
 		ToUpdateStrategyBO(teamID uint32) *bo.UpdateStrategyParams
 	}
 
+	StrategyLevelModelBuilder interface {
+		ToApi() *admin.StrategyLevel
+	}
+	strategyLevelBuilder struct {
+		// model
+		*bizmodel.StrategyLevel
+		ctx context.Context
+	}
+
 	strategyBuilder struct {
-		*bizmodel.Strategy
+		// model
+		Strategy      *bizmodel.Strategy
+		StrategyLevel *bizmodel.StrategyLevel
+		// request
 		CreateStrategy *strategyapi.CreateStrategyRequest
 		UpdateStrategy *strategyapi.UpdateStrategyRequest
-		ctx            context.Context
+
+		// context
+		ctx context.Context
 	}
 )
 
@@ -32,24 +49,24 @@ func (b *strategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
-	strategyLevels := types.SliceToWithFilter(b.StrategyLevel, func(level *bizmodel.StrategyLevel) (*admin.StrategyLevel, bool) {
-		return NewStrategyLevelBuilder(level).ToApi(ctx), true
+	strategyLevels := types.SliceToWithFilter(b.Strategy.StrategyLevel, func(level *bizmodel.StrategyLevel) (*admin.StrategyLevel, bool) {
+		return NewBuilder().WithApiStrategyLevel(level).ToApi(), true
 	})
 
 	return &admin.Strategy{
-		Name:        b.Name,
-		Id:          b.ID,
-		Expr:        b.Expr,
-		Labels:      b.Labels.Map(),
-		Annotations: b.Annotations,
-		Datasource: types.SliceTo(b.Datasource, func(datasource *bizmodel.Datasource) *admin.Datasource {
+		Name:        b.Strategy.Name,
+		Id:          b.Strategy.ID,
+		Expr:        b.Strategy.Expr,
+		Labels:      b.Strategy.Labels.Map(),
+		Annotations: b.Strategy.Annotations,
+		Datasource: types.SliceTo(b.Strategy.Datasource, func(datasource *bizmodel.Datasource) *admin.Datasource {
 			return NewBuilder().WithContext(ctx).WithDoDatasource(datasource).ToApi()
 		}),
-		StrategyTemplateId: b.StrategyTemplateID,
+		StrategyTemplateId: b.Strategy.StrategyTemplateID,
 		Levels:             strategyLevels,
-		Status:             api.Status(b.Status),
-		Step:               b.Step,
-		SourceType:         api.TemplateSourceType(b.StrategyTemplateSource),
+		Status:             api.Status(b.Strategy.Status),
+		Step:               b.Strategy.Step,
+		SourceType:         api.TemplateSourceType(b.Strategy.StrategyTemplateSource),
 	}
 }
 
@@ -113,4 +130,24 @@ func (b *strategyBuilder) ToUpdateStrategyBO(teamID uint32) *bo.UpdateStrategyPa
 			StrategyLevel: strategyLevels,
 		},
 	}
+}
+
+func (b *strategyLevelBuilder) ToApi() *admin.StrategyLevel {
+	if types.IsNil(b) || types.IsNil(b.StrategyLevel) {
+		return nil
+	}
+
+	strategyLevel := &admin.StrategyLevel{
+		Duration:    b.Duration.GetDuration(),
+		Count:       b.Count,
+		SustainType: api.SustainType(b.SustainType),
+		Interval:    b.Interval.GetDuration(),
+		Status:      api.Status(b.Status),
+		Id:          b.ID,
+		LevelId:     b.LevelID,
+		Threshold:   b.Threshold,
+		StrategyId:  b.StrategyID,
+		Condition:   api.Condition(b.Condition),
+	}
+	return strategyLevel
 }

@@ -14,17 +14,25 @@ import (
 )
 
 type (
-	TemplateBuilder interface {
+	TemplateModelBuilder interface {
 		ToApi(ctx context.Context) *admin.StrategyTemplate
+	}
+
+	TemplateRequestBuilder interface {
 		ToCreateTemplateBO() *bo.CreateTemplateStrategyParams
 		ToUpdateTemplateBO() *bo.UpdateTemplateStrategyParams
 	}
 
 	templateStrategyBuilder struct {
+		// model
 		*model.StrategyTemplate
+
+		// request
 		CreateStrategy *templateapi.CreateTemplateStrategyRequest
 		UpdateStrategy *templateapi.UpdateTemplateStrategyRequest
-		ctx            context.Context
+
+		// context
+		ctx context.Context
 	}
 
 	TemplateLevelBuilder interface {

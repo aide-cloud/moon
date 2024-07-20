@@ -13,21 +13,27 @@ import (
 )
 
 type (
-	DictBuilder interface {
+	DictModelBuilder interface {
 		ToApi() *admin.Dict
-
 		ToApiSelect() *admin.Select
+	}
 
+	DictRequestBuilder interface {
 		ToCreateDictBO() *bo.CreateDictParams
 
 		ToUpdateDictBO() *bo.UpdateDictParams
 	}
 
 	dictBuilder struct {
+		// model
 		*model.SysDict
+
+		// request
 		CreateDictRequest *dictapi.CreateDictRequest
 		UpdateDictRequest *dictapi.UpdateDictRequest
-		ctx               context.Context
+
+		// context
+		ctx context.Context
 	}
 )
 

@@ -29,66 +29,75 @@ type (
 
 		// TODO 注册新的数据转换方法写在这里
 
-		WithDoDatasource(d *bizmodel.Datasource) DatasourceBuilder
+		WithDoDatasource(d *bizmodel.Datasource) DatasourceModelBuilder
+		WithCreateDatasourceBo(user *datasourceapi.CreateDatasourceRequest) DatasourceRequestBuilder
+		WithListDatasourceBo(user *datasourceapi.ListDatasourceRequest) DatasourceRequestBuilder
+
 		WithBoDatasourceQueryData(d *bo.DatasourceQueryData) DatasourceQueryDataBuilder
 
-		WithApiTemplateStrategy(template *model.StrategyTemplate) TemplateBuilder
-		WithCreateBoTemplateStrategy(template *strategyapi.CreateTemplateStrategyRequest) TemplateBuilder
-		WithUpdateBoTemplateStrategy(template *strategyapi.UpdateTemplateStrategyRequest) TemplateBuilder
+		WithApiTemplateStrategy(template *model.StrategyTemplate) TemplateModelBuilder
+		WithCreateBoTemplateStrategy(template *strategyapi.CreateTemplateStrategyRequest) TemplateRequestBuilder
+		WithUpdateBoTemplateStrategy(template *strategyapi.UpdateTemplateStrategyRequest) TemplateRequestBuilder
 
 		WithApiTemplateStrategyLevel(*model.StrategyLevelTemplate) TemplateLevelBuilder
 
-		WithApiStrategy(strategy *bizmodel.Strategy) StrategyBuilder
+		WithApiStrategy(strategy *bizmodel.Strategy) StrategyModelBuilder
 
-		WithCreateBoStrategy(strategy *strategyapi.CreateStrategyRequest) StrategyBuilder
+		WithCreateBoStrategy(strategy *strategyapi.CreateStrategyRequest) StrategyRequestBuilder
 
-		WithUpdateBoStrategy(strategy *strategyapi.UpdateStrategyRequest) StrategyBuilder
+		WithUpdateBoStrategy(strategy *strategyapi.UpdateStrategyRequest) StrategyRequestBuilder
 
-		WithCreateBoDict(dict *dictapi.CreateDictRequest) DictBuilder
+		WithApiStrategyLevel(strategy *bizmodel.StrategyLevel) StrategyLevelModelBuilder
 
-		WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictBuilder
+		WithCreateBoDict(dict *dictapi.CreateDictRequest) DictRequestBuilder
 
-		WithApiDict(dict *model.SysDict) DictBuilder
+		WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictRequestBuilder
 
-		WithApiDictSelect(dict *model.SysDict) DictBuilder
+		WithApiDict(dict *model.SysDict) DictModelBuilder
 
-		WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuBuilder
+		WithApiDictSelect(dict *model.SysDict) DictModelBuilder
 
-		WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuBuilder
+		WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuRequestBuilder
 
-		WithApiMenu(menu *model.SysMenu) MenuBuilder
+		WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuRequestBuilder
 
-		WithBatchCreateMenuBo(menus *menuapi.BatchCreateMenuRequest) MenuBuilder
+		WithApiMenu(menu *model.SysMenu) MenuModelBuilder
+
+		WithBatchCreateMenuBo(menus *menuapi.BatchCreateMenuRequest) MenuRequestBuilder
 
 		WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuTreeBuilder
 
-		WithApiTeam(team *model.SysTeam) TeamBuilder
+		WithApiTeam(team *model.SysTeam) TeamModelBuilder
 
 		WithSelectTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder
 
 		WithApiTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder
 
-		WithCreateTeamBo(req *teamapi.CreateTeamRequest) TeamBuilder
+		WithCreateTeamBo(team *teamapi.CreateTeamRequest, LeaderId uint32) TeamRequestBuilder
 
-		WithUpdateTeamBo(req *teamapi.UpdateTeamRequest) TeamBuilder
+		WithUpdateTeamBo(team *teamapi.UpdateTeamRequest) TeamRequestBuilder
 
-		WithListTeamBo(req *teamapi.ListTeamRequest) TeamBuilder
+		WithListTeamBo(team *teamapi.ListTeamRequest) TeamRequestBuilder
 
-		WithListTeamTeamMemberBo(req *teamapi.ListTeamMemberRequest) TeamBuilder
+		WithListTeamTeamMemberBo(team *teamapi.ListTeamMemberRequest) TeamRequestBuilder
 
-		WithAddTeamMemberBo(req *teamapi.AddTeamMemberRequest) TeamBuilder
+		WithAddTeamMemberBo(team *teamapi.AddTeamMemberRequest) TeamRequestBuilder
+
+		WithLeaderIdBo(leaderId uint32) TeamRequestBuilder
 
 		WithApiTeamMember(teamMember *bizmodel.SysTeamMember) TeamMemberBuilder
 
-		WithApiUserBo(user *model.SysUser) UserBuilder
+		WithApiUserBo(user *model.SysUser) UserModelBuilder
 
-		WithCreateUserBo(req *userapi.CreateUserRequest) UserBuilder
+		WithCreateUserBo(user *userapi.CreateUserRequest) UserRequestBuilder
 
-		WithUpdateUserBo(req *userapi.UpdateUserRequest) UserBuilder
+		WithUpdateUserBo(user *userapi.UpdateUserRequest) UserRequestBuilder
 
-		WithCreateDatasourceBo(req *datasourceapi.CreateDatasourceRequest) DatasourceBuilder
+		WithApiDatasourceMetric(metric *bizmodel.DatasourceMetric) DatasourceMetricModelBuilder
 
-		WithListDatasourceBo(req *datasourceapi.ListDatasourceRequest) DatasourceBuilder
+		WithApiDatasourceMetricLabel(metric *bizmodel.MetricLabel) DatasourceMetricLabelModelBuilder
+
+		WithApiDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
 	}
 )
 
@@ -99,27 +108,27 @@ func (b *builder) WithBoDatasourceQueryData(d *bo.DatasourceQueryData) Datasourc
 	}
 }
 
-func (b *builder) WithDoDatasource(d *bizmodel.Datasource) DatasourceBuilder {
+func (b *builder) WithDoDatasource(d *bizmodel.Datasource) DatasourceModelBuilder {
 	return &datasourceBuilder{
 		Datasource: d,
 		ctx:        b.ctx,
 	}
 }
-func (b *builder) WithApiTemplateStrategy(template *model.StrategyTemplate) TemplateBuilder {
+func (b *builder) WithApiTemplateStrategy(template *model.StrategyTemplate) TemplateModelBuilder {
 	return &templateStrategyBuilder{
 		StrategyTemplate: template,
 		ctx:              b.ctx,
 	}
 }
 
-func (b *builder) WithCreateBoTemplateStrategy(template *strategyapi.CreateTemplateStrategyRequest) TemplateBuilder {
+func (b *builder) WithCreateBoTemplateStrategy(template *strategyapi.CreateTemplateStrategyRequest) TemplateRequestBuilder {
 	return &templateStrategyBuilder{
 		CreateStrategy: template,
 		ctx:            b.ctx,
 	}
 }
 
-func (b *builder) WithUpdateBoTemplateStrategy(template *strategyapi.UpdateTemplateStrategyRequest) TemplateBuilder {
+func (b *builder) WithUpdateBoTemplateStrategy(template *strategyapi.UpdateTemplateStrategyRequest) TemplateRequestBuilder {
 	return &templateStrategyBuilder{
 		UpdateStrategy: template,
 		ctx:            b.ctx,
@@ -133,77 +142,77 @@ func (b *builder) WithApiTemplateStrategyLevel(template *model.StrategyLevelTemp
 	}
 }
 
-func (b *builder) WithApiStrategy(strategy *bizmodel.Strategy) StrategyBuilder {
+func (b *builder) WithApiStrategy(strategy *bizmodel.Strategy) StrategyModelBuilder {
 	return &strategyBuilder{
 		Strategy: strategy,
 		ctx:      b.ctx,
 	}
 }
 
-func (b *builder) WithCreateBoStrategy(strategy *strategyapi.CreateStrategyRequest) StrategyBuilder {
+func (b *builder) WithCreateBoStrategy(strategy *strategyapi.CreateStrategyRequest) StrategyRequestBuilder {
 	return &strategyBuilder{
 		CreateStrategy: strategy,
 		ctx:            b.ctx,
 	}
 }
 
-func (b *builder) WithUpdateBoStrategy(strategy *strategyapi.UpdateStrategyRequest) StrategyBuilder {
+func (b *builder) WithUpdateBoStrategy(strategy *strategyapi.UpdateStrategyRequest) StrategyRequestBuilder {
 	return &strategyBuilder{
 		UpdateStrategy: strategy,
 		ctx:            b.ctx,
 	}
 }
 
-func (b *builder) WithCreateBoDict(dict *dictapi.CreateDictRequest) DictBuilder {
+func (b *builder) WithCreateBoDict(dict *dictapi.CreateDictRequest) DictRequestBuilder {
 	return &dictBuilder{
 		CreateDictRequest: dict,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictBuilder {
+func (b *builder) WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictRequestBuilder {
 	return &dictBuilder{
 		UpdateDictRequest: dict,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithApiDict(dict *model.SysDict) DictBuilder {
+func (b *builder) WithApiDict(dict *model.SysDict) DictModelBuilder {
 	return &dictBuilder{
 		SysDict: dict,
 		ctx:     b.ctx,
 	}
 }
 
-func (b *builder) WithApiDictSelect(dict *model.SysDict) DictBuilder {
+func (b *builder) WithApiDictSelect(dict *model.SysDict) DictModelBuilder {
 	return &dictBuilder{
 		SysDict: dict,
 		ctx:     b.ctx,
 	}
 }
 
-func (b *builder) WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuBuilder {
+func (b *builder) WithCreateMenuBo(menu *menuapi.CreateMenuRequest) MenuRequestBuilder {
 	return &menuBuilder{
 		CreateMenuRequest: menu,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuBuilder {
+func (b *builder) WithUpdateMenuBo(menu *menuapi.UpdateMenuRequest) MenuRequestBuilder {
 	return &menuBuilder{
 		UpdateMenuRequest: menu,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithApiMenu(menu *model.SysMenu) MenuBuilder {
+func (b *builder) WithApiMenu(menu *model.SysMenu) MenuModelBuilder {
 	return &menuBuilder{
 		Menu: menu,
 		ctx:  b.ctx,
 	}
 }
 
-func (b *builder) WithBatchCreateMenuBo(menu *menuapi.BatchCreateMenuRequest) MenuBuilder {
+func (b *builder) WithBatchCreateMenuBo(menu *menuapi.BatchCreateMenuRequest) MenuRequestBuilder {
 	return &menuBuilder{
 		BatchCreateMenuRequest: menu,
 		ctx:                    b.ctx,
@@ -226,7 +235,7 @@ func (b *builder) WithApiMenuTree(menuList []*admin.Menu, parentID uint32) MenuT
 	}
 }
 
-func (b *builder) WithApiTeam(team *model.SysTeam) TeamBuilder {
+func (b *builder) WithApiTeam(team *model.SysTeam) TeamModelBuilder {
 	return &teamBuilder{
 		SysTeam: team,
 		ctx:     b.ctx,
@@ -247,35 +256,36 @@ func (b *builder) WithApiTeamRole(team *bizmodel.SysTeamRole) TeamRoleBuilder {
 	}
 }
 
-func (b *builder) WithCreateTeamBo(req *teamapi.CreateTeamRequest) TeamBuilder {
+func (b *builder) WithCreateTeamBo(req *teamapi.CreateTeamRequest, leaderId uint32) TeamRequestBuilder {
 	return &teamBuilder{
 		CreateRoleRequest: req,
 		ctx:               b.ctx,
+		LeaderId:          leaderId,
 	}
 }
 
-func (b *builder) WithUpdateTeamBo(req *teamapi.UpdateTeamRequest) TeamBuilder {
+func (b *builder) WithUpdateTeamBo(req *teamapi.UpdateTeamRequest) TeamRequestBuilder {
 	return &teamBuilder{
 		UpdateTeamRequest: req,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithListTeamBo(req *teamapi.ListTeamRequest) TeamBuilder {
+func (b *builder) WithListTeamBo(req *teamapi.ListTeamRequest) TeamRequestBuilder {
 	return &teamBuilder{
 		ListTeamRequest: req,
 		ctx:             b.ctx,
 	}
 }
 
-func (b *builder) WithListTeamTeamMemberBo(req *teamapi.ListTeamMemberRequest) TeamBuilder {
+func (b *builder) WithListTeamTeamMemberBo(req *teamapi.ListTeamMemberRequest) TeamRequestBuilder {
 	return &teamBuilder{
 		ListTeamMemberRequest: req,
 		ctx:                   b.ctx,
 	}
 }
 
-func (b *builder) WithAddTeamMemberBo(req *teamapi.AddTeamMemberRequest) TeamBuilder {
+func (b *builder) WithAddTeamMemberBo(req *teamapi.AddTeamMemberRequest) TeamRequestBuilder {
 	return &teamBuilder{
 		AddTeamMemberRequest: req,
 		ctx:                  b.ctx,
@@ -289,46 +299,82 @@ func (b *builder) WithApiTeamMember(teamMember *bizmodel.SysTeamMember) TeamMemb
 	}
 }
 
-func (b *builder) WithApiUserBo(user *model.SysUser) UserBuilder {
+func (b *builder) WithApiUserBo(user *model.SysUser) UserModelBuilder {
 	return &userBuilder{
 		SysUser: user,
 		ctx:     b.ctx,
 	}
 }
 
-func (b *builder) WithCreateUserBo(req *userapi.CreateUserRequest) UserBuilder {
+func (b *builder) WithCreateUserBo(req *userapi.CreateUserRequest) UserRequestBuilder {
 	return &userBuilder{
 		CreateUserRequest: req,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithUpdateUserBo(req *userapi.UpdateUserRequest) UserBuilder {
+func (b *builder) WithUpdateUserBo(req *userapi.UpdateUserRequest) UserRequestBuilder {
 	return &userBuilder{
 		UpdateUserRequest: req,
 		ctx:               b.ctx,
 	}
 }
 
-func (b *builder) WithCreateDatasourceBo(req *datasourceapi.CreateDatasourceRequest) DatasourceBuilder {
+func (b *builder) WithCreateDatasourceBo(req *datasourceapi.CreateDatasourceRequest) DatasourceRequestBuilder {
 	return &datasourceBuilder{
 		CreateDatasourceRequest: req, ctx: b.ctx}
 }
 
-func (b *builder) WithUpdateDatasourceBo(req *datasourceapi.UpdateDatasourceRequest) DatasourceBuilder {
+func (b *builder) WithUpdateDatasourceBo(req *datasourceapi.UpdateDatasourceRequest) DatasourceRequestBuilder {
 	return &datasourceBuilder{
 		UpdateDatasourceRequest: req,
 		ctx:                     b.ctx,
 	}
 }
 
-func (b *builder) WithListDatasourceBo(req *datasourceapi.ListDatasourceRequest) DatasourceBuilder {
+func (b *builder) WithListDatasourceBo(req *datasourceapi.ListDatasourceRequest) DatasourceRequestBuilder {
 	return &datasourceBuilder{
 		ListDatasourceRequest: req,
 		ctx:                   b.ctx,
 	}
 }
 
+func (b *builder) WithLeaderIdBo(leaderId uint32) TeamRequestBuilder {
+	return &teamBuilder{
+		LeaderId: leaderId,
+		ctx:      b.ctx,
+	}
+}
+
+func (b *builder) WithApiDatasourceMetric(metric *bizmodel.DatasourceMetric) DatasourceMetricModelBuilder {
+	return &datasourceMetricModelBuilder{
+		DatasourceMetric: metric,
+		ctx:              b.ctx,
+	}
+}
+
+func (b *builder) WithApiDatasourceMetricLabel(metric *bizmodel.MetricLabel) DatasourceMetricLabelModelBuilder {
+	return &datasourceMetricLabelModelBuilder{
+		MetricLabel: metric,
+		ctx:         b.ctx,
+	}
+}
+
+func (b *builder) WithApiDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder {
+
+	return &datasourceMetricLabelValueBuilder{
+		MetricLabelValue: metric,
+		ctx:              b.ctx,
+	}
+}
+
+func (b *builder) WithApiStrategyLevel(strategy *bizmodel.StrategyLevel) StrategyLevelModelBuilder {
+	return &strategyLevelBuilder{
+		StrategyLevel: strategy,
+		ctx:           b.ctx,
+	}
+
+}
 func (b *builder) WithContext(ctx context.Context) Builder {
 	b.ctx = ctx
 	return b

@@ -37,7 +37,7 @@ func (s *Service) CreateTeam(ctx context.Context, req *teamapi.CreateTeamRequest
 	if leaderId <= 0 {
 		leaderId = claims.GetUser()
 	}
-	param := build.NewBuilder().WithCreateTeamBo(req).ToCreateRoleBO(leaderId)
+	param := build.NewBuilder().WithCreateTeamBo(req, leaderId).ToCreateTeamBO()
 	_, err := s.teamBiz.CreateTeam(ctx, param)
 	if !types.IsNil(err) {
 		return nil, err
@@ -59,7 +59,7 @@ func (s *Service) GetTeam(ctx context.Context, req *teamapi.GetTeamRequest) (*te
 		return nil, err
 	}
 	return &teamapi.GetTeamReply{
-		Team: build.NewBuilder().WithApiTeam(teamInfo).ToApi(ctx),
+		Team: build.NewBuilder().WithApiTeam(teamInfo).ToApi(),
 	}, nil
 }
 
@@ -72,7 +72,7 @@ func (s *Service) ListTeam(ctx context.Context, req *teamapi.ListTeamRequest) (*
 	return &teamapi.ListTeamReply{
 		Pagination: build.NewPageBuilder(param.Page).ToApi(),
 		List: types.SliceTo(teamList, func(team *model.SysTeam) *admin.Team {
-			return build.NewBuilder().WithApiTeam(team).ToApi(ctx)
+			return build.NewBuilder().WithApiTeam(team).ToApi()
 		}),
 	}, nil
 }
@@ -95,7 +95,7 @@ func (s *Service) MyTeam(ctx context.Context, _ *teamapi.MyTeamRequest) (*teamap
 	}
 	return &teamapi.MyTeamReply{
 		List: types.SliceTo(teamList, func(team *model.SysTeam) *admin.Team {
-			return build.NewBuilder().WithApiTeam(team).ToApi(ctx)
+			return build.NewBuilder().WithApiTeam(team).ToApi()
 		}),
 	}, nil
 }

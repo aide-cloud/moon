@@ -2,31 +2,39 @@ package build
 
 import (
 	"context"
-	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
-	"github.com/aide-family/moon/pkg/vobj"
 
 	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/api/admin"
 	userapi "github.com/aide-family/moon/api/admin/user"
+	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data/runtimecache"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
+	"github.com/aide-family/moon/pkg/vobj"
 )
 
 type (
-	UserBuilder interface {
+	UserModelBuilder interface {
 		ToApi() *admin.User
+	}
 
+	UserRequestBuilder interface {
 		ToCreateUserBO(userId uint32, pass string) *bo.CreateUserParams
 
 		ToUpdateUserBO() *bo.UpdateUserParams
 	}
+
 	userBuilder struct {
+		// model
 		*model.SysUser
+
+		// request
 		CreateUserRequest *userapi.CreateUserRequest
 		UpdateUserRequest *userapi.UpdateUserRequest
-		ctx               context.Context
+
+		// context
+		ctx context.Context
 	}
 
 	TeamMemberBuilder interface {
