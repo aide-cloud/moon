@@ -97,6 +97,9 @@ func (b *strategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 }
 
 func (b *strategyBuilder) ToCreateStrategyBO() *bo.CreateStrategyParams {
+	if types.IsNil(b) || types.IsNil(b.CreateStrategy) {
+		return nil
+	}
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(b.CreateStrategy.GetStrategyLevel()))
 	for _, strategyLevel := range b.CreateStrategy.GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
@@ -128,7 +131,9 @@ func (b *strategyBuilder) ToCreateStrategyBO() *bo.CreateStrategyParams {
 }
 
 func (b *strategyBuilder) ToUpdateStrategyBO() *bo.UpdateStrategyParams {
-
+	if types.IsNil(b) || types.IsNil(b.UpdateStrategy) {
+		return nil
+	}
 	strategyLevels := make([]*bo.CreateStrategyLevel, 0, len(b.UpdateStrategy.GetData().GetStrategyLevel()))
 	for _, strategyLevel := range b.UpdateStrategy.GetData().GetStrategyLevel() {
 		strategyLevels = append(strategyLevels, &bo.CreateStrategyLevel{
