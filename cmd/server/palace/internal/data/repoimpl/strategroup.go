@@ -12,7 +12,6 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
-	"github.com/aide-family/moon/pkg/palace/model/query"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -135,7 +134,7 @@ func (s strategyGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *b
 		return err
 	}
 	bizWrapper := bizquery.Use(bizDB).StrategyGroup.WithContext(ctx)
-	if _, err = bizWrapper.Where(query.SysMenu.ID.In(params.Ids...)).Update(bizquery.StrategyGroup.Status, params.Status); !types.IsNil(err) {
+	if _, err = bizWrapper.Where(bizquery.Use(bizDB).StrategyGroup.ID.In(params.Ids...)).Update(bizquery.Use(bizDB).StrategyGroup.Status, params.Status); !types.IsNil(err) {
 		return err
 	}
 	return nil

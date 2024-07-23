@@ -115,8 +115,7 @@ func (s *Service) UpdateStrategyGroupStatus(ctx context.Context, req *strategyap
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
 	param := &bo.UpdateStrategyGroupStatusParams{
-		Ids: req.GetIds(),
-
+		Ids:    req.GetIds(),
 		Status: vobj.Status(req.GetStatus()),
 		TeamID: claims.GetTeam(),
 	}

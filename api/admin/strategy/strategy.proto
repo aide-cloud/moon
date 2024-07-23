@@ -58,7 +58,7 @@ service Strategy {
   // 修改策略分组状态
   rpc UpdateStrategyGroupStatus(UpdateStrategyGroupStatusRequest) returns (UpdateStrategyGroupStatusReply) {
     option (google.api.http) = {
-      put: "/v1/group/strategy/status"
+      put: "/v1/group/strategy/group/status"
       body: "*"
     };
   }
