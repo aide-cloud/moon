@@ -1,10 +1,12 @@
 package labels
 
+import "strings"
+
 type Selector interface {
 	// Matches returns true if the specified Labels match this Selector.
 	Matches(labels Labels) bool
 
-	// AddRequirement adds a new Requirement to this Selector.
+	// AddRequirement adds new Requirement to this Selector.
 	AddRequirement(r ...Requirement) Selector
 }
 
@@ -26,6 +28,7 @@ func NewSelector() Selector {
 	return Requirements(nil)
 }
 
+// Matches returns true if all requirements matches the given Labels.
 func (x Requirements) Matches(labels Labels) bool {
 	for i := range x {
 		if !x[i].Matches(labels) {
@@ -40,4 +43,12 @@ func (x Requirements) AddRequirement(r ...Requirement) Selector {
 	req = append(req, x...)
 	req = append(req, r...)
 	return req
+}
+
+func (x Requirements) String() string {
+	strs := make([]string, 0, len(x))
+	for _, requirement := range x {
+		strs = append(strs, requirement.String())
+	}
+	return strings.Join(strs, ", ")
 }

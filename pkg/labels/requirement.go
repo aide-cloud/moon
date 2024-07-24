@@ -2,7 +2,9 @@ package labels
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type Requirement struct {
@@ -20,10 +22,10 @@ const (
 	NotEquals      Operator = "!="
 	In             Operator = "in"
 	NotIn          Operator = "notin"
-	GreaterThan    Operator = "gt"
-	LessThan       Operator = "lt"
-	GreaterOrEqual Operator = "ge"
-	LessOrEqual    Operator = "le"
+	GreaterThan    Operator = ">"
+	LessThan       Operator = "<"
+	GreaterOrEqual Operator = ">="
+	LessOrEqual    Operator = "<="
 )
 
 // NewRequirement creates a new Requirement based on the provided key, operator and values.
@@ -97,6 +99,9 @@ func (r *Requirement) Matches(labels Labels) bool {
 		if err != nil {
 			return false
 		}
+		if len(r.values) != 1 {
+			return false
+		}
 		requireValue, err := strconv.ParseInt(r.values[0], 10, 64)
 		if err != nil {
 			return false
@@ -106,4 +111,111 @@ func (r *Requirement) Matches(labels Labels) bool {
 	default:
 		return false
 	}
+}
+
+func (r *Requirement) String() string {
+	var sb strings.Builder
+	length := 0
+	// length of r.key
+	length += len(r.key)
+	// length of r.operator
+	length += len(r.operator)
+	// the most bad case, need 2 whitespace on both sides of operator
+	length += 2
+	for i := range r.values {
+		// length of per r.values
+		length += len(r.values[i])
+	}
+	// with the case need ',' between values
+	length += len(r.values) - 1
+	// the most bad case, need '()' on both sides of r.values
+	length += 2
+
+	sb.Grow(length)
+	if r.operator == NotExist {
+		sb.WriteString(string(r.operator))
+	}
+	sb.WriteString(r.key)
+	switch r.operator {
+	case Exists, NotExist:
+		return sb.String()
+	default:
+		sb.WriteString(" " + string(r.operator) + " ")
+	}
+	switch r.operator {
+	case In, NotIn:
+		sb.WriteString("(")
+	}
+	if len(r.values) == 1 {
+		sb.WriteString(r.values[0])
+	} else {
+		sb.WriteString(strings.Join(r.values, ","))
+	}
+	switch r.operator {
+	case In, NotIn:
+		sb.WriteString(")")
+	}
+	return sb.String()
+}
+
+func Parse(in string) Selector {
+	return parse(in)
+}
+
+// parse parses a string into a Requirements.
+// this implementation is a demo.
+func parse(in string) Requirements {
+	var reqs Requirements
+
+	// Define the regex patterns
+	operatorPatterns := map[Operator]*regexp.Regexp{
+		In:             regexp.MustCompile(`(\w+)\s+in\s+\(([^)]+)\)`),
+		NotIn:          regexp.MustCompile(`(\w+)\s+notin\s+\(([^)]+)\)`),
+		NotExist:       regexp.MustCompile(`!\s*(\w+)`),
+		Equals:         regexp.MustCompile(`(\w+)\s*=\s*(\w+)`),
+		NotEquals:      regexp.MustCompile(`(\w+)\s*!=\s*(\w+)`),
+		GreaterThan:    regexp.MustCompile(`(\w+)\s*>\s*(\w+)`),
+		LessThan:       regexp.MustCompile(`(\w+)\s*<\s*(\w+)`),
+		GreaterOrEqual: regexp.MustCompile(`(\w+)\s*>=\s*(\w+)`),
+		LessOrEqual:    regexp.MustCompile(`(\w+)\s*<=\s*(\w+)`),
+	}
+
+	// Iterate over patterns to find matches
+	for op, pattern := range operatorPatterns {
+		matches := pattern.FindAllStringSubmatch(in, -1)
+		for _, match := range matches {
+			key := match[1]
+			values := []string{}
+			if op == In || op == NotIn {
+				values = strings.Split(match[2], ",")
+				for i := range values {
+					values[i] = strings.TrimSpace(values[i])
+				}
+			} else if len(match) > 2 {
+				values = append(values, match[2])
+			}
+			reqs = append(reqs, Requirement{
+				key:      key,
+				operator: op,
+				values:   values,
+			})
+			in = strings.Replace(in, match[0], "", 1)
+		}
+	}
+
+	// Handle 'exists' operator separately
+	existsPattern := regexp.MustCompile(`\b(\w+)\b`)
+	matches := existsPattern.FindAllStringSubmatch(in, -1)
+	for _, match := range matches {
+		key := strings.TrimSpace(match[1])
+		if key != "" {
+			reqs = append(reqs, Requirement{
+				key:      key,
+				operator: Exists,
+				values:   []string{},
+			})
+		}
+	}
+
+	return reqs
 }

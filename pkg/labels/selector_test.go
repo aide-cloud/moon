@@ -119,3 +119,83 @@ func TestRequirements_Matches(t *testing.T) {
 		})
 	}
 }
+
+func TestRequirements_String(t *testing.T) {
+	tests := []struct {
+		name string
+		x    Requirements
+		want string
+	}{
+		{
+			name: "empty",
+			x:    Requirements{},
+			want: "",
+		},
+		{
+			name: "single",
+			x: Requirements{
+				{
+					key:      "foo",
+					operator: In,
+					values:   []string{"bar"},
+				},
+			},
+			want: "foo in (bar)",
+		},
+		{
+			name: "mutil",
+			x: Requirements{
+				{
+					key:      "foo",
+					operator: In,
+					values:   []string{"bar"},
+				},
+				{
+					key:      "a",
+					operator: Equals,
+					values:   []string{"a"},
+				},
+			},
+			want: "foo in (bar), a = a",
+		},
+		{
+			name: "not",
+			x: Requirements{
+				{
+					key:      "foo",
+					operator: In,
+					values:   []string{"bar", "barr"},
+				},
+				{
+					key:      "a",
+					operator: NotIn,
+					values:   []string{"a"},
+				},
+			},
+			want: "foo in (bar,barr), a notin (a)",
+		},
+		{
+			name: "not exist",
+			x: Requirements{
+				{
+					key:      "foo",
+					operator: In,
+					values:   []string{"bar"},
+				},
+				{
+					key:      "a",
+					operator: NotExist,
+					values:   []string{},
+				},
+			},
+			want: "foo in (bar), !a",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.x.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

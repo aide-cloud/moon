@@ -423,3 +423,119 @@ func TestRequirement_Matches(t *testing.T) {
 		})
 	}
 }
+
+func TestRequirement_String(t *testing.T) {
+	type fields struct {
+		key      string
+		operator Operator
+		values   []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "Equals operator",
+			fields: fields{
+				key:      "key",
+				operator: Equals,
+				values:   []string{"value"},
+			},
+			want: "key = value",
+		},
+		{
+			name: "In operator",
+			fields: fields{
+				key:      "key",
+				operator: In,
+				values:   []string{"value1", "value2"},
+			},
+			want: "key in (value1,value2)",
+		},
+		{
+			name: "Not equals operator",
+			fields: fields{
+				key:      "key",
+				operator: NotEquals,
+				values:   []string{"value"},
+			},
+			want: "key != value",
+		},
+		{
+			name: "Not in operator",
+			fields: fields{
+				key:      "key",
+				operator: NotIn,
+				values:   []string{"value1", "value2"},
+			},
+			want: "key notin (value1,value2)",
+		},
+		{
+			name: "Greater than operator",
+			fields: fields{
+				key:      "key",
+				operator: GreaterThan,
+				values:   []string{"10"},
+			},
+			want: "key > 10",
+		},
+		{
+			name: "Greater than or equal operator",
+			fields: fields{
+				key:      "key",
+				operator: GreaterOrEqual,
+				values:   []string{"10"},
+			},
+			want: "key >= 10",
+		},
+		{
+			name: "Less than operator",
+			fields: fields{
+				key:      "key",
+				operator: LessThan,
+				values:   []string{"10"},
+			},
+			want: "key < 10",
+		},
+		{
+			name: "Less than or equal operator",
+			fields: fields{
+				key:      "key",
+				operator: LessOrEqual,
+				values:   []string{"10"},
+			},
+			want: "key <= 10",
+		},
+		{
+			name: "Exists operator",
+			fields: fields{
+				key:      "key",
+				operator: Exists,
+				values:   []string{},
+			},
+			want: "key",
+		},
+		{
+			name: "Not exists operator",
+			fields: fields{
+				key:      "key",
+				operator: NotExist,
+				values:   []string{},
+			},
+			want: "!key",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Requirement{
+				key:      tt.fields.key,
+				operator: tt.fields.operator,
+				values:   tt.fields.values,
+			}
+			if got := r.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
