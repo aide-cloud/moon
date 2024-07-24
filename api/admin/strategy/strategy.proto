@@ -58,7 +58,7 @@ service Strategy {
   // 修改策略分组状态
   rpc UpdateStrategyGroupStatus(UpdateStrategyGroupStatusRequest) returns (UpdateStrategyGroupStatusReply) {
     option (google.api.http) = {
-      put: "/v1/group/strategy/group/status"
+      put: "/v1/group/strategy/update/status"
       body: "*"
     };
   }
@@ -177,8 +177,8 @@ message GetStrategyGroupReply {
 
 message UpdateStrategyGroupRequest {
   // 策略组ID
-  uint32 id = 1;
-  CreateStrategyGroupRequest update = 2;
+  uint32 id = 1 [(buf.validate.field).required = true];
+  CreateStrategyGroupRequest update = 2 [(buf.validate.field).required = true];
   uint32 teamId = 3;
 }
 message UpdateStrategyGroupReply {}
@@ -274,7 +274,7 @@ message UpdateStrategyGroupStatusReply{}
 
 
 message UpdateStrategyRequest {
-  uint32 id = 1;
+  uint32 id = 1 [(buf.validate.field).required = true];
   CreateStrategyRequest data = 2 [(buf.validate.field).required = true];
 }
 message UpdateStrategyReply {}
