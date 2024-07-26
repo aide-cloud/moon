@@ -167,7 +167,7 @@ func Parse(in string) Selector {
 func parse(in string) Requirements {
 	var reqs Requirements
 
-	// Define the regex patterns
+	// define the regex patterns
 	operatorPatterns := map[Operator]*regexp.Regexp{
 		In:             regexp.MustCompile(`(\w+)\s+in\s+\(([^)]+)\)`),
 		NotIn:          regexp.MustCompile(`(\w+)\s+notin\s+\(([^)]+)\)`),
@@ -180,7 +180,7 @@ func parse(in string) Requirements {
 		LessOrEqual:    regexp.MustCompile(`(\w+)\s*<=\s*(\w+)`),
 	}
 
-	// Iterate over patterns to find matches
+	// iterate over patterns to find matches
 	for op, pattern := range operatorPatterns {
 		matches := pattern.FindAllStringSubmatch(in, -1)
 		for _, match := range matches {
@@ -203,7 +203,7 @@ func parse(in string) Requirements {
 		}
 	}
 
-	// Handle 'exists' operator separately
+	// handle 'exists' operator separately
 	existsPattern := regexp.MustCompile(`\b(\w+)\b`)
 	matches := existsPattern.FindAllStringSubmatch(in, -1)
 	for _, match := range matches {
