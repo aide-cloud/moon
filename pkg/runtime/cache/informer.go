@@ -3,10 +3,11 @@ package cache
 import (
 	"context"
 	"fmt"
+	"github.com/aide-family/moon/api"
 	"github.com/aide-family/moon/pkg/runtime"
 	"github.com/aide-family/moon/pkg/runtime/client"
 	"k8s.io/client-go/tools/cache"
-	"reflect"
+	"strings"
 	"sync"
 	"time"
 )
@@ -40,15 +41,16 @@ func (m *informerCache) Get(context context.Context, key string, out client.Obje
 	return cache.Reader.Get(context, key, out)
 }
 
-func (m *informerCache) List(context context.Context, out []client.Object) error {
-	elementType := reflect.ValueOf(out).Type().Elem()
-	single := reflect.New(elementType).Elem().Interface().(runtime.Object)
-	kind, err := m.Scheme.ObjectKind(single)
+func (m *informerCache) List(context context.Context, out client.ObjectList, opts *api.ListOptions) error {
+	kind, err := m.Scheme.ObjectKind(out)
 	if err != nil {
 		return err
 	}
-
-	started, cache, err := m.standard.Get(context, kind, single)
+	if !strings.HasSuffix(kind, "List") {
+		return fmt.Errorf("list must be suffix with List, %s", kind)
+	}
+	kind = kind[:len(kind)-4]
+	started, cache, err := m.standard.Get(context, kind, out)
 	if err != nil {
 		return err
 	}
@@ -56,7 +58,7 @@ func (m *informerCache) List(context context.Context, out []client.Object) error
 	if !started {
 		return fmt.Errorf("cache not started, %s", kind)
 	}
-	return cache.Reader.List(context, out)
+	return cache.Reader.List(context, out, opts)
 }
 
 func (m *informerCache) GetInformer(ctx context.Context, obj client.Object) (Informer, error) {
@@ -201,10 +203,7 @@ func (ip *specificInformersMap) addInformerToMap(kind string, obj runtime.Object
 	i := &MapEntry{
 		Informer: NewSharedIndexInformer(),
 		Reader: Reader{indexer: cache.NewIndexer(
-			KeyFunc,
-			cache.Indexers{
-				NameIndex: NameIndexFunc,
-			}), kind: kind},
+			KeyFunc, nil), kind: kind},
 	}
 	ip.informersByKind[kind] = i
 

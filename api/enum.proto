@@ -278,3 +278,29 @@ enum TemplateSourceType {
   // 团队
   TemplateSourceTypeTeam = 2;
 }
+
+
+enum Operator {
+  // 匹配操作
+  Operator_UNKNOWN = 0;
+  // 存在
+  Operator_EXIST = 1;
+  // 不存在
+  Operator_NOT_EXIST = 2;
+  // 包含
+  Operator_IN = 3;
+  // 不包含
+  Operator_NOT_IN = 4;
+  // 匹配
+  Operator_EQUAL = 5;
+  // 不匹配
+  Operator_NOT_EQUAL = 6;
+  // 大于
+  Operator_GREATER_THAN = 7;
+  // 小于
+  Operator_LESS_THAN = 8;
+  // 大于等于
+  Operator_GREATER_THAN_OR_EQUAL = 9;
+  // 小于等于
+  Operator_LESS_THAN_OR_EQUAL = 10;
+}

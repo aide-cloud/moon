@@ -57,6 +57,11 @@ func (s *Scheme) ObjectKind(obj Object) (string, error) {
 	}
 	return kind, nil
 }
+func (s *Scheme) ObjectsKind(objs []Object) (string, error) {
+	elementType := reflect.ValueOf(objs).Type().Elem()
+	obj := reflect.New(elementType).Elem().Interface().(Object)
+	return s.ObjectKind(obj)
+}
 
 func (s *Scheme) Recognizes(kind string) bool {
 	_, exists := s.kindToType[kind]

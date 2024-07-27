@@ -3,6 +3,7 @@ syntax = "proto3";
 package api;
 
 import "google/protobuf/duration.proto";
+import "google/api/annotations.proto";
 import "buf/validate/validate.proto";
 import "datasource.proto";
 import "enum.proto";
@@ -73,14 +74,22 @@ message Strategy {
 // 表示这个对象的数据类型
 message TypeMeta {
   // 类型
-  string kind = 1;
+  string kind = 1 [(buf.validate.field).cel = {
+    id: "TypeMeta_kind"
+    expression: 'this.size() > 0'
+    message: "元数据类型不允许为空"
+  }];
 }
 
 // 对象元数据，每个对象都应该包含这个字段
 // 相同类型数据的对象的唯一标识
 message ObjectMeta {
   // 名称
-  string name = 1;
+  string name = 1 [(buf.validate.field).cel = {
+    id: "ObjectMeta_name"
+    expression: 'this.size() > 0'
+    message: "对象名称不允许为空"
+  }];
 }
 
 // 过滤规则，过滤掉不需要的数据
@@ -91,8 +100,6 @@ message FilterRule {
   ObjectMeta object = 2;
   // 策略，规则的详细描述
   FilterRuleSpec spec = 3;
-  // 状态,描述规则的状态
-  Status status = 4;
 }
 
 message FilterRuleSpec {
@@ -106,23 +113,14 @@ message FilterRuleSpec {
   repeated LabelRequirement matchExpression = 4;
 }
 
-enum Operator {
-  // 匹配操作
-  Operator_UNKNOWN = 0;
-  // 存在
-  Operator_EXIST = 1;
-  // 不存在
-  Operator_NOT_EXIST = 2;
-  // 包含
-  Operator_IN = 3;
-  // 不包含
-  Operator_NOT_IN = 4;
+message FilterRuleList {
+  repeated FilterRule items = 1;
 }
 
 message LabelRequirement {
   // key 是需要用于匹配的键，不能为空
   string key = 1;
-  // 匹配操作是一组用于键值匹配的表达式，它包含以下操作：IN,NOT_IN,EXIST,NOT_EXIST
+  // 匹配操作是一组用于键值匹配的表达式，它包含以下操作：IN,NOT_IN,EXIST,NOT_EXIST,EQUAL,NOT_EQUAL,GREATER_THAN,LESS_THAN,GREATER_THAN_OR_EQUAL,LESS_THAN_OR_EQUAL
   Operator op = 2;
   // 需要匹配的值
   // 如何匹配表达式是 IN 或者 NOT_IN, values 必须不为空
@@ -138,8 +136,6 @@ message AggregateRule {
   ObjectMeta object = 2;
   // 策略
   AggregateRuleSpec spec = 3;
-  // 状态
-  Status status = 4;
 }
 
 message AggregateRuleSpec {
@@ -164,15 +160,13 @@ message NotifyObject {
   ObjectMeta object = 2;
   // 策略
   NotifyObjectSpec spec = 3;
-  // 状态
-  Status status = 4;
 }
 
 message NotifyObjectSpec {
   // 启用状态，默认启用
   bool enabled = 1;
   // 发送配置
-  repeated SendConfig config = 2;
+  repeated string sendConfigNames = 2;
 }
 
 
@@ -184,8 +178,6 @@ message SendConfig {
   ObjectMeta object = 2;
   // 策略
   SendConfigSpec spec = 3;
-  // 状态
-  Status status = 4;
 }
 
 message SendConfigSpec {
@@ -213,9 +205,9 @@ message NotifyRuleSpec {
   // 启用状态，默认启用
   bool enabled = 1;
   // 通知对象
-  NotifyObject object = 2;
+  string notifyObjectName = 2;
   //聚合规则
-  AggregateRule aggregate = 3;
+  string aggregateRuleName = 3;
 }
 
 // 通知组，通知组包含多个通知规则和一个过滤规则
@@ -233,9 +225,9 @@ message NotifyGroupSpec {
   // 启用状态，默认启用
   bool enabled = 1;
   // 通知规则
-  repeated NotifyRule rule = 2;
+  repeated string notifyRuleNames = 2;
   // 过滤规则,过滤规则可以为空，为空则表示不需要过滤
-  FilterRule filter = 3;
+  string filterRule = 3;
 }
 
 message Message  {
@@ -248,5 +240,59 @@ message Message  {
   // 消息标签,在进行消息过滤时，使用这个字段进行过滤规则的匹配
   map<string, string> labels = 4;
   // 通知组，需要通知的对象组列表
-  repeated NotifyGroup groups = 5;
+  repeated string notifyGroupNames = 5;
+}
+
+service Filter {
+  rpc Create(FilterRule) returns (FilterRule) {
+    option (google.api.http) = {
+      post: "/v1/filterRule"
+      body: "*"
+    };
+  }
+
+  rpc Get(GetOptions) returns (FilterRule) {
+    option (google.api.http) = {
+      get: "/v1/filterRule/{name}"
+    };
+  }
+
+  rpc List(ListOptions) returns (FilterRuleList) {
+    option (google.api.http) = {
+      get: "/v1/filterRules"
+    };
+  }
+
+  rpc Update(FilterRule) returns (FilterRule) {
+    option (google.api.http) = {
+      put: "/v1/filterRule/{object.name}"
+      body: "*"
+    };
+  }
+
+  rpc Delete(DeleteOptions) returns (FilterRule) {
+    option (google.api.http) = {
+      delete: "/v1/filterRule/{name}"
+    };
+  }
+
+  rpc Stream(ListOptions) returns (stream FilterRule) {
+    option (google.api.http) = {
+      get: "/v1/stream/filterRules"
+    };
+  }
+}
+
+
+message GetOptions {
+  string name = 1;
+}
+
+message DeleteOptions {
+  string name = 1;
+}
+
+message ListOptions {
+  int32 page = 1;
+  int32 pageSize = 2;
 }

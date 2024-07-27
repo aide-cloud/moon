@@ -30,6 +30,7 @@ type Framer interface {
 
 type ObjectTyper interface {
 	ObjectKind(Object) (string, error)
+	ObjectsKind(objs []Object) (string, error)
 	Recognizes(kind string) bool
 }
 
