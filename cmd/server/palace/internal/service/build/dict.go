@@ -8,6 +8,7 @@ import (
 	dictapi "github.com/aide-family/moon/api/admin/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/pkg/palace/model"
+	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -15,6 +16,9 @@ import (
 type (
 	DictModelBuilder interface {
 		ToApi() *admin.Dict
+
+		ToBizApi() *admin.Dict
+
 		ToApiSelect() *admin.Select
 	}
 
@@ -27,6 +31,8 @@ type (
 	dictBuilder struct {
 		// model
 		SysDict *model.SysDict
+
+		BizDict *bizmodel.SysDict
 
 		// request
 		CreateDictRequest *dictapi.CreateDictRequest
@@ -55,6 +61,26 @@ func (b *dictBuilder) ToApi() *admin.Dict {
 		Remark:       b.SysDict.Remark,
 		CreatedAt:    b.SysDict.CreatedAt.String(),
 		UpdatedAt:    b.SysDict.UpdatedAt.String(),
+	}
+}
+
+func (b *dictBuilder) ToBizApi() *admin.Dict {
+	if types.IsNil(b) || types.IsNil(b.BizDict) {
+		return nil
+	}
+	return &admin.Dict{
+		Id:           b.BizDict.ID,
+		Name:         b.BizDict.Name,
+		Value:        b.BizDict.Value,
+		ColorType:    b.BizDict.ColorType,
+		Icon:         b.BizDict.Icon,
+		Status:       api.Status(b.BizDict.Status),
+		DictType:     api.DictType(b.BizDict.DictType),
+		ImageUrl:     b.BizDict.ImageUrl,
+		LanguageCode: b.BizDict.LanguageCode,
+		Remark:       b.BizDict.Remark,
+		CreatedAt:    b.BizDict.CreatedAt.String(),
+		UpdatedAt:    b.BizDict.UpdatedAt.String(),
 	}
 }
 

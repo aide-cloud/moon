@@ -3,11 +3,11 @@ package model
 import (
 	"context"
 
-	"github.com/aide-family/moon/pkg/helper/middleware"
-	"github.com/aide-family/moon/pkg/util/types"
-
 	"gorm.io/gorm"
 	"gorm.io/plugin/soft_delete"
+
+	"github.com/aide-family/moon/pkg/helper/middleware"
+	"github.com/aide-family/moon/pkg/util/types"
 )
 
 type BaseModel struct {
@@ -42,4 +42,15 @@ func (u *BaseModel) BeforeCreate(_ *gorm.DB) (err error) {
 	}
 	u.CreatorID = claims.GetUser()
 	return
+}
+
+func (u *BaseModel) GetContext() context.Context {
+	if types.IsNil(u.ctx) {
+		return context.TODO()
+	}
+	return u.ctx
+}
+
+type IDict interface {
+	model()
 }

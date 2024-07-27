@@ -131,7 +131,7 @@ message CreateDictRequest {
   // 语言编码
   string languageCode = 9 [(buf.validate.field).cel = {
     expression: "(this in ['zh-CN','en-US'])",
-    message: "字典类型值必须在[中文(zh), 英文(en)]之间",
+    message: "字典类型值必须在[中文(zh-CN), 英文(en-US)]之间",
   }];
   // 备注
   string remark = 10 [(buf.validate.field).cel = {

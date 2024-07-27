@@ -278,3 +278,13 @@ enum TemplateSourceType {
   // 团队
   TemplateSourceTypeTeam = 2;
 }
+
+// 来源类型
+enum SourceType {
+  // 未知
+  SourceTypeUnknown = 0;
+  // 系统
+  SourceTypeSystem = 1;
+  // 团队
+  SourceTypeTeam = 2;
+}

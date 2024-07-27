@@ -52,6 +52,7 @@ func NewHTTPServer(bc *palaceconf.Bootstrap, authService *authorization.Service)
 			recovery.Recovery(recovery.WithHandler(log.RecoveryHandle)),
 			middleware.Logging(log.GetLogger()),
 			middleware.I18N(),
+			middleware.SourceType(),
 			authMiddleware,
 			rbacMiddleware,
 			middleware.Validate(protovalidate.WithFailFast(false)),

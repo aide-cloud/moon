@@ -3,6 +3,8 @@ package model
 import (
 	"encoding/json"
 
+	"github.com/aide-family/moon/api/merr"
+	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
@@ -10,6 +12,7 @@ import (
 const TableNameSysDict = "sys_dict"
 
 type SysDict struct {
+	IDict `gorm:"-"`
 	AllFieldModel
 	Name         string        `gorm:"column:name;type:varchar(100);not null;uniqueIndex:idx__p__name__dict,priority:1;comment:字典名称"`
 	Value        string        `gorm:"column:value;type:varchar(100);not null;default:'';comment:字典键值"`
@@ -32,4 +35,11 @@ func (c *SysDict) String() string {
 // TableName SysDict's table name
 func (*SysDict) TableName() string {
 	return TableNameSysDict
+}
+
+func (c *SysDict) MainModel() (*SysDict, error) {
+	if types.IsNil(c) {
+		return nil, merr.ErrorI18nDictNotFoundErr(c.GetContext())
+	}
+	return c, nil
 }

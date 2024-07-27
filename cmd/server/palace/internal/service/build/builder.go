@@ -55,6 +55,7 @@ type (
 		WithCreateBoDict(*dictapi.CreateDictRequest) DictRequestBuilder
 		WithUpdateBoDict(*dictapi.UpdateDictRequest) DictRequestBuilder
 		WithApiDict(*model.SysDict) DictModelBuilder
+		WithApiBizDict(dict *bizmodel.SysDict) DictModelBuilder
 		WithApiDictSelect(*model.SysDict) DictModelBuilder
 
 		WithCreateMenuBo(*menuapi.CreateMenuRequest) MenuRequestBuilder
@@ -163,6 +164,13 @@ func (b *builder) WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictRequestB
 func (b *builder) WithApiDict(dict *model.SysDict) DictModelBuilder {
 	return &dictBuilder{
 		SysDict: dict,
+		ctx:     b.ctx,
+	}
+}
+
+func (b *builder) WithApiBizDict(dict *bizmodel.SysDict) DictModelBuilder {
+	return &dictBuilder{
+		BizDict: dict,
 		ctx:     b.ctx,
 	}
 }

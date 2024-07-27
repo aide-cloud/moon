@@ -26,22 +26,37 @@ type (
 		// 状态
 		Status       vobj.Status `json:"status"`
 		LanguageCode string      `json:"language_code"`
+
+		SourceType vobj.SourceType `json:"source_type"`
 	}
 
 	UpdateDictParams struct {
 		ID          uint32 `json:"id"`
 		UpdateParam CreateDictParams
+		SourceType  vobj.SourceType `json:"source_type"`
 	}
 
 	UpdateDictStatusParams struct {
-		IDs    []uint32    `json:"ids"`
-		Status vobj.Status `json:"status"`
+		IDs        []uint32        `json:"ids"`
+		Status     vobj.Status     `json:"status"`
+		SourceType vobj.SourceType `json:"source_type"`
 	}
 
 	QueryDictListParams struct {
-		Keyword  string           `json:"keyword"`
-		Page     types.Pagination `json:"page"`
-		Status   vobj.Status      `json:"status"`
-		DictType vobj.DictType    `json:"dict_type"`
+		Keyword    string           `json:"keyword"`
+		Page       types.Pagination `json:"page"`
+		Status     vobj.Status      `json:"status"`
+		DictType   vobj.DictType    `json:"dict_type"`
+		SourceType vobj.SourceType  `json:"source_type"`
+	}
+
+	GetDictDetailParams struct {
+		ID         uint32          `json:"id"`
+		SourceType vobj.SourceType `json:"source_type"`
+	}
+
+	DeleteDictParams struct {
+		ID         uint32 `json:"id"`
+		SourceType vobj.SourceType
 	}
 )
