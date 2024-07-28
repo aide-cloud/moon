@@ -34,9 +34,8 @@ type (
 	}
 
 	UpdateDictStatusParams struct {
-		IDs        []uint32        `json:"ids"`
-		Status     vobj.Status     `json:"status"`
-		SourceType vobj.SourceType `json:"source_type"`
+		IDs    []uint32    `json:"ids"`
+		Status vobj.Status `json:"status"`
 	}
 
 	QueryDictListParams struct {
@@ -47,8 +46,7 @@ type (
 	}
 
 	GetDictDetailParams struct {
-		ID         uint32          `json:"id"`
-		SourceType vobj.SourceType `json:"source_type"`
+		ID uint32 `json:"id"`
 	}
 
 	DeleteDictParams struct {

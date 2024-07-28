@@ -120,9 +120,9 @@ func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32) (model.IDic
 		}
 		bizWrapper := bizquery.Use(bizDB).SysDict.WithContext(ctx)
 		return bizWrapper.Where(bizquery.Use(bizDB).SysDict.ID.Eq(id)).Preload(field.Associations).First()
+	} else {
+		return query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).First()
 	}
-
-	return query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).First()
 }
 
 func (l *dictRepositoryImpl) UpdateByID(ctx context.Context, dict *bo.UpdateDictParams) error {
