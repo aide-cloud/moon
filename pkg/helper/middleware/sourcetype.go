@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 
-	"github.com/aide-family/moon/pkg/util/types"
+	"github.com/aide-family/moon/pkg/vobj"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -14,13 +14,7 @@ func SourceType() middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				sourceCode := tr.RequestHeader().Get("Source-Type")
-				if types.TextIsNull(sourceCode) {
-					sourceCode = "Team"
-				}
-				source := &SourceTypeInfo{
-					SourceCode: sourceCode,
-				}
-				ctx = context.WithValue(ctx, SourceTypeInfo{}, source)
+				ctx = context.WithValue(ctx, sourceTypeKey{}, vobj.GetSourceType(sourceCode))
 			}
 			return handler(ctx, req)
 		}
@@ -28,25 +22,12 @@ func SourceType() middleware.Middleware {
 }
 
 // SourceTypeInfo Request header source
-type SourceTypeInfo struct {
-	SourceCode string
-}
+type sourceTypeKey struct{}
 
-func (s *SourceTypeInfo) SetSourceType(sourceCode string) {
-	s.SourceCode = sourceCode
-}
-
-func (s *SourceTypeInfo) GetSourceCode() string {
-	if types.IsNil(s.SourceCode) {
-		return ""
-	}
-	return s.SourceCode
-}
-
-func ParseSourceTypeInfo(ctx context.Context) (*SourceTypeInfo, bool) {
-	sourceTypeInfo, ok := ctx.Value(SourceTypeInfo{}).(*SourceTypeInfo)
+func GetSourceType(ctx context.Context) vobj.SourceType {
+	sourceTypeInfo, ok := ctx.Value(sourceTypeKey{}).(vobj.SourceType)
 	if ok {
-		return sourceTypeInfo, true
+		return sourceTypeInfo
 	}
-	return nil, false
+	return vobj.SourceTypeTeam
 }

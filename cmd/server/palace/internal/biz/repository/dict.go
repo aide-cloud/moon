@@ -5,7 +5,6 @@ import (
 
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/pkg/palace/model"
-	"github.com/aide-family/moon/pkg/vobj"
 )
 
 type (
@@ -17,7 +16,7 @@ type (
 		BatchCreate(ctx context.Context, users []*bo.CreateDictParams) error
 
 		// GetByID 通过id 获取字典详情
-		GetByID(ctx context.Context, id uint32, sourceType vobj.SourceType) (model.IDict, error)
+		GetByID(ctx context.Context, id uint32) (model.IDict, error)
 
 		// FindByPage 分页查询字典列表
 		FindByPage(ctx context.Context, page *bo.QueryDictListParams) ([]model.IDict, error)

@@ -9,9 +9,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
-	"github.com/aide-family/moon/pkg/helper/middleware"
 	"github.com/aide-family/moon/pkg/palace/model"
-	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -42,11 +40,6 @@ func (s *Service) CreateDict(ctx context.Context, req *dictapi.CreateDictRequest
 
 func (s *Service) UpdateDict(ctx context.Context, req *dictapi.UpdateDictRequest) (*dictapi.UpdateDictReply, error) {
 	updateParams := build.NewBuilder().WithUpdateBoDict(req).ToUpdateDictBO()
-	sourceType, ok := middleware.ParseSourceTypeInfo(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nRequestSourceParsingError(ctx)
-	}
-	updateParams.SourceType = vobj.GetSourceType(sourceType.GetSourceCode())
 	if err := s.dictBiz.UpdateDict(ctx, updateParams); !types.IsNil(err) {
 		return nil, err
 	}
@@ -54,33 +47,22 @@ func (s *Service) UpdateDict(ctx context.Context, req *dictapi.UpdateDictRequest
 }
 
 func (s *Service) ListDict(ctx context.Context, req *dictapi.GetDictSelectListRequest) (*dictapi.ListDictReply, error) {
-	sourceType, ok := middleware.ParseSourceTypeInfo(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nRequestSourceParsingError(ctx)
-	}
 	queryParams := &bo.QueryDictListParams{
-		Keyword:    req.GetKeyword(),
-		Page:       types.NewPagination(req.GetPagination()),
-		Status:     vobj.Status(req.GetStatus()),
-		DictType:   vobj.DictType(req.GetDictType()),
-		SourceType: vobj.GetSourceType(sourceType.GetSourceCode()),
+		Keyword:  req.GetKeyword(),
+		Page:     types.NewPagination(req.GetPagination()),
+		Status:   vobj.Status(req.GetStatus()),
+		DictType: vobj.DictType(req.GetDictType()),
 	}
-
 	dictPage, err := s.dictBiz.ListDict(ctx, queryParams)
 	if !types.IsNil(err) {
 		return nil, err
 	}
+	resList := types.SliceTo(dictPage, func(dict model.IDict) *admin.Dict {
+		return build.NewBuilder().WithContext(ctx).WithDict(dict).ToApi()
+	})
 	return &dictapi.ListDictReply{
 		Pagination: build.NewPageBuilder(queryParams.Page).ToApi(),
-		List: types.SliceTo(dictPage, func(dict model.IDict) *admin.Dict {
-			resDict := &admin.Dict{}
-			if vobj.GetSourceType(sourceType.GetSourceCode()).GetValue() == vobj.SourceTeam.GetValue() {
-				resDict = build.NewBuilder().WithApiBizDict(dict.(*bizmodel.SysDict)).ToBizApi()
-			} else {
-				resDict = build.NewBuilder().WithApiDict(dict.(*model.SysDict)).ToApi()
-			}
-			return resDict
-		}),
+		List:       resList,
 	}, nil
 }
 
@@ -97,14 +79,8 @@ func (s *Service) BatchUpdateDictStatus(ctx context.Context, params *dictapi.Bat
 }
 
 func (s *Service) DeleteDict(ctx context.Context, req *dictapi.DeleteDictRequest) (*dictapi.DeleteDictReply, error) {
-	sourceType, ok := middleware.ParseSourceTypeInfo(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nRequestSourceParsingError(ctx)
-	}
-
 	params := &bo.DeleteDictParams{
-		ID:         req.GetId(),
-		SourceType: vobj.GetSourceType(sourceType.GetSourceCode()),
+		ID: req.GetId(),
 	}
 	err := s.dictBiz.DeleteDictById(ctx, params)
 	if !types.IsNil(err) {
@@ -114,26 +90,15 @@ func (s *Service) DeleteDict(ctx context.Context, req *dictapi.DeleteDictRequest
 }
 
 func (s *Service) GetDict(ctx context.Context, req *dictapi.GetDictRequest) (*dictapi.GetDictReply, error) {
-	sourceType, ok := middleware.ParseSourceTypeInfo(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nRequestSourceParsingError(ctx)
-	}
 	params := &bo.GetDictDetailParams{
-		ID:         req.GetId(),
-		SourceType: vobj.GetSourceType(sourceType.GetSourceCode()),
+		ID: req.GetId(),
 	}
 	dictDO, err := s.dictBiz.GetDict(ctx, params)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	resDict := &admin.Dict{}
-	if vobj.GetSourceType(sourceType.GetSourceCode()).GetValue() == vobj.SourceTeam.GetValue() {
-		resDict = build.NewBuilder().WithApiBizDict(dictDO.(*bizmodel.SysDict)).ToBizApi()
-	} else {
-		resDict = build.NewBuilder().WithApiDict(dictDO.(*model.SysDict)).ToApi()
-	}
 	return &dictapi.GetDictReply{
-		Dict: resDict,
+		Dict: build.NewBuilder().WithContext(ctx).WithDict(dictDO).ToApi(),
 	}, nil
 }
 

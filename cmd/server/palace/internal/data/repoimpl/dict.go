@@ -15,7 +15,6 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/palace/model/query"
 	"github.com/aide-family/moon/pkg/util/types"
-	"github.com/aide-family/moon/pkg/vobj"
 	"gorm.io/gen/field"
 )
 
@@ -30,10 +29,9 @@ type dictRepositoryImpl struct {
 }
 
 func (l *dictRepositoryImpl) UpdateStatusByIds(ctx context.Context, params *bo.UpdateDictStatusParams) error {
-	isTeam := params.SourceType.GetValue() == vobj.SourceTeam.GetValue()
 	ids := params.IDs
 	status := params.Status
-	if isTeam {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		claims, ok := middleware.ParseJwtClaims(ctx)
 		if !ok {
 			return merr.ErrorI18nUnLoginErr(ctx)
@@ -54,9 +52,7 @@ func (l *dictRepositoryImpl) UpdateStatusByIds(ctx context.Context, params *bo.U
 }
 
 func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DeleteDictParams) error {
-	isTeam := params.SourceType.GetValue() == vobj.SourceTeam.GetValue()
-	id := params.ID
-	if isTeam {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		claims, ok := middleware.ParseJwtClaims(ctx)
 		if !ok {
 			return merr.ErrorI18nUnLoginErr(ctx)
@@ -66,26 +62,21 @@ func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DeleteDi
 			return err
 		}
 		err = bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
-			_, err := tx.SysDict.WithContext(ctx).Where(bizquery.Use(bizDB).SysDict.ID.Eq(id)).Delete()
+			_, err := tx.SysDict.WithContext(ctx).Where(bizquery.Use(bizDB).SysDict.ID.Eq(params.ID)).Delete()
 			return err
 		})
 		if !types.IsNil(err) {
 			return err
 		}
 	} else {
-		_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(id)).Delete()
+		_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(params.ID)).Delete()
 		return err
 	}
 	return nil
 }
 
 func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictParams) (model.IDict, error) {
-	sourceType, ok := middleware.ParseSourceTypeInfo(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nRequestSourceParsingError(ctx)
-	}
-	isTeam := vobj.GetSourceType(sourceType.GetSourceCode()).GetValue() == vobj.SourceTeam.GetValue()
-	if isTeam {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		// Team  creation
 		return createDictModel(ctx, l.data, dict)
 	}
@@ -99,8 +90,7 @@ func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictPara
 }
 
 func (l *dictRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryDictListParams) ([]model.IDict, error) {
-	isTeam := params.SourceType.GetValue() == vobj.SourceTeam.GetValue()
-	if isTeam {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		// Team  creation
 		return listBizDictModel(ctx, l.data, params)
 	} else {
@@ -118,10 +108,8 @@ func (l *dictRepositoryImpl) BatchCreate(ctx context.Context, createDicts []*bo.
 	return nil
 }
 
-func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32, sourceType vobj.SourceType) (model.IDict, error) {
-
-	isTeam := sourceType.GetValue() == vobj.SourceTeam.GetValue()
-	if isTeam {
+func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32) (model.IDict, error) {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		claims, ok := middleware.ParseJwtClaims(ctx)
 		if !ok {
 			return nil, merr.ErrorI18nUnLoginErr(ctx)
@@ -138,8 +126,7 @@ func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32, sourceType 
 }
 
 func (l *dictRepositoryImpl) UpdateByID(ctx context.Context, dict *bo.UpdateDictParams) error {
-	isTeam := dict.SourceType.GetValue() == vobj.SourceTeam.GetValue()
-	if isTeam {
+	if middleware.GetSourceType(ctx).IsTeam() {
 		err := updateBizDictModel(ctx, l.data, dict)
 		if !types.IsNil(err) {
 			return err
@@ -177,7 +164,7 @@ func listDictModel(ctx context.Context, data *data.Data, params *bo.QueryDictLis
 	if err := types.WithPageQuery[query.ISysDictDo](queryWrapper, params.Page); err != nil {
 		return nil, err
 	}
-	dbDicts, err := queryWrapper.Order(dict.ID.Desc()).Find()
+	dbDicts, err := queryWrapper.Order(query.SysDict.ID.Desc()).Find()
 	if !types.IsNil(err) {
 		return nil, err
 	}
@@ -192,7 +179,6 @@ func listBizDictModel(ctx context.Context, data *data.Data, params *bo.QueryDict
 	if !ok {
 		return nil, merr.ErrorI18nUnLoginErr(ctx)
 	}
-
 	bizDB, err := data.GetBizGormDB(claims.GetTeam())
 	if !types.IsNil(err) {
 		return nil, err

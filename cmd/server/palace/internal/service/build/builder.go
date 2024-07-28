@@ -11,8 +11,10 @@ import (
 	teamapi "github.com/aide-family/moon/api/admin/team"
 	userapi "github.com/aide-family/moon/api/admin/user"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
+	"github.com/aide-family/moon/pkg/helper/middleware"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
+	"github.com/aide-family/moon/pkg/vobj"
 )
 
 func NewBuilder() Builder {
@@ -55,8 +57,9 @@ type (
 		WithCreateBoDict(*dictapi.CreateDictRequest) DictRequestBuilder
 		WithUpdateBoDict(*dictapi.UpdateDictRequest) DictRequestBuilder
 		WithApiDict(*model.SysDict) DictModelBuilder
-		WithApiBizDict(dict *bizmodel.SysDict) DictModelBuilder
+
 		WithApiDictSelect(*model.SysDict) DictModelBuilder
+		WithDict(model.IDict) DictModelBuilder
 
 		WithCreateMenuBo(*menuapi.CreateMenuRequest) MenuRequestBuilder
 		WithUpdateMenuBo(*menuapi.UpdateMenuRequest) MenuRequestBuilder
@@ -84,6 +87,22 @@ type (
 		WithApiDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
 	}
 )
+
+func (b *builder) WithDict(dict model.IDict) DictModelBuilder {
+	sourceType := middleware.GetSourceType(b.ctx)
+	switch sourceType {
+	case vobj.SourceTypeSystem:
+		return &dictBuilder{
+			SysDict: dict.(*model.SysDict),
+			ctx:     b.ctx,
+		}
+	default:
+		return &dictBuilder{
+			SysDict: dict.(*bizmodel.SysDict),
+			ctx:     b.ctx,
+		}
+	}
+}
 
 func (b *builder) WithBoDatasourceQueryData(d *bo.DatasourceQueryData) DatasourceQueryDataBuilder {
 	return &datasourceQueryDataBuilder{
@@ -170,7 +189,7 @@ func (b *builder) WithApiDict(dict *model.SysDict) DictModelBuilder {
 
 func (b *builder) WithApiBizDict(dict *bizmodel.SysDict) DictModelBuilder {
 	return &dictBuilder{
-		BizDict: dict,
+		SysDict: dict,
 		ctx:     b.ctx,
 	}
 }
