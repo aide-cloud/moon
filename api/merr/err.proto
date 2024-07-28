@@ -327,4 +327,10 @@ enum ErrorReason {
     (errors.message) = "字典名称已经存在!",
     (errors.id) = "DICT_NOT_FOUND_ERR"
   ];
+
+  DICT_CREATE_PARAM_CANNOT_EMPTY = 46[
+    (errors.code) = 405,
+    (errors.message) = "创建字典参数不能为空!",
+    (errors.id) = "DICT_CREATE_PARAM_CANNOT_EMPTY"
+  ];
 }

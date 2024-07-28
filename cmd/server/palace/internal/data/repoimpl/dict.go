@@ -3,19 +3,20 @@ package repoimpl
 import (
 	"context"
 
-	"gorm.io/gen"
-
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
 	"github.com/aide-family/moon/pkg/helper/middleware"
+	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/palace/model/query"
 	"github.com/aide-family/moon/pkg/util/types"
 	"gorm.io/gen/field"
+
+	"gorm.io/gen"
 )
 
 func NewDictRepository(data *data.Data) repository.Dict {
@@ -32,56 +33,47 @@ func (l *dictRepositoryImpl) UpdateStatusByIds(ctx context.Context, params *bo.U
 	ids := params.IDs
 	status := params.Status
 	if middleware.GetSourceType(ctx).IsTeam() {
-		claims, ok := middleware.ParseJwtClaims(ctx)
-		if !ok {
-			return merr.ErrorI18nUnLoginErr(ctx)
-		}
-		bizDB, err := l.data.GetBizGormDB(claims.GetTeam())
+		bizDB, err := getBizDB(ctx, l.data)
 		if !types.IsNil(err) {
 			return err
 		}
-		bizWrapper := bizquery.Use(bizDB).SysDict.WithContext(ctx)
-		if _, err = bizWrapper.Where(bizquery.Use(bizDB).SysDict.ID.In(ids...)).Update(bizquery.Use(bizDB).SysDict.Status, params.Status); !types.IsNil(err) {
+		if _, err = bizDB.SysDict.WithContext(ctx).Where(bizDB.SysDict.ID.In(ids...)).Update(bizDB.SysDict.Status, params.Status); !types.IsNil(err) {
 			return err
 		}
-	} else {
-		_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.In(ids...)).Update(query.SysDict.Status, status)
+	}
+	if _, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.In(ids...)).Update(query.SysDict.Status, status); !types.IsNil(err) {
 		return err
 	}
 	return nil
 }
 
-func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DeleteDictParams) error {
+func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, id uint32) error {
 	if middleware.GetSourceType(ctx).IsTeam() {
-		claims, ok := middleware.ParseJwtClaims(ctx)
-		if !ok {
-			return merr.ErrorI18nUnLoginErr(ctx)
-		}
-		bizDB, err := l.data.GetBizGormDB(claims.GetTeam())
+		bizDB, err := getBizDB(ctx, l.data)
 		if !types.IsNil(err) {
 			return err
 		}
-		err = bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
-			_, err := tx.SysDict.WithContext(ctx).Where(bizquery.Use(bizDB).SysDict.ID.Eq(params.ID)).Delete()
-			return err
-		})
+		_, err = bizDB.SysDict.Where(bizDB.SysDict.ID.Eq(id)).Delete()
 		if !types.IsNil(err) {
 			return err
 		}
-	} else {
-		_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(params.ID)).Delete()
+	}
+	if _, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(id)).Delete(); !types.IsNil(err) {
 		return err
 	}
 	return nil
 }
 
-func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictParams) (model.IDict, error) {
+func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictParams) (imodel.IDict, error) {
 	if middleware.GetSourceType(ctx).IsTeam() {
 		// Team  creation
-		return createDictModel(ctx, l.data, dict)
+		return l.createBizDictModel(ctx, dict)
 	}
 	// system creation
 	dictModel := createDictParamsToModel(ctx, dict)
+	if types.IsNil(dictModel) {
+		return nil, merr.ErrorI18nDictCreateParamCannotEmpty(ctx)
+	}
 	q := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict
 	if err := q.Create(dictModel); !types.IsNil(err) {
 		return nil, err
@@ -89,59 +81,35 @@ func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictPara
 	return dictModel, nil
 }
 
-func (l *dictRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryDictListParams) ([]model.IDict, error) {
+func (l *dictRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryDictListParams) ([]imodel.IDict, error) {
 	if middleware.GetSourceType(ctx).IsTeam() {
-		// Team  creation
-		return listBizDictModel(ctx, l.data, params)
-	} else {
-		return listDictModel(ctx, l.data, params)
+		return l.listBizDictModel(ctx, params)
 	}
+	return l.listDictModel(ctx, params)
 }
 
-func (l *dictRepositoryImpl) BatchCreate(ctx context.Context, createDicts []*bo.CreateDictParams) error {
-	for _, dict := range createDicts {
-		_, err := l.Create(ctx, dict)
-		if !types.IsNil(err) {
-			return err
-		}
-	}
-	return nil
-}
-
-func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32) (model.IDict, error) {
+func (l *dictRepositoryImpl) GetByID(ctx context.Context, id uint32) (imodel.IDict, error) {
 	if middleware.GetSourceType(ctx).IsTeam() {
-		claims, ok := middleware.ParseJwtClaims(ctx)
-		if !ok {
-			return nil, merr.ErrorI18nUnLoginErr(ctx)
-		}
-		bizDB, err := l.data.GetBizGormDB(claims.GetTeam())
+		bizDB, err := getBizDB(ctx, l.data)
 		if !types.IsNil(err) {
 			return nil, err
 		}
-		bizWrapper := bizquery.Use(bizDB).SysDict.WithContext(ctx)
-		return bizWrapper.Where(bizquery.Use(bizDB).SysDict.ID.Eq(id)).Preload(field.Associations).First()
-	} else {
-		return query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).First()
+		bizWrapper := bizDB.SysDict.WithContext(ctx)
+		return bizWrapper.Where(bizDB.SysDict.ID.Eq(id)).Preload(field.Associations).First()
 	}
+	return query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).First()
 }
 
 func (l *dictRepositoryImpl) UpdateByID(ctx context.Context, dict *bo.UpdateDictParams) error {
 	if middleware.GetSourceType(ctx).IsTeam() {
-		err := updateBizDictModel(ctx, l.data, dict)
-		if !types.IsNil(err) {
-			return err
-		}
+		return l.updateBizDictModel(ctx, dict)
 	} else {
-		err := updateDictModel(ctx, l.data, dict)
-		if !types.IsNil(err) {
-			return err
-		}
+		return l.updateDictModel(ctx, dict)
 	}
-	return nil
 }
 
-func listDictModel(ctx context.Context, data *data.Data, params *bo.QueryDictListParams) ([]model.IDict, error) {
-	dict := query.Use(data.GetMainDB(ctx)).SysDict
+func (l *dictRepositoryImpl) listDictModel(ctx context.Context, params *bo.QueryDictListParams) ([]imodel.IDict, error) {
+	dict := query.Use(l.data.GetMainDB(ctx)).SysDict
 	queryWrapper := dict.WithContext(ctx)
 
 	var wheres []gen.Condition
@@ -168,32 +136,28 @@ func listDictModel(ctx context.Context, data *data.Data, params *bo.QueryDictLis
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	dicts := types.SliceTo(dbDicts, func(dict *model.SysDict) model.IDict {
+	dicts := types.SliceTo(dbDicts, func(dict *model.SysDict) imodel.IDict {
 		return dict
 	})
 	return dicts, nil
 }
 
-func listBizDictModel(ctx context.Context, data *data.Data, params *bo.QueryDictListParams) ([]model.IDict, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	bizDB, err := data.GetBizGormDB(claims.GetTeam())
+func (l *dictRepositoryImpl) listBizDictModel(ctx context.Context, params *bo.QueryDictListParams) ([]imodel.IDict, error) {
+	bizDB, err := getBizDB(ctx, l.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	bizWrapper := bizquery.Use(bizDB).SysDict.WithContext(ctx)
+	bizWrapper := bizDB.SysDict.WithContext(ctx)
 
 	var wheres []gen.Condition
 
 	if !params.Status.IsUnknown() {
-		wheres = append(wheres, bizquery.Use(bizDB).SysDict.Status.Eq(params.Status.GetValue()))
+		wheres = append(wheres, bizDB.SysDict.Status.Eq(params.Status.GetValue()))
 	}
 	if !types.TextIsNull(params.Keyword) {
-		bizWrapper = bizWrapper.Or(bizquery.Use(bizDB).SysDict.Name.Like(params.Keyword))
-		bizWrapper = bizWrapper.Or(bizquery.Use(bizDB).SysDict.Value.Like(params.Keyword))
-		bizWrapper = bizWrapper.Or(bizquery.Use(bizDB).SysDict.Remark.Like(params.Keyword))
+		bizWrapper = bizWrapper.Or(bizDB.SysDict.Name.Like(params.Keyword))
+		bizWrapper = bizWrapper.Or(bizDB.SysDict.Value.Like(params.Keyword))
+		bizWrapper = bizWrapper.Or(bizDB.SysDict.Remark.Like(params.Keyword))
 	}
 
 	bizWrapper = bizWrapper.Where(wheres...).Preload(field.Associations)
@@ -201,66 +165,33 @@ func listBizDictModel(ctx context.Context, data *data.Data, params *bo.QueryDict
 	if err := types.WithPageQuery[bizquery.ISysDictDo](bizWrapper, params.Page); err != nil {
 		return nil, err
 	}
-	sysDicts, err := bizWrapper.Order(bizquery.Use(bizDB).SysDict.ID.Desc()).Find()
+	sysDicts, err := bizWrapper.Order(bizDB.SysDict.ID.Desc()).Find()
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	dicts := types.SliceTo(sysDicts, func(dict *bizmodel.SysDict) model.IDict {
+	dicts := types.SliceTo(sysDicts, func(dict *bizmodel.SysDict) imodel.IDict {
 		return dict
 	})
 	return dicts, nil
 }
 
-// createDictParamsToModel create dict params to model
-func createDictParamsToModel(ctx context.Context, dict *bo.CreateDictParams) *model.SysDict {
-	if types.IsNil(dict) {
-		return nil
-	}
-	dictModel := &model.SysDict{
-		Name:         dict.Name,
-		Value:        dict.Value,
-		DictType:     dict.DictType,
-		ColorType:    dict.ColorType,
-		CssClass:     dict.CssClass,
-		Status:       dict.Status,
-		Remark:       dict.Remark,
-		Icon:         dict.Icon,
-		ImageUrl:     dict.ImageUrl,
-		LanguageCode: dict.LanguageCode,
-	}
-	dictModel.WithContext(ctx)
-	return dictModel
-}
-
-// createDictModel create team dict model
-func createDictModel(ctx context.Context, data *data.Data, dict *bo.CreateDictParams) (*bizmodel.SysDict, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	bizDB, err := data.GetBizGormDB(claims.GetTeam())
+// createBizDictModel create team dict model
+func (l *dictRepositoryImpl) createBizDictModel(ctx context.Context, dict *bo.CreateDictParams) (*bizmodel.SysDict, error) {
+	bizDB, err := getBizDB(ctx, l.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	dictWrapper := bizquery.Use(bizDB)
-
 	dictBizModel := createBizDictParamsToModel(ctx, dict)
-	err = dictWrapper.Transaction(func(tx *bizquery.Query) error {
-		if err := tx.SysDict.WithContext(ctx).Create(dictBizModel); !types.IsNil(err) {
-			return err
-		}
-		return err
-	})
-	if !types.IsNil(err) {
+	if err := bizDB.SysDict.WithContext(ctx).Create(dictBizModel); !types.IsNil(err) {
 		return nil, err
 	}
 	return dictBizModel, nil
 }
 
-func updateDictModel(ctx context.Context, data *data.Data, params *bo.UpdateDictParams) error {
+func (l *dictRepositoryImpl) updateDictModel(ctx context.Context, params *bo.UpdateDictParams) error {
 	id := params.ID
 	updateParam := params.UpdateParam
-	_, err := query.Use(data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).UpdateSimple(
+	_, err := query.Use(l.data.GetMainDB(ctx)).SysDict.WithContext(ctx).Where(query.SysDict.ID.Eq(id)).UpdateSimple(
 		query.SysDict.Name.Value(updateParam.Name),
 		query.SysDict.Value.Value(updateParam.Value),
 		query.SysDict.CssClass.Value(updateParam.CssClass),
@@ -272,32 +203,22 @@ func updateDictModel(ctx context.Context, data *data.Data, params *bo.UpdateDict
 	return err
 }
 
-func updateBizDictModel(ctx context.Context, data *data.Data, params *bo.UpdateDictParams) error {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return merr.ErrorI18nUnLoginErr(ctx)
-	}
-	bizDB, err := data.GetBizGormDB(claims.GetTeam())
+func (l *dictRepositoryImpl) updateBizDictModel(ctx context.Context, params *bo.UpdateDictParams) error {
+	bizDB, err := getBizDB(ctx, l.data)
 	if !types.IsNil(err) {
 		return err
 	}
 	updateParam := params.UpdateParam
 	id := params.ID
-	dictWrapper := bizquery.Use(bizDB)
-	err = dictWrapper.Transaction(func(tx *bizquery.Query) error {
-		if _, err = tx.SysDict.WithContext(ctx).Where(bizquery.Use(bizDB).SysDict.ID.Eq(id)).UpdateSimple(
-			dictWrapper.SysDict.Name.Value(updateParam.Name),
-			dictWrapper.SysDict.Remark.Value(updateParam.Remark),
-			dictWrapper.SysDict.Value.Value(updateParam.Value),
-			dictWrapper.SysDict.CssClass.Value(updateParam.CssClass),
-			dictWrapper.SysDict.ColorType.Value(updateParam.ColorType),
-			dictWrapper.SysDict.ImageUrl.Value(updateParam.ImageUrl),
-			dictWrapper.SysDict.Icon.Value(updateParam.Icon),
-		); !types.IsNil(err) {
-			return err
-		}
-		return nil
-	})
+	_, err = bizDB.SysDict.Where(bizDB.SysDict.ID.Eq(id)).UpdateSimple(
+		bizDB.SysDict.Name.Value(updateParam.Name),
+		bizDB.SysDict.Remark.Value(updateParam.Remark),
+		bizDB.SysDict.Value.Value(updateParam.Value),
+		bizDB.SysDict.CssClass.Value(updateParam.CssClass),
+		bizDB.SysDict.ColorType.Value(updateParam.ColorType),
+		bizDB.SysDict.ImageUrl.Value(updateParam.ImageUrl),
+		bizDB.SysDict.Icon.Value(updateParam.Icon),
+	)
 	return err
 }
 
@@ -319,4 +240,25 @@ func createBizDictParamsToModel(ctx context.Context, dict *bo.CreateDictParams) 
 	}
 	modelDict.WithContext(ctx)
 	return modelDict
+}
+
+// createDictParamsToModel create dict params to model
+func createDictParamsToModel(ctx context.Context, dict *bo.CreateDictParams) *model.SysDict {
+	if types.IsNil(dict) {
+		return nil
+	}
+	dictModel := &model.SysDict{
+		Name:         dict.Name,
+		Value:        dict.Value,
+		DictType:     dict.DictType,
+		ColorType:    dict.ColorType,
+		CssClass:     dict.CssClass,
+		Status:       dict.Status,
+		Remark:       dict.Remark,
+		Icon:         dict.Icon,
+		ImageUrl:     dict.ImageUrl,
+		LanguageCode: dict.LanguageCode,
+	}
+	dictModel.WithContext(ctx)
+	return dictModel
 }

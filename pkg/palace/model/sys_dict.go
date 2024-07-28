@@ -3,14 +3,14 @@ package model
 import (
 	"encoding/json"
 
-	"gorm.io/plugin/soft_delete"
-
-	"github.com/aide-family/moon/api/merr"
+	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
+	"gorm.io/plugin/soft_delete"
 )
 
-var _ IDict = (*SysDict)(nil)
+var _ imodel.IDict = (*SysDict)(nil)
 
 // TableNameSysDict 字典数据表
 const TableNameSysDict = "sys_dict"
@@ -143,11 +143,4 @@ func (c *SysDict) String() string {
 // TableName SysDict's table name
 func (*SysDict) TableName() string {
 	return TableNameSysDict
-}
-
-func (c *SysDict) MainModel() (*SysDict, error) {
-	if types.IsNil(c) {
-		return nil, merr.ErrorI18nDictNotFoundErr(c.GetContext())
-	}
-	return c, nil
 }

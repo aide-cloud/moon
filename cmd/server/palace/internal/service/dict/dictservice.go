@@ -9,7 +9,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
-	"github.com/aide-family/moon/pkg/palace/model"
+	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -57,7 +57,7 @@ func (s *Service) ListDict(ctx context.Context, req *dictapi.GetDictSelectListRe
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	resList := types.SliceTo(dictPage, func(dict model.IDict) *admin.Dict {
+	resList := types.SliceTo(dictPage, func(dict imodel.IDict) *admin.Dict {
 		return build.NewBuilder().WithContext(ctx).WithDict(dict).ToApi()
 	})
 	return &dictapi.ListDictReply{
@@ -79,21 +79,14 @@ func (s *Service) BatchUpdateDictStatus(ctx context.Context, params *dictapi.Bat
 }
 
 func (s *Service) DeleteDict(ctx context.Context, req *dictapi.DeleteDictRequest) (*dictapi.DeleteDictReply, error) {
-	params := &bo.DeleteDictParams{
-		ID: req.GetId(),
-	}
-	err := s.dictBiz.DeleteDictById(ctx, params)
-	if !types.IsNil(err) {
+	if err := s.dictBiz.DeleteDictById(ctx, req.GetId()); !types.IsNil(err) {
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
 	return &dictapi.DeleteDictReply{}, nil
 }
 
 func (s *Service) GetDict(ctx context.Context, req *dictapi.GetDictRequest) (*dictapi.GetDictReply, error) {
-	params := &bo.GetDictDetailParams{
-		ID: req.GetId(),
-	}
-	dictDO, err := s.dictBiz.GetDict(ctx, params)
+	dictDO, err := s.dictBiz.GetDict(ctx, req.GetId())
 	if !types.IsNil(err) {
 		return nil, err
 	}

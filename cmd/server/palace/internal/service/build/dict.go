@@ -7,7 +7,7 @@ import (
 	"github.com/aide-family/moon/api/admin"
 	dictapi "github.com/aide-family/moon/api/admin/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
-	"github.com/aide-family/moon/pkg/palace/model"
+	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
 )
@@ -27,7 +27,7 @@ type (
 
 	dictBuilder struct {
 		// model
-		SysDict model.IDict
+		SysDict imodel.IDict
 
 		// request
 		CreateDictRequest *dictapi.CreateDictRequest

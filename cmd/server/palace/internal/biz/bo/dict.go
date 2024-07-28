@@ -44,12 +44,4 @@ type (
 		Status   vobj.Status      `json:"status"`
 		DictType vobj.DictType    `json:"dict_type"`
 	}
-
-	GetDictDetailParams struct {
-		ID uint32 `json:"id"`
-	}
-
-	DeleteDictParams struct {
-		ID uint32 `json:"id"`
-	}
 )

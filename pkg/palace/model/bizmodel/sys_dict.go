@@ -3,15 +3,16 @@ package bizmodel
 import (
 	"encoding/json"
 
-	"gorm.io/plugin/soft_delete"
-
 	"github.com/aide-family/moon/api/merr"
+	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
+	"gorm.io/plugin/soft_delete"
 )
 
-var _ model.IDict = (*SysDict)(nil)
+var _ imodel.IDict = (*SysDict)(nil)
 
 // TableNameSysDict 字典数据表
 const TableNameSysDict = "sys_dict"
