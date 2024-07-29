@@ -31,20 +31,16 @@ type dictRepositoryImpl struct {
 
 func (l *dictRepositoryImpl) UpdateStatusByIds(ctx context.Context, params *bo.UpdateDictStatusParams) error {
 	ids := params.IDs
-	status := params.Status
 	if middleware.GetSourceType(ctx).IsTeam() {
 		bizDB, err := getBizDB(ctx, l.data)
 		if !types.IsNil(err) {
 			return err
 		}
-		if _, err = bizDB.SysDict.WithContext(ctx).Where(bizDB.SysDict.ID.In(ids...)).Update(bizDB.SysDict.Status, params.Status); !types.IsNil(err) {
-			return err
-		}
-	}
-	if _, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.In(ids...)).Update(query.SysDict.Status, status); !types.IsNil(err) {
+		_, err = bizDB.SysDict.WithContext(ctx).Where(bizDB.SysDict.ID.In(ids...)).Update(bizDB.SysDict.Status, params.Status)
 		return err
 	}
-	return nil
+	_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.In(ids...)).Update(query.SysDict.Status, params.Status)
+	return err
 }
 
 func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, id uint32) error {
@@ -54,14 +50,10 @@ func (l *dictRepositoryImpl) DeleteByID(ctx context.Context, id uint32) error {
 			return err
 		}
 		_, err = bizDB.SysDict.Where(bizDB.SysDict.ID.Eq(id)).Delete()
-		if !types.IsNil(err) {
-			return err
-		}
-	}
-	if _, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(id)).Delete(); !types.IsNil(err) {
 		return err
 	}
-	return nil
+	_, err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Where(query.SysDict.ID.Eq(id)).Delete()
+	return err
 }
 
 func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictParams) (imodel.IDict, error) {
@@ -74,8 +66,7 @@ func (l *dictRepositoryImpl) Create(ctx context.Context, dict *bo.CreateDictPara
 	if types.IsNil(dictModel) {
 		return nil, merr.ErrorI18nDictCreateParamCannotEmpty(ctx)
 	}
-	q := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict
-	if err := q.Create(dictModel); !types.IsNil(err) {
+	if err := query.Use(l.data.GetMainDB(ctx)).WithContext(ctx).SysDict.Create(dictModel); !types.IsNil(err) {
 		return nil, err
 	}
 	return dictModel, nil
@@ -182,6 +173,9 @@ func (l *dictRepositoryImpl) createBizDictModel(ctx context.Context, dict *bo.Cr
 		return nil, err
 	}
 	dictBizModel := createBizDictParamsToModel(ctx, dict)
+	if types.IsNil(dictBizModel) {
+		return nil, merr.ErrorI18nDictCreateParamCannotEmpty(ctx)
+	}
 	if err := bizDB.SysDict.WithContext(ctx).Create(dictBizModel); !types.IsNil(err) {
 		return nil, err
 	}
