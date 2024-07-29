@@ -168,13 +168,6 @@ func (b *builder) WithUpdateBoDict(dict *dictapi.UpdateDictRequest) DictRequestB
 	}
 }
 
-func (b *builder) WithApiBizDict(dict *bizmodel.SysDict) DictModelBuilder {
-	return &dictBuilder{
-		SysDict: dict,
-		ctx:     b.ctx,
-	}
-}
-
 func (b *builder) WithApiDictSelect(dict *model.SysDict) DictModelBuilder {
 	return &dictBuilder{
 		SysDict: dict,
