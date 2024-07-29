@@ -3,11 +3,11 @@ package model
 import (
 	"context"
 
-	"gorm.io/gorm"
-	"gorm.io/plugin/soft_delete"
-
 	"github.com/aide-family/moon/pkg/helper/middleware"
 	"github.com/aide-family/moon/pkg/util/types"
+
+	"gorm.io/gorm"
+	"gorm.io/plugin/soft_delete"
 )
 
 type BaseModel struct {

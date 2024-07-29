@@ -3,7 +3,6 @@ package bizmodel
 import (
 	"encoding/json"
 
-	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/pkg/palace/imodel"
 	"github.com/aide-family/moon/pkg/palace/model"
 	"github.com/aide-family/moon/pkg/util/types"
@@ -147,11 +146,4 @@ func (c *SysDict) String() string {
 // TableName SysDict's table name
 func (*SysDict) TableName() string {
 	return TableNameSysDict
-}
-
-func (c *SysDict) BizModel() (*SysDict, error) {
-	if types.IsNil(c) {
-		return nil, merr.ErrorI18nDictNotFoundErr(c.GetContext())
-	}
-	return c, nil
 }

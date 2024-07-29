@@ -40,7 +40,7 @@ type (
 
 // ToApi 转换成api
 func (b *dictBuilder) ToApi() *admin.Dict {
-	if types.IsNil(b) {
+	if types.IsNil(b) || types.IsNil(b.SysDict) {
 		return nil
 	}
 	return &admin.Dict{
