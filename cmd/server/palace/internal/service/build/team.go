@@ -52,7 +52,7 @@ type (
 	}
 
 	TeamRoleBuilder interface {
-		ToSelect() *admin.Select
+		ToSelect() *admin.SelectItem
 		ToApi() *admin.TeamRole
 	}
 
@@ -193,11 +193,11 @@ func (b *teamRoleBuilder) ToApi() *admin.TeamRole {
 }
 
 // ToSelect 转换为Select数据
-func (b *teamRoleBuilder) ToSelect() *admin.Select {
+func (b *teamRoleBuilder) ToSelect() *admin.SelectItem {
 	if types.IsNil(b) || types.IsNil(b.SysTeamRole) {
 		return nil
 	}
-	return &admin.Select{
+	return &admin.SelectItem{
 		Value:    b.SysTeamRole.ID,
 		Label:    b.SysTeamRole.Name,
 		Disabled: b.SysTeamRole.DeletedAt > 0 || !vobj.Status(b.SysTeamRole.Status).IsEnable(),

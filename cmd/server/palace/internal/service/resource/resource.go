@@ -71,7 +71,7 @@ func (s *Service) GetResourceSelectList(ctx context.Context, req *resourceapi.Ge
 
 	return &resourceapi.GetResourceSelectListReply{
 		Pagination: build.NewPageBuilder(queryParams.Page).ToApi(),
-		List: types.SliceTo(resourceDos, func(item *bo.SelectOptionBo) *admin.Select {
+		List: types.SliceTo(resourceDos, func(item *bo.SelectOptionBo) *admin.SelectItem {
 			return build.NewSelectBuilder(item).ToApi()
 		}),
 	}, nil

@@ -31,13 +31,16 @@ var ProviderSetData = wire.NewSet(NewData, NewGreeterRepo)
 
 // Data .
 type Data struct {
-	bizDatabaseConf *palaceconf.Data_Database
+	bizDatabaseConf   *palaceconf.Data_Database
+	alarmDatabaseConf *palaceconf.Data_Database
 
 	mainDB       *gorm.DB
+	alarmDB      *sql.DB
 	bizDB        *sql.DB
 	cacher       conn.Cache
 	enforcerMap  *sync.Map
 	teamBizDBMap *sync.Map
+	alarmDBMap   *sync.Map
 
 	exit chan struct{}
 }
@@ -47,13 +50,16 @@ var closeFuncList []func()
 // NewData .
 func NewData(c *palaceconf.Bootstrap) (*Data, func(), error) {
 	mainConf := c.GetData().GetDatabase()
+	alarmConf := c.GetData().GetAlarmDatabase()
 	bizConf := c.GetData().GetBizDatabase()
 	cacheConf := c.GetData().GetCache()
 	d := &Data{
-		bizDatabaseConf: bizConf,
-		teamBizDBMap:    new(sync.Map),
-		enforcerMap:     new(sync.Map),
-		exit:            make(chan struct{}),
+		bizDatabaseConf:   bizConf,
+		alarmDatabaseConf: alarmConf,
+		teamBizDBMap:      new(sync.Map),
+		alarmDBMap:        new(sync.Map),
+		enforcerMap:       new(sync.Map),
+		exit:              make(chan struct{}),
 	}
 	cleanup := func() {
 		for _, f := range closeFuncList {
@@ -62,7 +68,7 @@ func NewData(c *palaceconf.Bootstrap) (*Data, func(), error) {
 		log.Info("closing the data resources")
 	}
 	closeFuncList = append(closeFuncList, func() {
-		log.Debugw("close data")
+		log.Debug("close data")
 		d.exit <- struct{}{}
 	})
 
@@ -73,33 +79,27 @@ func NewData(c *palaceconf.Bootstrap) (*Data, func(), error) {
 		})
 	}
 
-	if !types.IsNil(mainConf) && !types.TextIsNull(mainConf.GetDsn()) {
-		mainDB, err := conn.NewGormDB(mainConf.GetDsn(), mainConf.GetDriver())
+	if !types.IsNil(alarmConf) && !types.TextIsNull(alarmConf.GetDsn()) {
+		// 打开数据库连接
+		db, err := sql.Open(alarmConf.GetDriver(), bizConf.GetDsn())
 		if !types.IsNil(err) {
+			log.Fatalf("Error opening database: %v\n", err)
 			cleanup()
 			return nil, nil, err
 		}
-
-		d.mainDB = mainDB
-		// 判断是否有默认用户， 如果没有，则创建一个默认用户
-		if err := d.initMainDatabase(); err != nil {
-			log.Fatalf("Error init default user: %v\n", err)
-			cleanup()
-			return nil, nil, err
-		}
-
-		// 同步业务模型到各个团队， 保证数据一致性
-		if err := d.syncBizDatabase(); err != nil {
-			log.Fatalf("Error init biz database: %v\n", err)
-			cleanup()
-			return nil, nil, err
-		}
-
+		d.alarmDB = db
 		closeFuncList = append(closeFuncList, func() {
-			mainDBClose, _ := d.mainDB.DB()
-			log.Debugw("close main db", mainDBClose.Close())
+			log.Debugw("close alarm db", d.bizDB.Close())
+			d.alarmDBMap.Range(func(key, value any) bool {
+				alarmDB, ok := value.(*gorm.DB)
+				if !ok {
+					return true
+				}
+				dbTmp, _ := alarmDB.DB()
+				log.Debugw("close alarm orm db", dbTmp.Close())
+				return ok
+			})
 		})
-		query.SetDefault(d.mainDB)
 	}
 
 	if !types.IsNil(bizConf) && !types.TextIsNull(bizConf.GetDsn()) {
@@ -123,6 +123,33 @@ func NewData(c *palaceconf.Bootstrap) (*Data, func(), error) {
 				log.Debugw("close biz orm db", dbTmp.Close())
 				return ok
 			})
+		})
+	}
+
+	if !types.IsNil(mainConf) && !types.TextIsNull(mainConf.GetDsn()) {
+		mainDB, err := conn.NewGormDB(mainConf)
+		if !types.IsNil(err) {
+			cleanup()
+			return nil, nil, err
+		}
+		d.mainDB = mainDB
+		// 判断是否有默认用户， 如果没有，则创建一个默认用户
+		if err := d.initMainDatabase(); err != nil {
+			log.Fatalf("Error init default user: %v\n", err)
+			cleanup()
+			return nil, nil, err
+		}
+
+		// 同步业务模型到各个团队， 保证数据一致性
+		if err := d.syncBizDatabase(); err != nil {
+			log.Fatalf("Error init biz database: %v\n", err)
+			cleanup()
+			return nil, nil, err
+		}
+
+		closeFuncList = append(closeFuncList, func() {
+			mainDBClose, _ := d.mainDB.DB()
+			log.Debugw("close main db", mainDBClose.Close())
 		})
 	}
 
@@ -187,6 +214,14 @@ func (d *Data) syncBizDatabase() error {
 		if err := db.AutoMigrate(bizmodel.Models()...); err != nil {
 			return err
 		}
+		// TODO 同步实时告警数据库
+		alarmDB, err := d.GetAlarmGormDB(team.ID)
+		if err != nil {
+			return err
+		}
+		if err := alarmDB.AutoMigrate(bizmodel.AlarmModels()...); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -229,7 +264,12 @@ func (d *Data) GetBizGormDB(teamId uint32) (*gorm.DB, error) {
 	}
 
 	dsn := d.bizDatabaseConf.GetDsn() + GenBizDatabaseName(teamId) + "?charset=utf8mb4&parseTime=True&loc=Local"
-	bizDB, err := conn.NewGormDB(dsn, d.bizDatabaseConf.GetDriver())
+	bizDbConf := &palaceconf.Data_Database{
+		Driver: d.bizDatabaseConf.GetDriver(),
+		Dsn:    dsn,
+		Debug:  d.bizDatabaseConf.GetDebug(),
+	}
+	bizDB, err := conn.NewGormDB(bizDbConf)
 	if !types.IsNil(err) {
 		return nil, err
 	}
@@ -241,6 +281,34 @@ func (d *Data) GetBizGormDB(teamId uint32) (*gorm.DB, error) {
 		return nil, err
 	}
 	d.enforcerMap.Store(teamId, enforcer)
+	return bizDB, nil
+}
+
+func (d *Data) GetAlarmGormDB(teamId uint32) (*gorm.DB, error) {
+	if teamId == 0 {
+		return nil, merr.ErrorI18nNoTeamErr(context.Background())
+	}
+	dbValue, exist := d.alarmDBMap.Load(teamId)
+	if exist {
+		bizDB, isBizDB := dbValue.(*gorm.DB)
+		if isBizDB {
+			return bizDB, nil
+		}
+		return nil, merr.ErrorNotification("数据库服务异常")
+	}
+
+	dsn := d.alarmDatabaseConf.GetDsn() + GenBizDatabaseName(teamId) + "?charset=utf8mb4&parseTime=True&loc=Local"
+	alarmDbConf := &palaceconf.Data_Database{
+		Driver: d.alarmDatabaseConf.GetDriver(),
+		Dsn:    dsn,
+		Debug:  d.alarmDatabaseConf.GetDebug(),
+	}
+	bizDB, err := conn.NewGormDB(alarmDbConf)
+	if !types.IsNil(err) {
+		return nil, err
+	}
+
+	d.alarmDBMap.Store(teamId, bizDB)
 	return bizDB, nil
 }
 

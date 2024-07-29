@@ -15,7 +15,7 @@ import (
 
 type (
 	StrategyModelBuilder interface {
-		ToApi(ctx context.Context) *admin.Strategy
+		ToApi(ctx context.Context) *admin.StrategyItem
 	}
 
 	StrategyRequestBuilder interface {
@@ -45,7 +45,7 @@ type (
 	}
 
 	StrategyGroupModelBuilder interface {
-		ToApi() *admin.StrategyGroup
+		ToApi() *admin.StrategyGroupItem
 	}
 
 	StrategyGroupRequestBuilder interface {
@@ -71,7 +71,7 @@ type (
 )
 
 // ToApi 转换为API层数据
-func (b *strategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
+func (b *strategyBuilder) ToApi(ctx context.Context) *admin.StrategyItem {
 	if types.IsNil(b) || types.IsNil(b.Strategy) {
 		return nil
 	}
@@ -79,13 +79,13 @@ func (b *strategyBuilder) ToApi(ctx context.Context) *admin.Strategy {
 		return NewBuilder().WithApiStrategyLevel(level).ToApi(), true
 	})
 
-	return &admin.Strategy{
+	return &admin.StrategyItem{
 		Name:        b.Strategy.Name,
 		Id:          b.Strategy.ID,
 		Expr:        b.Strategy.Expr,
 		Labels:      b.Strategy.Labels.Map(),
 		Annotations: b.Strategy.Annotations,
-		Datasource: types.SliceTo(b.Strategy.Datasource, func(datasource *bizmodel.Datasource) *admin.Datasource {
+		Datasource: types.SliceTo(b.Strategy.Datasource, func(datasource *bizmodel.Datasource) *admin.DatasourceItem {
 			return NewBuilder().WithContext(ctx).WithDoDatasource(datasource).ToApi()
 		}),
 		StrategyTemplateId: b.Strategy.StrategyTemplateID,
@@ -185,12 +185,12 @@ func (b *strategyLevelBuilder) ToApi() *admin.StrategyLevel {
 	return strategyLevel
 }
 
-func (b *strategyGroupBuilder) ToApi() *admin.StrategyGroup {
+func (b *strategyGroupBuilder) ToApi() *admin.StrategyGroupItem {
 	if types.IsNil(b) || types.IsNil(b.StrategyGroup) {
 		return nil
 	}
 	cache := runtimecache.GetRuntimeCache()
-	return &admin.StrategyGroup{
+	return &admin.StrategyGroupItem{
 		Id:        b.StrategyGroup.ID,
 		Name:      b.StrategyGroup.Name,
 		Remark:    b.StrategyGroup.Remark,

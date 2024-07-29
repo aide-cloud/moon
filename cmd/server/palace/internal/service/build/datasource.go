@@ -18,7 +18,7 @@ import (
 
 type (
 	DatasourceModelBuilder interface {
-		ToApi() *admin.Datasource
+		ToApi() *admin.DatasourceItem
 	}
 
 	DatasourceRequestBuilder interface {
@@ -92,7 +92,7 @@ func (b *datasourceBuilder) ToListDatasourceBo() *bo.QueryDatasourceListParams {
 	}
 }
 
-func (b *datasourceBuilder) ToApi() *admin.Datasource {
+func (b *datasourceBuilder) ToApi() *admin.DatasourceItem {
 	if types.IsNil(b) || types.IsNil(b.Datasource) {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (b *datasourceBuilder) ToApi() *admin.Datasource {
 		log.Warnw("error", err)
 	}
 	cache := runtimecache.GetRuntimeCache()
-	return &admin.Datasource{
+	return &admin.DatasourceItem{
 		Id:          b.Datasource.ID,
 		Name:        b.Datasource.Name,
 		Type:        api.DatasourceType(b.Datasource.Category),

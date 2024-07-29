@@ -74,7 +74,7 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 	}
 	return &strategyapi.ListStrategyGroupReply{
 		Pagination: build.NewPageBuilder(params.Page).ToApi(),
-		List: types.SliceTo(listPage, func(strategy *bizmodel.StrategyGroup) *admin.StrategyGroup {
+		List: types.SliceTo(listPage, func(strategy *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
 			return build.NewBuilder().WithContext(ctx).WithApiStrategyGroup(strategy).ToApi()
 		}),
 	}, nil
@@ -219,7 +219,7 @@ func (s *Service) ListStrategy(ctx context.Context, req *strategyapi.ListStrateg
 	}
 	return &strategyapi.ListStrategyReply{
 		Pagination: build.NewPageBuilder(params.Page).ToApi(),
-		List: types.SliceTo(strategies, func(strategy *bizmodel.Strategy) *admin.Strategy {
+		List: types.SliceTo(strategies, func(strategy *bizmodel.Strategy) *admin.StrategyItem {
 			return build.NewBuilder().WithApiStrategy(strategy).ToApi(ctx)
 		}),
 	}, nil

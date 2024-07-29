@@ -16,14 +16,14 @@ func NewSelectBuilder(option *bo.SelectOptionBo) *SelectBuilder {
 	}
 }
 
-func (b *SelectBuilder) ToApi() *admin.Select {
+func (b *SelectBuilder) ToApi() *admin.SelectItem {
 	if types.IsNil(b) || types.IsNil(b.SelectOptionBo) {
 		return nil
 	}
-	return &admin.Select{
+	return &admin.SelectItem{
 		Value: b.Value,
 		Label: b.Label,
-		Children: types.SliceTo(b.Children, func(i *bo.SelectOptionBo) *admin.Select {
+		Children: types.SliceTo(b.Children, func(i *bo.SelectOptionBo) *admin.SelectItem {
 			return NewSelectBuilder(i).ToApi()
 		}),
 		Disabled: b.Disabled,

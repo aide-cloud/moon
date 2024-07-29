@@ -89,7 +89,7 @@ func (s *MetricService) SelectMetric(ctx context.Context, req *datasourceapi.Sel
 
 	return &datasourceapi.SelectMetricReply{
 		Pagination: build.NewPageBuilder(params.Page).ToApi(),
-		List: types.SliceTo(list, func(item *bo.SelectOptionBo) *admin.Select {
+		List: types.SliceTo(list, func(item *bo.SelectOptionBo) *admin.SelectItem {
 			return build.NewSelectBuilder(item).ToApi()
 		}),
 	}, nil

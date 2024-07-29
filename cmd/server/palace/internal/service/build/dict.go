@@ -15,8 +15,7 @@ import (
 type (
 	DictModelBuilder interface {
 		ToApi() *admin.Dict
-
-		ToApiSelect() *admin.Select
+		ToApiSelect() *admin.SelectItem
 	}
 
 	DictRequestBuilder interface {
@@ -60,11 +59,11 @@ func (b *dictBuilder) ToApi() *admin.Dict {
 }
 
 // ToApiSelect 转换成api下拉数据
-func (b *dictBuilder) ToApiSelect() *admin.Select {
+func (b *dictBuilder) ToApiSelect() *admin.SelectItem {
 	if types.IsNil(b) || types.IsNil(b.SysDict) {
 		return nil
 	}
-	return &admin.Select{
+	return &admin.SelectItem{
 		Value:    b.SysDict.GetID(),
 		Label:    b.SysDict.GetName(),
 		Children: nil,

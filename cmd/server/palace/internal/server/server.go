@@ -6,6 +6,7 @@ import (
 	datasourceapi "github.com/aide-family/moon/api/admin/datasource"
 	dictapi "github.com/aide-family/moon/api/admin/dict"
 	menuapi "github.com/aide-family/moon/api/admin/menu"
+	realtimeapi "github.com/aide-family/moon/api/admin/realtime"
 	resourceapi "github.com/aide-family/moon/api/admin/resource"
 	strategyapi "github.com/aide-family/moon/api/admin/strategy"
 	teamapi "github.com/aide-family/moon/api/admin/team"
@@ -16,6 +17,7 @@ import (
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/datasource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/dict"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/menu"
+	"github.com/aide-family/moon/cmd/server/palace/internal/service/realtime"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/resource"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/strategy"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/team"
@@ -69,6 +71,8 @@ func RegisterService(
 	dictService *dict.Service,
 	strategyService *strategy.Service,
 	strategyTemplateService *strategy.TemplateService,
+	dashboardService *realtime.DashboardService,
+	alarmService *realtime.AlarmService,
 ) *Server {
 	// 注册GRPC服务
 	v1.RegisterGreeterServer(rpcSrv, greeter)
@@ -84,6 +88,8 @@ func RegisterService(
 	api.RegisterHealthServer(rpcSrv, healthService)
 	strategyapi.RegisterStrategyServer(rpcSrv, strategyService)
 	strategyapi.RegisterTemplateServer(rpcSrv, strategyTemplateService)
+	realtimeapi.RegisterDashboardServer(rpcSrv, dashboardService)
+	realtimeapi.RegisterAlarmServer(rpcSrv, alarmService)
 
 	// 注册HTTP服务
 	v1.RegisterGreeterHTTPServer(httpSrv, greeter)
@@ -99,6 +105,8 @@ func RegisterService(
 	api.RegisterHealthHTTPServer(httpSrv, healthService)
 	strategyapi.RegisterStrategyHTTPServer(httpSrv, strategyService)
 	strategyapi.RegisterTemplateHTTPServer(httpSrv, strategyTemplateService)
+	realtimeapi.RegisterDashboardHTTPServer(httpSrv, dashboardService)
+	realtimeapi.RegisterAlarmHTTPServer(httpSrv, alarmService)
 
 	return &Server{
 		rpcSrv:  rpcSrv,

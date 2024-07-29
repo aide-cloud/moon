@@ -114,7 +114,7 @@ func (s *RoleService) GetRoleSelectList(ctx context.Context, req *teamapi.GetRol
 		return nil, err
 	}
 	return &teamapi.GetRoleSelectListReply{
-		List: types.SliceTo(teamRoles, func(item *bizmodel.SysTeamRole) *admin.Select {
+		List: types.SliceTo(teamRoles, func(item *bizmodel.SysTeamRole) *admin.SelectItem {
 			return build.NewBuilder().WithSelectTeamRole(item).ToSelect()
 		}),
 	}, nil
