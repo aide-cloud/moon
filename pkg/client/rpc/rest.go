@@ -11,6 +11,7 @@ type Interface interface {
 	List() *Request
 	Update() *Request
 	Delete() *Request
+	Stream() *Request
 	Watch() *Request
 }
 
@@ -20,6 +21,7 @@ const (
 	MethodList   = "List"
 	MethodUpdate = "Update"
 	MethodDelete = "Delete"
+	MethodStream = "Stream"
 	MethodWatch  = "Watch"
 )
 
@@ -56,6 +58,10 @@ func (x *RESTClient) Delete() *Request {
 }
 func (x *RESTClient) Watch() *Request {
 	return x.Method(MethodWatch)
+}
+
+func (x *RESTClient) Stream() *Request {
+	return x.Method(MethodStream)
 }
 
 func (x *RESTClient) Method(method string) *Request {

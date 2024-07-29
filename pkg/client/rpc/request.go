@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/aide-family/moon/pkg/runtime/watch"
 	"google.golang.org/grpc"
+	"reflect"
 )
 
 type Request struct {
@@ -82,6 +84,64 @@ func (x *Request) do(ctx context.Context) {
 		x.callOpts = append(x.callOpts, grpc.StaticMethod())
 	}
 	x.err = x.c.client.Invoke(ctx, rpcMethodName, x.params, x.out, x.callOpts...)
+}
+
+func (x *Request) Stream(ctx context.Context, objType any) (chan<- any, error) {
+	rpcMethodName := x.buildRPCMethodName()
+	if len(x.callOpts) == 0 {
+		x.callOpts = append(x.callOpts, grpc.StaticMethod())
+	}
+	streamDesc := &grpc.StreamDesc{StreamName: MethodStream, ServerStreams: true}
+	stream, err := x.c.client.NewStream(ctx, streamDesc, rpcMethodName, x.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = stream.SendMsg(x.params); err != nil {
+		return nil, err
+	}
+	if err = stream.CloseSend(); err != nil {
+		return nil, err
+	}
+	ch := make(chan any)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				out := reflect.New(reflect.TypeOf(objType)).Interface()
+				if err = stream.RecvMsg(out); err != nil {
+					// TODO handler err log
+					return
+				}
+				ch <- out
+			}
+		}
+	}()
+	return ch, nil
+}
+
+func (x *Request) Watch(ctx context.Context, objType any) (watch.Interface, error) {
+	rpcMethodName := x.buildRPCMethodName()
+	if len(x.callOpts) == 0 {
+		x.callOpts = append(x.callOpts, grpc.StaticMethod())
+	}
+	streamDesc := &grpc.StreamDesc{StreamName: MethodWatch, ServerStreams: true}
+	stream, err := x.c.client.NewStream(ctx, streamDesc, rpcMethodName, x.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = stream.SendMsg(x.params); err != nil {
+		return nil, err
+	}
+	if err = stream.CloseSend(); err != nil {
+		return nil, err
+	}
+	g := NewGenericWatchClient(objType, stream)
+	go g.Run(ctx)
+	return g, nil
 }
 
 func (x *Request) RPCMethodName() string {

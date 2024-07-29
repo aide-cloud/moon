@@ -8,6 +8,7 @@ import (
 	"github.com/aide-family/moon/pkg/runtime/client"
 	"github.com/aide-family/moon/pkg/runtime/watch"
 	"google.golang.org/grpc"
+	"reflect"
 )
 
 type watchClient struct {
@@ -37,59 +38,55 @@ func (x *watchClient) Watch(ctx context.Context, obj runtime.Object, opts *api.L
 	if err = stream.CloseSend(); err != nil {
 		return nil, err
 	}
-	g := &genericStreamClient{
-		kind:   kind,
-		scheme: x.scheme,
-		stream: stream,
-	}
+	g := NewGenericWatchClient(obj, stream)
 	go g.Run(ctx)
 
 	return g, nil
 }
 
-var _ watch.Interface = &genericStreamClient{}
+var _ watch.Interface = &genericWatchClient{}
 
-type genericStreamClient struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	kind   string
-	scheme *runtime.Scheme
-	stream grpc.ClientStream
-	resCh  chan watch.Event
+type genericWatchClient struct {
+	ctx        context.Context
+	cancel     context.CancelFunc
+	objectType any
+	stream     grpc.ClientStream
+	resCh      chan watch.Event
 }
 
-func (g *genericStreamClient) Stop() {
+func NewGenericWatchClient(object any, stream grpc.ClientStream) *genericWatchClient {
+	return &genericWatchClient{
+		objectType: object,
+		stream:     stream,
+		resCh:      make(chan watch.Event),
+	}
+}
+
+func (g *genericWatchClient) Stop() {
 	g.cancel()
 }
 
-func (g *genericStreamClient) ResultChan() <-chan watch.Event {
-	ch := make(chan watch.Event)
-	return ch
+func (g *genericWatchClient) ResultChan() <-chan watch.Event {
+	return g.resCh
 }
 
-func (g *genericStreamClient) Run(ctx context.Context) {
+func (g *genericWatchClient) Run(ctx context.Context) {
 	g.ctx, g.cancel = context.WithCancel(ctx)
 	defer g.cancel()
 	for {
 		select {
 		case <-g.ctx.Done():
-			g.stream.Trailer()
 			return
 		default:
 			res := watch.Event{}
-			object, err := g.scheme.New(g.kind)
-			if err != nil {
-				res.Type = watch.Error
-				g.resCh <- res
-				continue
-			}
-			if err = g.stream.RecvMsg(object); err != nil {
+			object := reflect.New(reflect.TypeOf(g.objectType)).Interface()
+			if err := g.stream.RecvMsg(object); err != nil {
 				res.Type = watch.Error
 				g.resCh <- res
 				continue
 			}
 			res.Type = watch.Added
-			res.Object = object
+			res.Object = object.(runtime.Object)
 			g.resCh <- res
 		}
 	}

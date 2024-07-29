@@ -6,13 +6,21 @@ import (
 	"github.com/aide-family/moon/pkg/runtime/watch"
 )
 
-// ListFunc knows how to list resources
-type ListFunc func(options api.ListOptions) (runtime.Object, error)
+// Lister is any object that knows how to perform an initial list.
+type Lister interface {
+	// List should return a list type object; the Items field will be extracted, and the
+	// ResourceVersion field will be used to start the watch in the right place.
+	List(options *api.ListOptions) (runtime.Object, error)
+}
 
-// WatchFunc knows how to watch resources
-type WatchFunc func(options api.ListOptions) (watch.Interface, error)
+// Watcher is any object that knows how to start a watch on a resource.
+type Watcher interface {
+	// Watch should begin a watch at the specified version.
+	Watch(options *api.ListOptions) (watch.Interface, error)
+}
 
-type ListAndWatch struct {
-	ListFunc  ListFunc
-	WatchFunc WatchFunc
+// ListerWatcher is any object that knows how to perform an initial list and start a watch on a resource.
+type ListerWatcher interface {
+	Lister
+	Watcher
 }
