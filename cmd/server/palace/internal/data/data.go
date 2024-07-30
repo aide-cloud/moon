@@ -156,6 +156,7 @@ func NewData(c *palaceconf.Bootstrap) (*Data, func(), error) {
 	return d, cleanup, nil
 }
 
+// Exit 推出data
 func (d *Data) Exit() <-chan struct{} {
 	return d.exit
 }
@@ -228,7 +229,7 @@ func (d *Data) syncBizDatabase() error {
 
 // GetMainDB 获取主库连接
 func (d *Data) GetMainDB(ctx context.Context) *gorm.DB {
-	db, exist := ctx.Value(conn.GormContextTxKey{}).(*gorm.DB)
+	db, exist := conn.GetDB(ctx)
 	if exist {
 		return db
 	}
@@ -236,25 +237,21 @@ func (d *Data) GetMainDB(ctx context.Context) *gorm.DB {
 }
 
 // GetBizDB 获取业务库连接
-func (d *Data) GetBizDB(ctx context.Context) *sql.DB {
-	db, exist := ctx.Value(conn.GormContextTxKey{}).(*sql.DB)
-	if exist {
-		return db
-	}
+func (d *Data) GetBizDB(_ context.Context) *sql.DB {
 	return d.bizDB
 }
 
 // GenBizDatabaseName 生成业务库名称
-func GenBizDatabaseName(teamId uint32) string {
-	return fmt.Sprintf("team_%d", teamId)
+func GenBizDatabaseName(teamID uint32) string {
+	return fmt.Sprintf("team_%d", teamID)
 }
 
 // GetBizGormDB 获取业务库连接
-func (d *Data) GetBizGormDB(teamId uint32) (*gorm.DB, error) {
-	if teamId == 0 {
+func (d *Data) GetBizGormDB(teamID uint32) (*gorm.DB, error) {
+	if teamID == 0 {
 		return nil, merr.ErrorI18nNoTeamErr(context.Background())
 	}
-	dbValue, exist := d.teamBizDBMap.Load(teamId)
+	dbValue, exist := d.teamBizDBMap.Load(teamID)
 	if exist {
 		bizDB, isBizDB := dbValue.(*gorm.DB)
 		if isBizDB {
@@ -263,7 +260,7 @@ func (d *Data) GetBizGormDB(teamId uint32) (*gorm.DB, error) {
 		return nil, merr.ErrorNotification("数据库服务异常")
 	}
 
-	dsn := d.bizDatabaseConf.GetDsn() + GenBizDatabaseName(teamId) + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := d.bizDatabaseConf.GetDsn() + GenBizDatabaseName(teamID) + "?charset=utf8mb4&parseTime=True&loc=Local"
 	bizDbConf := &palaceconf.Data_Database{
 		Driver: d.bizDatabaseConf.GetDriver(),
 		Dsn:    dsn,
@@ -274,21 +271,22 @@ func (d *Data) GetBizGormDB(teamId uint32) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	d.teamBizDBMap.Store(teamId, bizDB)
+	d.teamBizDBMap.Store(teamID, bizDB)
 	enforcer, err := rbac.InitCasbinModel(bizDB)
 	if !types.IsNil(err) {
 		log.Errorw("casbin init error", err)
 		return nil, err
 	}
-	d.enforcerMap.Store(teamId, enforcer)
+	d.enforcerMap.Store(teamID, enforcer)
 	return bizDB, nil
 }
 
-func (d *Data) GetAlarmGormDB(teamId uint32) (*gorm.DB, error) {
-	if teamId == 0 {
+// GetAlarmGormDB 获取告警库连接
+func (d *Data) GetAlarmGormDB(teamID uint32) (*gorm.DB, error) {
+	if teamID == 0 {
 		return nil, merr.ErrorI18nNoTeamErr(context.Background())
 	}
-	dbValue, exist := d.alarmDBMap.Load(teamId)
+	dbValue, exist := d.alarmDBMap.Load(teamID)
 	if exist {
 		bizDB, isBizDB := dbValue.(*gorm.DB)
 		if isBizDB {
@@ -297,7 +295,7 @@ func (d *Data) GetAlarmGormDB(teamId uint32) (*gorm.DB, error) {
 		return nil, merr.ErrorNotification("数据库服务异常")
 	}
 
-	dsn := d.alarmDatabaseConf.GetDsn() + GenBizDatabaseName(teamId) + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := d.alarmDatabaseConf.GetDsn() + GenBizDatabaseName(teamID) + "?charset=utf8mb4&parseTime=True&loc=Local"
 	alarmDbConf := &palaceconf.Data_Database{
 		Driver: d.alarmDatabaseConf.GetDriver(),
 		Dsn:    dsn,
@@ -308,7 +306,7 @@ func (d *Data) GetAlarmGormDB(teamId uint32) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	d.alarmDBMap.Store(teamId, bizDB)
+	d.alarmDBMap.Store(teamID, bizDB)
 	return bizDB, nil
 }
 
@@ -321,10 +319,10 @@ func (d *Data) GetCacher() conn.Cache {
 }
 
 // GetCasbin 获取casbin
-func (d *Data) GetCasbin(teamId uint32) *casbin.SyncedEnforcer {
-	enforceVal, exist := d.enforcerMap.Load(teamId)
+func (d *Data) GetCasbin(teamID uint32) *casbin.SyncedEnforcer {
+	enforceVal, exist := d.enforcerMap.Load(teamID)
 	if !exist {
-		_, err := d.GetBizGormDB(teamId)
+		_, err := d.GetBizGormDB(teamID)
 		if !types.IsNil(err) {
 			panic(err)
 		}

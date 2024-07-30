@@ -7,7 +7,7 @@ import (
 	"github.com/aide-family/moon/pkg/vobj"
 )
 
-const TableNameRealtimeAlarm = "realtime_alarm"
+const tableNameRealtimeAlarm = "realtime_alarm"
 
 // RealtimeAlarm mapped from table <RealtimeAlarm>
 type RealtimeAlarm struct {
@@ -15,8 +15,8 @@ type RealtimeAlarm struct {
 	// 发生这条告警的具体策略信息
 	StrategyID uint32    `gorm:"column:strategy_id;type:int unsigned;not null;uniqueIndex:idx__ar__strategy_id,priority:1;comment:策略ID"`
 	Strategy   *Strategy `gorm:"foreignKey:StrategyID"`
-	LevelId    uint32    `gorm:"column:level_id;type:int unsigned;not null;uniqueIndex:idx__ar__level_id,priority:1;comment:告警等级ID"`
-	Level      *SysDict  `gorm:"foreignKey:LevelId"`
+	LevelID    uint32    `gorm:"column:level_id;type:int unsigned;not null;uniqueIndex:idx__ar__level_id,priority:1;comment:告警等级ID"`
+	Level      *SysDict  `gorm:"foreignKey:LevelID"`
 	// 告警状态: 1告警;2恢复
 	Status vobj.AlertStatus `gorm:"column:status;type:tinyint;not null;default:1;comment:告警状态: 1告警;2恢复"`
 	// 告警时间
@@ -44,15 +44,17 @@ func (c *RealtimeAlarm) String() string {
 	return string(bs)
 }
 
+// UnmarshalBinary redis存储实现
 func (c *RealtimeAlarm) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, c)
 }
 
+// MarshalBinary redis存储实现
 func (c *RealtimeAlarm) MarshalBinary() (data []byte, err error) {
 	return json.Marshal(c)
 }
 
 // TableName RealtimeAlarm's table name
 func (*RealtimeAlarm) TableName() string {
-	return TableNameRealtimeAlarm
+	return tableNameRealtimeAlarm
 }

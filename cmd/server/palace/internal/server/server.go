@@ -32,18 +32,19 @@ import (
 // ProviderSetServer is server providers.
 var ProviderSetServer = wire.NewSet(NewGRPCServer, NewHTTPServer, RegisterService)
 
+// Server 服务
 type Server struct {
 	rpcSrv  *grpc.Server
 	httpSrv *http.Server
 }
 
-// GetRpcServer 获取rpc server
-func (s *Server) GetRpcServer() *grpc.Server {
+// GetRPCServer 获取rpc server
+func (s *Server) GetRPCServer() *grpc.Server {
 	return s.rpcSrv
 }
 
-// GetHttpServer 获取http server
-func (s *Server) GetHttpServer() *http.Server {
+// GetHTTPServer 获取http server
+func (s *Server) GetHTTPServer() *http.Server {
 	return s.httpSrv
 }
 
@@ -55,6 +56,7 @@ func (s *Server) GetServers() []transport.Server {
 	}
 }
 
+// RegisterService 注册服务
 func RegisterService(
 	rpcSrv *grpc.Server,
 	httpSrv *http.Server,
@@ -66,7 +68,7 @@ func RegisterService(
 	teamService *team.Service,
 	teamRoleService *team.RoleService,
 	datasourceService *datasource.Service,
-	menuService *menu.MenuService,
+	menuService *menu.Service,
 	metricService *datasource.MetricService,
 	dictService *dict.Service,
 	strategyService *strategy.Service,

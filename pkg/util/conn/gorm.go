@@ -1,6 +1,7 @@
 package conn
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 
@@ -13,13 +14,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// GormContextTxKey GORM事务的上下文
-type GormContextTxKey struct{}
+// gormContextTxKey GORM事务的上下文
+type gormContextTxKey struct{}
 
+// GormDBConfig GORM数据库配置
 type GormDBConfig interface {
 	GetDriver() string
 	GetDsn() string
 	GetDebug() bool
+}
+
+// GetDB 获取数据库连接
+func GetDB(ctx context.Context) (*gorm.DB, bool) {
+	if v, ok := ctx.Value(gormContextTxKey{}).(*gorm.DB); ok {
+		return v, true
+	}
+	return nil, false
 }
 
 // NewGormDB 获取数据库连接

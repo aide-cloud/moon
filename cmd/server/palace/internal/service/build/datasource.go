@@ -17,10 +17,12 @@ import (
 )
 
 type (
+	// DatasourceModelBuilder 数据源模型构造器接口
 	DatasourceModelBuilder interface {
-		ToApi() *admin.DatasourceItem
+		ToAPI() *admin.DatasourceItem
 	}
 
+	// DatasourceRequestBuilder 数据源请求参数构造器接口
 	DatasourceRequestBuilder interface {
 		ToCreateDatasourceBO([]byte) *bo.CreateDatasourceParams
 
@@ -29,8 +31,9 @@ type (
 		ToListDatasourceBo() *bo.QueryDatasourceListParams
 	}
 
+	// DatasourceQueryDataBuilder 数据源查询结果构造器接口
 	DatasourceQueryDataBuilder interface {
-		ToApi() *api.MetricQueryResult
+		ToAPI() *api.MetricQueryResult
 	}
 
 	datasourceBuilder struct {
@@ -92,7 +95,7 @@ func (b *datasourceBuilder) ToListDatasourceBo() *bo.QueryDatasourceListParams {
 	}
 }
 
-func (b *datasourceBuilder) ToApi() *admin.DatasourceItem {
+func (b *datasourceBuilder) ToAPI() *admin.DatasourceItem {
 	if types.IsNil(b) || types.IsNil(b.Datasource) {
 		return nil
 	}
@@ -112,12 +115,12 @@ func (b *datasourceBuilder) ToApi() *admin.DatasourceItem {
 		Config:      configMap,
 		Remark:      b.Datasource.Remark,
 		StorageType: api.StorageType(b.Datasource.StorageType),
-		Creator:     NewBuilder().WithApiUserBo(cache.GetUser(b.ctx, b.Datasource.CreatorID)).ToApi(),
+		Creator:     NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.Datasource.CreatorID)).ToAPI(),
 	}
 }
 
-// ToApi 转换为api
-func (b *datasourceQueryDataBuilder) ToApi() *api.MetricQueryResult {
+// ToAPI 转换为api
+func (b *datasourceQueryDataBuilder) ToAPI() *api.MetricQueryResult {
 	if types.IsNil(b) || types.IsNil(b.DatasourceQueryData) {
 		return nil
 	}
