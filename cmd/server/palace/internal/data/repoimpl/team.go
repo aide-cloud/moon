@@ -333,6 +333,7 @@ func (l *teamRepositoryImpl) SetMemberAdmin(ctx context.Context, params *bo.SetM
 	if !types.IsNil(err) {
 		return err
 	}
+
 	bizQuery := bizquery.Use(bizDB)
 	_, err = bizQuery.WithContext(ctx).SysTeamMember.Where(
 		bizQuery.SysTeamMember.TeamID.Eq(params.ID),

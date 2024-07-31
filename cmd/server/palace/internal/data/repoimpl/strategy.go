@@ -114,13 +114,20 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 			return err
 		}
 
-		strategyTemplate, err := tx.StrategyTemplate.Where(query.StrategyTemplate.ID.Eq(params.UpdateParam.TemplateID)).Preload(field.Associations).First()
-		if !types.IsNil(err) {
-			return err
-		}
-		categories := types.SliceToWithFilter(strategyTemplate.Categories, func(dict *bizmodel.SysDict) (*bizmodel.SysDict, bool) {
-			if dict.ID <= 0 {
-				return nil, false
+		strategyTemplate, err := queryWrapper.StrategyTemplate.Where(query.StrategyTemplate.ID.Eq(params.UpdateParam.TemplateID)).Preload(field.Associations).First()
+
+		if strategyTemplate != nil {
+			categories := types.SliceToWithFilter(strategyTemplate.Categories, func(dict *bizmodel.SysDict) (*bizmodel.SysDict, bool) {
+				if dict.ID <= 0 {
+					return nil, false
+				}
+				return &bizmodel.SysDict{
+					AllFieldModel: model.AllFieldModel{ID: dict.ID},
+				}, true
+			})
+
+			if err = queryWrapper.Strategy.Categories.Model(&bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(categories...); !types.IsNil(err) {
+				return err
 			}
 			return &bizmodel.SysDict{
 				AllFieldModel: model.AllFieldModel{ID: dict.ID},
