@@ -10,6 +10,7 @@ import (
 )
 
 type (
+	// RealtimeAlarmBuilder realtime alarm builder
 	RealtimeAlarmBuilder interface {
 		ToAPI() *adminapi.RealtimeAlarmItem
 	}
@@ -43,6 +44,7 @@ func (r *realtimeAlarmBuilder) ToAPI() *adminapi.RealtimeAlarmItem {
 	}
 }
 
+// NewRealtimeAlarmBuilder new realtime alarm builder
 func NewRealtimeAlarmBuilder(ctx context.Context, alarm *bizmodel.RealtimeAlarm) RealtimeAlarmBuilder {
 	return &realtimeAlarmBuilder{alarm: alarm, ctx: ctx}
 }

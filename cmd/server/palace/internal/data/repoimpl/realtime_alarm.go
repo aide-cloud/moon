@@ -12,12 +12,14 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
 )
 
+// NewRealtimeAlarmRepository 实例化告警业务数据库
 func NewRealtimeAlarmRepository(data *data.Data) repository.Alarm {
 	return &realtimeAlarmRepositoryImpl{data: data}
 }
