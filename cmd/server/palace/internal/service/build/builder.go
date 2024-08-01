@@ -86,8 +86,13 @@ type (
 		WithAPIDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
 
 		WithRealTimeAlarm(alarm *bizmodel.RealtimeAlarm) RealtimeAlarmBuilder
+		DashboardModule() DashboardModuleBuilder
 	}
 )
+
+func (b *builder) DashboardModule() DashboardModuleBuilder {
+	return NewDashboardModuleBuilder(b.ctx)
+}
 
 func (b *builder) WithRealTimeAlarm(alarm *bizmodel.RealtimeAlarm) RealtimeAlarmBuilder {
 	return NewRealtimeAlarmBuilder(b.ctx, alarm)
