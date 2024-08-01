@@ -279,6 +279,7 @@ func createStrategyParamsToModel(ctx context.Context, strategyTemplate *model.St
 		Labels:                 params.Labels,
 		Annotations:            params.Annotations,
 		Remark:                 params.Remark,
+		Status:                 vobj.Status(params.Status.GetValue()),
 		Step:                   params.Step,
 		Datasource: types.SliceToWithFilter(params.DatasourceIDs, func(datasourceId uint32) (*bizmodel.Datasource, bool) {
 			if datasourceId <= 0 {

@@ -24,14 +24,16 @@ type Service struct {
 	templateBiz      *biz.TemplateBiz
 	strategyBiz      *biz.StrategyBiz
 	strategyGroupBiz *biz.StrategyGroupBiz
+	strategyCountBiz *biz.StrategyCountBiz
 }
 
 // NewStrategyService 创建策略管理服务
-func NewStrategyService(templateBiz *biz.TemplateBiz, strategy *biz.StrategyBiz, strategyGroupBiz *biz.StrategyGroupBiz) *Service {
+func NewStrategyService(templateBiz *biz.TemplateBiz, strategy *biz.StrategyBiz, strategyGroupBiz *biz.StrategyGroupBiz, strategyCountBiz *biz.StrategyCountBiz) *Service {
 	return &Service{
 		templateBiz:      templateBiz,
 		strategyBiz:      strategy,
 		strategyGroupBiz: strategyGroupBiz,
+		strategyCountBiz: strategyCountBiz,
 	}
 }
 
@@ -77,11 +79,21 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 	if !types.IsNil(err) {
 		return nil, err
 	}
+	// Get the total
+	groupIDs := types.SliceTo(listPage, func(strategy *bizmodel.StrategyGroup) uint32 {
+		return strategy.ID
+	})
+	strategyCount := s.strategyCountBiz.StrategyCount(ctx, &bo.GetStrategyCountParams{
+		StrategyGroupIds: groupIDs,
+		Status:           vobj.StatusUnknown,
+	})
+	strategyEnableCount := s.strategyCountBiz.StrategyCount(ctx, &bo.GetStrategyCountParams{
+		StrategyGroupIds: groupIDs,
+		Status:           vobj.StatusEnable,
+	})
 	return &strategyapi.ListStrategyGroupReply{
 		Pagination: build.NewPageBuilder(params.Page).ToAPI(),
-		List: types.SliceTo(listPage, func(strategy *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
-			return build.NewBuilder().WithContext(ctx).WithAPIStrategyGroup(strategy).ToAPI()
-		}),
+		List:       build.NewBuilder().WithStrategyGroupList(listPage, strategyCount, strategyEnableCount).ToStrategyGroupList(),
 	}, nil
 }
 

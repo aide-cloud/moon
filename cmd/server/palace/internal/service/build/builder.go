@@ -50,7 +50,8 @@ type (
 		WithUpdateBoStrategy(*strategyapi.UpdateStrategyRequest) StrategyRequestBuilder
 		WithAPIStrategyLevel(*bizmodel.StrategyLevel) StrategyLevelModelBuilder
 
-		WithAPIStrategyGroup(*bizmodel.StrategyGroup) StrategyGroupModelBuilder
+		WithAPIStrategyGroup(strategyGroup *bizmodel.StrategyGroup) StrategyGroupModelBuilder
+		WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder
 		WithCreateBoStrategyGroup(*strategyapi.CreateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithUpdateBoStrategyGroup(*strategyapi.UpdateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithListStrategyGroup(*strategyapi.ListStrategyGroupRequest) StrategyGroupRequestBuilder
@@ -86,6 +87,21 @@ type (
 		WithAPIDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
 	}
 )
+
+func (b *builder) WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder {
+	return &strategyGroupBuilder{
+		StrategyGroups:           strategyGroup,
+		StrategyCountModel:       strategyCountModel,
+		StrategyEnableCountModel: strategyEnableCountModel,
+	}
+}
+
+func (b *builder) WithStrategyCount(models []*bo.StrategyCountModel) StrategyGroupModelBuilder {
+	return &strategyGroupBuilder{
+		StrategyCountModel: models,
+		ctx:                b.ctx,
+	}
+}
 
 func (b *builder) WithDict(dict imodel.IDict) DictModelBuilder {
 	return &dictBuilder{

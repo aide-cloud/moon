@@ -23,8 +23,46 @@ func NewStrategyGroupRepository(data *data.Data) repository.StrategyGroup {
 	}
 }
 
-type strategyGroupRepositoryImpl struct {
-	data *data.Data
+// NewStrategyCountRepository 创建策略计数仓库
+func NewStrategyCountRepository(data *data.Data) repository.StrategyCountRepo {
+	return &strategyCountRepositoryImpl{
+		data: data,
+	}
+}
+
+type (
+	strategyGroupRepositoryImpl struct {
+		data *data.Data
+	}
+
+	strategyCountRepositoryImpl struct {
+		data *data.Data
+	}
+)
+
+func (s strategyCountRepositoryImpl) FindStrategyCount(ctx context.Context, params *bo.GetStrategyCountParams) ([]*bo.StrategyCountModel, error) {
+	bizQuery, err := getBizQuery(ctx, s.data)
+	if !types.IsNil(err) {
+		return nil, err
+	}
+	strategyGroupIds := params.StrategyGroupIds
+	var totals []*bo.StrategyCountModel
+	if params.Status.IsEnable() {
+		err = bizQuery.Strategy.WithContext(ctx).Where(bizQuery.Strategy.GroupID.In(strategyGroupIds...), bizQuery.Strategy.Status.Eq(params.Status.GetValue())).
+			Select(bizQuery.Strategy.GroupID.Count().As("total"), bizQuery.Strategy.GroupID.As("group_id")).
+			Group(bizQuery.Strategy.GroupID).Scan(&totals)
+		if !types.IsNil(err) {
+			return nil, err
+		}
+		return totals, nil
+	}
+	err = bizQuery.Strategy.WithContext(ctx).Where(bizQuery.Strategy.GroupID.In(strategyGroupIds...)).
+		Select(bizQuery.Strategy.GroupID.Count().As("total"), bizQuery.Strategy.GroupID.As("group_id")).
+		Group(bizQuery.Strategy.GroupID).Scan(&totals)
+	if !types.IsNil(err) {
+		return nil, err
+	}
+	return totals, nil
 }
 
 func (s strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, params *bo.CreateStrategyGroupParams) (*bizmodel.StrategyGroup, error) {

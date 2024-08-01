@@ -20,10 +20,23 @@ func NewStrategyGroupBiz(strategy repository.StrategyGroup) *StrategyGroupBiz {
 	}
 }
 
-// StrategyGroupBiz 策略分组业务
-type StrategyGroupBiz struct {
-	strategyRepo repository.StrategyGroup
+// NewStrategyCountBiz 创建策略计数业务
+func NewStrategyCountBiz(strategyCount repository.StrategyCountRepo) *StrategyCountBiz {
+	return &StrategyCountBiz{
+		strategyCountRepo: strategyCount,
+	}
 }
+
+type (
+	// StrategyGroupBiz 策略分组业务
+	StrategyGroupBiz struct {
+		strategyRepo repository.StrategyGroup
+	}
+	// StrategyCountBiz 策略计数业务
+	StrategyCountBiz struct {
+		strategyCountRepo repository.StrategyCountRepo
+	}
+)
 
 // CreateStrategyGroup 创建策略分组
 func (s *StrategyGroupBiz) CreateStrategyGroup(ctx context.Context, params *bo.CreateStrategyGroupParams) (*bizmodel.StrategyGroup, error) {
@@ -83,4 +96,13 @@ func (s *StrategyGroupBiz) ListPage(ctx context.Context, params *bo.QueryStrateg
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
 	return strategyGroups, err
+}
+
+// StrategyCount 策略分组关联策略总数
+func (b *StrategyCountBiz) StrategyCount(ctx context.Context, params *bo.GetStrategyCountParams) []*bo.StrategyCountModel {
+	strategyCount, err := b.strategyCountRepo.FindStrategyCount(ctx, params)
+	if !types.IsNil(err) {
+		return nil
+	}
+	return strategyCount
 }

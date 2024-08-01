@@ -146,4 +146,24 @@ type (
 		Status  vobj.Status
 		TeamID  uint32 `json:"teamID"`
 	}
+
+	// GetStrategyCountParams 查询策略总数参数
+	GetStrategyCountParams struct {
+		StrategyGroupIds []uint32 `json:"strategyGroupIds"`
+		Status           vobj.Status
+	}
+
+	// StrategyCountModel 策略数量统计  策略总数,策略开启总数接收model
+	StrategyCountModel struct {
+		GroupID uint32 `json:"group_id"`
+		// 总数
+		Total uint64 `json:"total"`
+	}
+	// StrategyCountDetail 策略数量详情
+	StrategyCountDetail struct {
+		// 策略开启总数
+		StrategyEnableCounts StrategyCountModel `json:"strategyEnableCounts"`
+		// 策略总数
+		StrategyCounts StrategyCountModel `json:"strategyCounts"`
+	}
 )

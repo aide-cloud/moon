@@ -51,6 +51,8 @@ type (
 	// StrategyGroupModelBuilder 策略组模型构建器
 	StrategyGroupModelBuilder interface {
 		ToAPI() *admin.StrategyGroupItem
+
+		ToStrategyGroupList() []*admin.StrategyGroupItem
 	}
 
 	// StrategyGroupRequestBuilder 策略组请求构建器
@@ -64,7 +66,10 @@ type (
 
 	strategyGroupBuilder struct {
 		// Model
-		StrategyGroup *bizmodel.StrategyGroup
+		StrategyGroup            *bizmodel.StrategyGroup
+		StrategyGroups           []*bizmodel.StrategyGroup
+		StrategyCountModel       []*bo.StrategyCountModel
+		StrategyEnableCountModel []*bo.StrategyCountModel
 
 		// request
 		CreateStrategyGroupRequest *strategyapi.CreateStrategyGroupRequest
@@ -196,15 +201,16 @@ func (b *strategyGroupBuilder) ToAPI() *admin.StrategyGroupItem {
 		return nil
 	}
 	cache := runtimecache.GetRuntimeCache()
-	return &admin.StrategyGroupItem{
+	groupItem := &admin.StrategyGroupItem{
 		Id:        b.StrategyGroup.ID,
 		Name:      b.StrategyGroup.Name,
 		Remark:    b.StrategyGroup.Remark,
 		Status:    api.Status(b.StrategyGroup.Status),
 		CreatedAt: b.StrategyGroup.CreatedAt.String(),
 		UpdatedAt: b.StrategyGroup.UpdatedAt.String(),
-		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).ToAPI(),
+		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).GetUsername(),
 	}
+	return groupItem
 }
 
 func (b *strategyGroupBuilder) ToCreateStrategyGroupBO() *bo.CreateStrategyGroupParams {
@@ -246,4 +252,35 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 		Status:  vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
 		Page:    types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
 	}
+}
+
+func (b *strategyGroupBuilder) ToStrategyGroupList() []*admin.StrategyGroupItem {
+	if types.IsNil(b) || types.IsNil(b.StrategyGroups) {
+		return nil
+	}
+	countMap := map[uint32]uint64{}
+	enableCountMap := map[uint32]uint64{}
+	if !types.IsNil(b.StrategyCountModel) {
+		for _, strategy := range b.StrategyCountModel {
+			countMap[strategy.GroupID] = strategy.Total
+		}
+	}
+	if !types.IsNil(b.StrategyEnableCountModel) {
+		for _, strategy := range b.StrategyEnableCountModel {
+			enableCountMap[strategy.GroupID] = strategy.Total
+		}
+	}
+	return types.SliceTo(b.StrategyGroups, func(item *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
+		groupAPI := NewBuilder().WithAPIStrategyGroup(item).ToAPI()
+		count, exists := countMap[item.ID]
+		if exists {
+			groupAPI.StrategyCount = count
+		}
+		enableCount, exists := enableCountMap[item.ID]
+		if exists {
+			groupAPI.EnableStrategyCount = enableCount
+		}
+
+		return groupAPI
+	})
 }
