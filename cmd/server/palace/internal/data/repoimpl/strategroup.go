@@ -3,9 +3,6 @@ package repoimpl
 import (
 	"context"
 
-	"gorm.io/gen"
-	"gorm.io/gen/field"
-
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
@@ -14,6 +11,9 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
+	"gorm.io/gen"
+	"gorm.io/gen/field"
 )
 
 // NewStrategyGroupRepository 创建策略分组仓库
@@ -64,12 +64,11 @@ func (s *strategyCountRepositoryImpl) FindStrategyCount(ctx context.Context, par
 }
 
 func (s *strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, params *bo.CreateStrategyGroupParams) (*bizmodel.StrategyGroup, error) {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
 	strategyGroupModel := createStrategyGroupParamsToModel(ctx, params)
-	bizQuery := bizquery.Use(bizDB)
 	err = bizQuery.Transaction(func(tx *bizquery.Query) error {
 		if err := tx.StrategyGroup.WithContext(ctx).Create(strategyGroupModel); !types.IsNil(err) {
 			return err
@@ -83,12 +82,11 @@ func (s *strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, p
 }
 
 func (s *strategyGroupRepositoryImpl) UpdateStrategyGroup(ctx context.Context, params *bo.UpdateStrategyGroupParams) error {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return err
 	}
-	queryWrapper := bizquery.Use(bizDB)
-	return queryWrapper.Transaction(func(tx *bizquery.Query) error {
+	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		if !types.IsNil(params.UpdateParam.CategoriesIds) {
 			// 更新类型
 			Categories := types.SliceToWithFilter(params.UpdateParam.CategoriesIds, func(id uint32) (*bizmodel.SysDict, bool) {
@@ -116,13 +114,12 @@ func (s *strategyGroupRepositoryImpl) UpdateStrategyGroup(ctx context.Context, p
 }
 
 func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, params *bo.DelStrategyGroupParams) error {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return err
 	}
-	queryWrapper := bizquery.Use(bizDB)
-	return bizquery.Use(bizDB).Transaction(func(tx *bizquery.Query) error {
-		if _, err = queryWrapper.StrategyGroup.WithContext(ctx).Where(queryWrapper.StrategyGroup.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+	return bizQuery.Transaction(func(tx *bizquery.Query) error {
+		if _, err = bizQuery.StrategyGroup.WithContext(ctx).Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
 			return err
 		}
 		return nil
@@ -130,21 +127,19 @@ func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, p
 }
 
 func (s *strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, params *bo.GetStrategyGroupDetailParams) (*bizmodel.StrategyGroup, error) {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	bizQuery := bizquery.Use(bizDB)
 	bizWrapper := bizQuery.StrategyGroup.WithContext(ctx)
 	return bizWrapper.Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Preload(field.Associations).First()
 }
 
 func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, params *bo.QueryStrategyGroupListParams) ([]*bizmodel.StrategyGroup, error) {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	bizQuery := bizquery.Use(bizDB)
 	bizWrapper := bizQuery.StrategyGroup.WithContext(ctx)
 
 	var wheres []gen.Condition
@@ -169,11 +164,10 @@ func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, par
 }
 
 func (s *strategyGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.UpdateStrategyGroupStatusParams) error {
-	bizDB, err := s.data.GetBizGormDB(params.TeamID)
+	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return err
 	}
-	bizQuery := bizquery.Use(bizDB)
 	bizWrapper := bizQuery.StrategyGroup.WithContext(ctx)
 	if _, err = bizWrapper.Where(bizQuery.StrategyGroup.ID.In(params.IDs...)).Update(bizQuery.StrategyGroup.Status, params.Status); !types.IsNil(err) {
 		return err

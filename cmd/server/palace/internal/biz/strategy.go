@@ -9,7 +9,6 @@ import (
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
-	"github.com/aide-family/moon/pkg/helper/middleware"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
 )
@@ -28,12 +27,6 @@ type StrategyBiz struct {
 
 // GetStrategy 获取策略
 func (b *StrategyBiz) GetStrategy(ctx context.Context, param *bo.GetStrategyDetailParams) (*bizmodel.Strategy, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	teamID := claims.TeamID
-	param.TeamID = teamID
 	strategy, err := b.strategyRepo.GetByID(ctx, param)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -97,11 +90,6 @@ func (b *StrategyBiz) StrategyPage(ctx context.Context, param *bo.QueryStrategyL
 
 // CopyStrategy 复制策略
 func (b *StrategyBiz) CopyStrategy(ctx context.Context, param *bo.CopyStrategyParams) (*bizmodel.Strategy, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	param.TeamID = claims.TeamID
 	strategy, err := b.strategyRepo.CopyStrategy(ctx, param)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

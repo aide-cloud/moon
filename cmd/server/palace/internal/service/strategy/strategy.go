@@ -6,16 +6,14 @@ import (
 	"strings"
 
 	"github.com/aide-family/moon/api/admin"
+	strategyapi "github.com/aide-family/moon/api/admin/strategy"
 	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
-	"github.com/aide-family/moon/pkg/helper/middleware"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
-
-	strategyapi "github.com/aide-family/moon/api/admin/strategy"
 )
 
 // Service 策略管理服务
@@ -39,11 +37,6 @@ func NewStrategyService(templateBiz *biz.TemplateBiz, strategy *biz.StrategyBiz,
 
 // CreateStrategyGroup 创建策略组
 func (s *Service) CreateStrategyGroup(ctx context.Context, req *strategyapi.CreateStrategyGroupRequest) (*strategyapi.CreateStrategyGroupReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	req.TeamId = claims.TeamID
 	params := build.NewBuilder().WithCreateBoStrategyGroup(req).ToCreateStrategyGroupBO()
 	if _, err := s.strategyGroupBiz.CreateStrategyGroup(ctx, params); err != nil {
 		return nil, err
@@ -53,13 +46,8 @@ func (s *Service) CreateStrategyGroup(ctx context.Context, req *strategyapi.Crea
 
 // DeleteStrategyGroup 删除策略组
 func (s *Service) DeleteStrategyGroup(ctx context.Context, req *strategyapi.DeleteStrategyGroupRequest) (*strategyapi.DeleteStrategyGroupReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	params := &bo.DelStrategyGroupParams{
-		ID:     req.GetId(),
-		TeamID: claims.TeamID,
+		ID: req.GetId(),
 	}
 	if err := s.strategyGroupBiz.DeleteStrategyGroup(ctx, params); err != nil {
 		return nil, err
@@ -69,11 +57,6 @@ func (s *Service) DeleteStrategyGroup(ctx context.Context, req *strategyapi.Dele
 
 // ListStrategyGroup 策略组列表
 func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListStrategyGroupRequest) (*strategyapi.ListStrategyGroupReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	req.TeamId = claims.TeamID
 	params := build.NewBuilder().WithContext(ctx).WithListStrategyGroup(req).ToListStrategyGroupBO()
 	listPage, err := s.strategyGroupBiz.ListPage(ctx, params)
 	if !types.IsNil(err) {
@@ -105,7 +88,7 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 	}
 	return &strategyapi.ListStrategyGroupReply{
 		Pagination: build.NewPageBuilder(params.Page).ToAPI(),
-		List: build.NewBuilder().
+		List: build.NewBuilder().WithContext(ctx).
 			StrategyGroupModuleBuilder().
 			WithDoStrategyGroupList(listPage).
 			WithStrategyCountMap(countDetail).ToAPIs(),
@@ -114,13 +97,8 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 
 // GetStrategyGroup 获取策略组详情
 func (s *Service) GetStrategyGroup(ctx context.Context, req *strategyapi.GetStrategyGroupRequest) (*strategyapi.GetStrategyGroupReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	params := &bo.GetStrategyGroupDetailParams{
-		ID:     req.GetId(),
-		TeamID: claims.GetTeam(),
+		ID: req.GetId(),
 	}
 	groupDetail, err := s.strategyGroupBiz.GetStrategyGroupDetail(ctx, params)
 	if !types.IsNil(err) {
@@ -154,11 +132,6 @@ func (s *Service) GetStrategyGroup(ctx context.Context, req *strategyapi.GetStra
 
 // UpdateStrategyGroup 更新策略组
 func (s *Service) UpdateStrategyGroup(ctx context.Context, req *strategyapi.UpdateStrategyGroupRequest) (*strategyapi.UpdateStrategyGroupReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
-	req.TeamId = claims.GetTeam()
 	params := build.NewBuilder().WithUpdateBoStrategyGroup(req).ToUpdateStrategyGroupBO()
 	if err := s.strategyGroupBiz.UpdateStrategyGroup(ctx, params); err != nil {
 		return nil, err
@@ -168,14 +141,9 @@ func (s *Service) UpdateStrategyGroup(ctx context.Context, req *strategyapi.Upda
 
 // UpdateStrategyGroupStatus 更新策略组状态
 func (s *Service) UpdateStrategyGroupStatus(ctx context.Context, req *strategyapi.UpdateStrategyGroupStatusRequest) (*strategyapi.UpdateStrategyGroupStatusReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	param := &bo.UpdateStrategyGroupStatusParams{
 		IDs:    req.GetIds(),
 		Status: vobj.Status(req.GetStatus()),
-		TeamID: claims.GetTeam(),
 	}
 	if err := s.strategyGroupBiz.UpdateStatus(ctx, param); err != nil {
 		return nil, err
@@ -185,10 +153,6 @@ func (s *Service) UpdateStrategyGroupStatus(ctx context.Context, req *strategyap
 
 // CreateStrategy 创建策略
 func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStrategyRequest) (*strategyapi.CreateStrategyReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	// 校验数组是否有重复数据
 	if has := types.SlicesHasDuplicates(req.GetStrategyLevel(), func(request *strategyapi.CreateStrategyLevelRequest) string {
 		var sb strings.Builder
@@ -197,7 +161,6 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 	}); has {
 		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
 	}
-	req.TeamId = claims.GetTeam()
 	param := build.NewBuilder().WithCreateBoStrategy(req).ToCreateStrategyBO()
 	if _, err := s.strategyBiz.CreateStrategy(ctx, param); err != nil {
 		return nil, err
@@ -207,10 +170,6 @@ func (s *Service) CreateStrategy(ctx context.Context, req *strategyapi.CreateStr
 
 // UpdateStrategy 更新策略
 func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStrategyRequest) (*strategyapi.UpdateStrategyReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	// 校验数组是否有重复数据
 	if has := types.SlicesHasDuplicates(req.GetData().GetStrategyLevel(), func(request *strategyapi.CreateStrategyLevelRequest) string {
 		var sb strings.Builder
@@ -219,8 +178,6 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 	}); has {
 		return nil, merr.ErrorI18nStrategyLevelRepeatErr(ctx)
 	}
-
-	req.GetData().TeamId = claims.GetTeam()
 	param := build.NewBuilder().WithUpdateBoStrategy(req).ToUpdateStrategyBO()
 	if err := s.strategyBiz.UpdateByID(ctx, param); !types.IsNil(err) {
 		return nil, err
@@ -230,13 +187,8 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 
 // DeleteStrategy 删除策略
 func (s *Service) DeleteStrategy(ctx context.Context, req *strategyapi.DeleteStrategyRequest) (*strategyapi.DeleteStrategyReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	param := &bo.DelStrategyParams{
-		TeamID: claims.GetTeam(),
-		ID:     req.GetId(),
+		ID: req.GetId(),
 	}
 	if err := s.strategyBiz.DeleteByID(ctx, param); !types.IsNil(err) {
 		return nil, err
@@ -246,13 +198,8 @@ func (s *Service) DeleteStrategy(ctx context.Context, req *strategyapi.DeleteStr
 
 // GetStrategy 获取策略详情
 func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyRequest) (*strategyapi.GetStrategyReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	param := &bo.GetStrategyDetailParams{
-		TeamID: claims.GetTeam(),
-		ID:     req.GetId(),
+		ID: req.GetId(),
 	}
 	strategy, err := s.strategyBiz.GetStrategy(ctx, param)
 	if err != nil {
@@ -265,12 +212,7 @@ func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyR
 
 // ListStrategy 获取策略列表
 func (s *Service) ListStrategy(ctx context.Context, req *strategyapi.ListStrategyRequest) (*strategyapi.ListStrategyReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	params := &bo.QueryStrategyListParams{
-		TeamID:     claims.GetTeam(),
 		Page:       types.NewPagination(req.GetPagination()),
 		Status:     vobj.Status(req.GetStatus()),
 		Keyword:    req.GetKeyword(),
@@ -290,14 +232,9 @@ func (s *Service) ListStrategy(ctx context.Context, req *strategyapi.ListStrateg
 
 // UpdateStrategyStatus 更新策略状态
 func (s *Service) UpdateStrategyStatus(ctx context.Context, req *strategyapi.UpdateStrategyStatusRequest) (*strategyapi.UpdateStrategyStatusReply, error) {
-	claims, ok := middleware.ParseJwtClaims(ctx)
-	if !ok {
-		return nil, merr.ErrorI18nUnLoginErr(ctx)
-	}
 	params := &bo.UpdateStrategyStatusParams{
 		Ids:    req.GetIds(),
 		Status: vobj.Status(req.GetStatus()),
-		TeamID: claims.GetTeam(),
 	}
 	err := s.strategyBiz.UpdateStatus(ctx, params)
 	if !types.IsNil(err) {

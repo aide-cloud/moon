@@ -152,7 +152,6 @@ func (b *strategyBuilder) ToCreateStrategyBO() *bo.CreateStrategyParams {
 		})
 	}
 	return &bo.CreateStrategyParams{
-		TeamID:        b.CreateStrategy.GetTeamId(),
 		TemplateID:    b.CreateStrategy.GetTemplateId(),
 		GroupID:       b.CreateStrategy.GetGroupId(),
 		Name:          b.CreateStrategy.GetName(),
@@ -186,8 +185,7 @@ func (b *strategyBuilder) ToUpdateStrategyBO() *bo.UpdateStrategyParams {
 		})
 	}
 	return &bo.UpdateStrategyParams{
-		TeamID: b.UpdateStrategy.GetData().GetTeamId(),
-		ID:     b.UpdateStrategy.GetId(),
+		ID: b.UpdateStrategy.GetId(),
 		UpdateParam: bo.CreateStrategyParams{
 			TemplateID:    b.UpdateStrategy.GetData().GetTemplateId(),
 			GroupID:       b.UpdateStrategy.GetData().GetGroupId(),
@@ -270,15 +268,14 @@ func (b *dosStrategyGroupBuilder) ToAPIs() []*admin.StrategyGroupItem {
 		return nil
 	}
 	return types.SliceTo(b.StrategyGroups, func(item *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
-		strategyGroup := NewBuilder().StrategyGroupModuleBuilder().WithDoStrategyGroup(item).ToAPI()
-		count := b.StrategyCountMap[item.ID]
-		enableCount := b.StrategyEnableMap[item.ID]
-		if !types.IsNil(count) {
-			strategyGroup.StrategyCount = count.Total
-		}
-		if !types.IsNil(enableCount) {
-			strategyGroup.EnableStrategyCount = enableCount.Total
-		}
+		strategyGroup := NewBuilder().
+			WithContext(b.ctx).
+			StrategyGroupModuleBuilder().
+			WithDoStrategyGroup(item).
+			WithStrategyCountMap(&bo.StrategyCountMap{
+				StrategyCountMap:  b.StrategyCountMap,
+				StrategyEnableMap: b.StrategyEnableMap,
+			}).ToAPI()
 		return strategyGroup
 	})
 }
@@ -313,7 +310,6 @@ func (b *strategyGroupBuilder) ToCreateStrategyGroupBO() *bo.CreateStrategyGroup
 		Remark:        b.CreateStrategyGroupRequest.GetRemark(),
 		Status:        b.CreateStrategyGroupRequest.GetStatus(),
 		CategoriesIds: b.CreateStrategyGroupRequest.GetCategoriesIds(),
-		TeamID:        b.CreateStrategyGroupRequest.GetTeamId(),
 	}
 }
 
@@ -327,9 +323,7 @@ func (b *strategyGroupBuilder) ToUpdateStrategyGroupBO() *bo.UpdateStrategyGroup
 			Name:          b.UpdateStrategyGroupRequest.Update.GetName(),
 			Remark:        b.UpdateStrategyGroupRequest.Update.GetRemark(),
 			CategoriesIds: b.UpdateStrategyGroupRequest.Update.GetCategoriesIds(),
-			TeamID:        b.UpdateStrategyGroupRequest.Update.GetTeamId(),
 		},
-		TeamID: b.UpdateStrategyGroupRequest.GetTeamId(),
 	}
 }
 
@@ -339,7 +333,6 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 	}
 	return &bo.QueryStrategyGroupListParams{
 		Keyword: b.ListStrategyGroupRequest.GetKeyword(),
-		TeamID:  b.ListStrategyGroupRequest.GetTeamId(),
 		Status:  vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
 		Page:    types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
 	}
