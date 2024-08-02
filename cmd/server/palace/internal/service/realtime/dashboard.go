@@ -3,14 +3,14 @@ package realtime
 import (
 	"context"
 
-	pb "github.com/aide-family/moon/api/admin/realtime"
+	realtimeapi "github.com/aide-family/moon/api/admin/realtime"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
 )
 
 // DashboardService 监控大盘服务
 type DashboardService struct {
-	pb.UnimplementedDashboardServer
+	realtimeapi.UnimplementedDashboardServer
 
 	dashboardBiz *biz.DashboardBiz
 }
@@ -23,16 +23,16 @@ func NewDashboardService(dashboardBiz *biz.DashboardBiz) *DashboardService {
 }
 
 // CreateDashboard 创建监控大盘
-func (s *DashboardService) CreateDashboard(ctx context.Context, req *pb.CreateDashboardRequest) (*pb.CreateDashboardReply, error) {
+func (s *DashboardService) CreateDashboard(ctx context.Context, req *realtimeapi.CreateDashboardRequest) (*realtimeapi.CreateDashboardReply, error) {
 	params := build.NewBuilder().WithContext(ctx).DashboardModule().WithAPIAddDashboardParams(req).ToBo()
 	if err := s.dashboardBiz.CreateDashboard(ctx, params); err != nil {
 		return nil, err
 	}
-	return &pb.CreateDashboardReply{}, nil
+	return &realtimeapi.CreateDashboardReply{}, nil
 }
 
 // UpdateDashboard 更新监控大盘
-func (s *DashboardService) UpdateDashboard(ctx context.Context, req *pb.UpdateDashboardRequest) (*pb.UpdateDashboardReply, error) {
+func (s *DashboardService) UpdateDashboard(ctx context.Context, req *realtimeapi.UpdateDashboardRequest) (*realtimeapi.UpdateDashboardReply, error) {
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
@@ -41,11 +41,11 @@ func (s *DashboardService) UpdateDashboard(ctx context.Context, req *pb.UpdateDa
 	if err := s.dashboardBiz.UpdateDashboard(ctx, params); err != nil {
 		return nil, err
 	}
-	return &pb.UpdateDashboardReply{}, nil
+	return &realtimeapi.UpdateDashboardReply{}, nil
 }
 
 // DeleteDashboard 删除监控大盘
-func (s *DashboardService) DeleteDashboard(ctx context.Context, req *pb.DeleteDashboardRequest) (*pb.DeleteDashboardReply, error) {
+func (s *DashboardService) DeleteDashboard(ctx context.Context, req *realtimeapi.DeleteDashboardRequest) (*realtimeapi.DeleteDashboardReply, error) {
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
@@ -54,12 +54,12 @@ func (s *DashboardService) DeleteDashboard(ctx context.Context, req *pb.DeleteDa
 	if err := s.dashboardBiz.DeleteDashboard(ctx, params); err != nil {
 		return nil, err
 	}
-	return &pb.DeleteDashboardReply{}, nil
+	return &realtimeapi.DeleteDashboardReply{}, nil
 }
 
 // GetDashboard 获取监控大盘
-func (s *DashboardService) GetDashboard(ctx context.Context, req *pb.GetDashboardRequest) (*pb.GetDashboardReply, error) {
-	detail, err := s.dashboardBiz.GetDashboard(ctx, req.Id)
+func (s *DashboardService) GetDashboard(ctx context.Context, req *realtimeapi.GetDashboardRequest) (*realtimeapi.GetDashboardReply, error) {
+	detail, err := s.dashboardBiz.GetDashboard(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -68,13 +68,13 @@ func (s *DashboardService) GetDashboard(ctx context.Context, req *pb.GetDashboar
 		DashboardModule().
 		WithDoDashboard(detail).
 		ToAPI()
-	return &pb.GetDashboardReply{
+	return &realtimeapi.GetDashboardReply{
 		Detail: apiDetail,
 	}, nil
 }
 
 // ListDashboard 获取监控大盘列表
-func (s *DashboardService) ListDashboard(ctx context.Context, req *pb.ListDashboardRequest) (*pb.ListDashboardReply, error) {
+func (s *DashboardService) ListDashboard(ctx context.Context, req *realtimeapi.ListDashboardRequest) (*realtimeapi.ListDashboardReply, error) {
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
@@ -89,14 +89,14 @@ func (s *DashboardService) ListDashboard(ctx context.Context, req *pb.ListDashbo
 		DashboardModule().
 		WithDoDashboardList(list).
 		ToAPIs()
-	return &pb.ListDashboardReply{
+	return &realtimeapi.ListDashboardReply{
 		List:       apiList,
 		Pagination: build.NewPageBuilder(params.Page).ToAPI(),
 	}, nil
 }
 
 // ListDashboardSelect 获取监控大盘下拉列表
-func (s *DashboardService) ListDashboardSelect(ctx context.Context, req *pb.ListDashboardSelectRequest) (*pb.ListDashboardSelectReply, error) {
+func (s *DashboardService) ListDashboardSelect(ctx context.Context, req *realtimeapi.ListDashboardSelectRequest) (*realtimeapi.ListDashboardSelectReply, error) {
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
@@ -111,7 +111,7 @@ func (s *DashboardService) ListDashboardSelect(ctx context.Context, req *pb.List
 		DashboardModule().
 		WithDoDashboardList(list).
 		ToSelects()
-	return &pb.ListDashboardSelectReply{
+	return &realtimeapi.ListDashboardSelectReply{
 		List:       apiList,
 		Pagination: build.NewPageBuilder(params.Page).ToAPI(),
 	}, nil

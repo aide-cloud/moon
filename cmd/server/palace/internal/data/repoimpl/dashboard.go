@@ -12,9 +12,9 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/util/types"
-	"gorm.io/gen"
 
 	"github.com/go-kratos/kratos/v2/errors"
+	"gorm.io/gen"
 	"gorm.io/gorm"
 )
 

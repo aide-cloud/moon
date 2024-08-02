@@ -145,20 +145,20 @@ func (r *doRealtimeAlarmBuilder) ToAPI() *adminapi.RealtimeAlarmItem {
 	}
 	detail := r.alarm
 	return &adminapi.RealtimeAlarmItem{
-		Id:           detail.ID,
-		StartsAt:     types.NewTimeByUnix(detail.StartsAt).String(),
-		EndsAt:       types.NewTimeByUnix(detail.EndsAt).String(),
-		Status:       api.AlertStatus(detail.Status),
-		Level:        NewBuilder().WithDict(detail.Level).ToAPISelect(),
-		LevelID:      detail.LevelID,
-		StrategyID:   detail.StrategyID,
-		Strategy:     NewBuilder().WithContext(r.ctx).WithAPIStrategy(detail.Strategy).ToAPI(),
+		Id:       detail.ID,
+		StartsAt: types.NewTimeByUnix(detail.StartsAt).String(),
+		EndsAt:   types.NewTimeByUnix(detail.EndsAt).String(),
+		Status:   api.AlertStatus(detail.Status),
+		//Level:        NewBuilder().WithDict(detail.Level).ToAPISelect(),
+		LevelID:    detail.LevelID,
+		StrategyID: detail.StrategyID,
+		//Strategy:     NewBuilder().WithContext(r.ctx).WithAPIStrategy(detail.Strategy).ToAPI(),
 		Summary:      detail.Summary,
 		Description:  detail.Description,
 		Expr:         detail.Expr,
 		DatasourceID: detail.DatasourceID,
-		Datasource:   NewBuilder().WithDoDatasource(detail.Datasource).ToAPI(),
-		Fingerprint:  detail.Fingerprint,
+		//Datasource:   NewBuilder().WithDoDatasource(detail.Datasource).ToAPI(),
+		Fingerprint: detail.Fingerprint,
 	}
 }
 
