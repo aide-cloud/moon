@@ -24,7 +24,7 @@ func NewDashboardService(dashboardBiz *biz.DashboardBiz) *DashboardService {
 
 // CreateDashboard 创建监控大盘
 func (s *DashboardService) CreateDashboard(ctx context.Context, req *pb.CreateDashboardRequest) (*pb.CreateDashboardReply, error) {
-	params := build.NewBuilder().WithContext(ctx).DashboardModule().WithAddDashboardParams(req).ToBo()
+	params := build.NewBuilder().WithContext(ctx).DashboardModule().WithAPIAddDashboardParams(req).ToBo()
 	if err := s.dashboardBiz.CreateDashboard(ctx, params); err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (s *DashboardService) UpdateDashboard(ctx context.Context, req *pb.UpdateDa
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
-		WithUpdateDashboardParams(req).
+		WithAPIUpdateDashboardParams(req).
 		ToBo()
 	if err := s.dashboardBiz.UpdateDashboard(ctx, params); err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (s *DashboardService) DeleteDashboard(ctx context.Context, req *pb.DeleteDa
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
-		WithDeleteDashboardParams(req).
+		WithAPIDeleteDashboardParams(req).
 		ToBo()
 	if err := s.dashboardBiz.DeleteDashboard(ctx, params); err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s *DashboardService) ListDashboard(ctx context.Context, req *pb.ListDashbo
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
-		WithQueryDashboardListParams(req).
+		WithAPIQueryDashboardListParams(req).
 		ToBo()
 	list, err := s.dashboardBiz.ListDashboard(ctx, params)
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *DashboardService) ListDashboardSelect(ctx context.Context, req *pb.List
 	params := build.NewBuilder().
 		WithContext(ctx).
 		DashboardModule().
-		WithQueryDashboardSelectParams(req).
+		WithAPIQueryDashboardSelectParams(req).
 		ToBo()
 	list, err := s.dashboardBiz.ListDashboard(ctx, params)
 	if err != nil {

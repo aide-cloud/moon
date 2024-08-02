@@ -348,4 +348,11 @@ enum ErrorReason {
     (errors.message) = "告警数据不存在!",
     (errors.id) = "ALARM_DATA_NOT_FOUND_ERR"
   ];
+
+  // 仪表盘数据不存在
+  DASHBOARD_DATA_NOT_FOUND_ERR = 49 [
+    (errors.code) = 405,
+    (errors.message) = "仪表盘数据不存在!",
+    (errors.id) = "DASHBOARD_DATA_NOT_FOUND_ERR"
+  ];
 }

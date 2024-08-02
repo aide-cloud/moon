@@ -25,12 +25,13 @@ type (
 		Remark         string
 		Color          string
 		Charts         []*ChartItem
-		StrategyGroups uint32
+		StrategyGroups []uint32
 	}
 
 	// DeleteDashboardParams 删除仪表盘请求参数
 	DeleteDashboardParams struct {
-		ID uint32
+		ID     uint32
+		Status vobj.Status
 	}
 
 	// UpdateDashboardParams 更新仪表盘请求参数
@@ -38,9 +39,10 @@ type (
 		ID             uint32
 		Name           string
 		Remark         string
+		Status         vobj.Status
 		Color          string
 		Charts         []*ChartItem
-		StrategyGroups uint32
+		StrategyGroups []uint32
 	}
 
 	// ListDashboardParams 仪表盘列表请求参数
