@@ -40,23 +40,21 @@ type (
 	}
 )
 
-func (s strategyCountRepositoryImpl) FindStrategyCount(ctx context.Context, params *bo.GetStrategyCountParams) ([]*bo.StrategyCountModel, error) {
+func (s *strategyCountRepositoryImpl) FindStrategyCount(ctx context.Context, params *bo.GetStrategyCountParams) ([]*bo.StrategyCountModel, error) {
 	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
 	strategyGroupIds := params.StrategyGroupIds
 	var totals []*bo.StrategyCountModel
-	if params.Status.IsEnable() {
-		err = bizQuery.Strategy.WithContext(ctx).Where(bizQuery.Strategy.GroupID.In(strategyGroupIds...), bizQuery.Strategy.Status.Eq(params.Status.GetValue())).
-			Select(bizQuery.Strategy.GroupID.Count().As("total"), bizQuery.Strategy.GroupID.As("group_id")).
-			Group(bizQuery.Strategy.GroupID).Scan(&totals)
-		if !types.IsNil(err) {
-			return nil, err
-		}
-		return totals, nil
+	wheres := make([]gen.Condition, 0, 2)
+	if len(params.StrategyGroupIds) > 0 {
+		wheres = append(wheres, bizQuery.Strategy.GroupID.In(strategyGroupIds...))
 	}
-	err = bizQuery.Strategy.WithContext(ctx).Where(bizQuery.Strategy.GroupID.In(strategyGroupIds...)).
+	if !params.Status.IsUnknown() {
+		wheres = append(wheres, bizQuery.Strategy.Status.Eq(params.Status.GetValue()))
+	}
+	err = bizQuery.Strategy.WithContext(ctx).Where(wheres...).
 		Select(bizQuery.Strategy.GroupID.Count().As("total"), bizQuery.Strategy.GroupID.As("group_id")).
 		Group(bizQuery.Strategy.GroupID).Scan(&totals)
 	if !types.IsNil(err) {
@@ -65,7 +63,7 @@ func (s strategyCountRepositoryImpl) FindStrategyCount(ctx context.Context, para
 	return totals, nil
 }
 
-func (s strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, params *bo.CreateStrategyGroupParams) (*bizmodel.StrategyGroup, error) {
+func (s *strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, params *bo.CreateStrategyGroupParams) (*bizmodel.StrategyGroup, error) {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return nil, err
@@ -84,7 +82,7 @@ func (s strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, pa
 	return strategyGroupModel, err
 }
 
-func (s strategyGroupRepositoryImpl) UpdateStrategyGroup(ctx context.Context, params *bo.UpdateStrategyGroupParams) error {
+func (s *strategyGroupRepositoryImpl) UpdateStrategyGroup(ctx context.Context, params *bo.UpdateStrategyGroupParams) error {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return err
@@ -117,7 +115,7 @@ func (s strategyGroupRepositoryImpl) UpdateStrategyGroup(ctx context.Context, pa
 	})
 }
 
-func (s strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, params *bo.DelStrategyGroupParams) error {
+func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, params *bo.DelStrategyGroupParams) error {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return err
@@ -131,7 +129,7 @@ func (s strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, pa
 	})
 }
 
-func (s strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, params *bo.GetStrategyGroupDetailParams) (*bizmodel.StrategyGroup, error) {
+func (s *strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, params *bo.GetStrategyGroupDetailParams) (*bizmodel.StrategyGroup, error) {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return nil, err
@@ -141,7 +139,7 @@ func (s strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, param
 	return bizWrapper.Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Preload(field.Associations).First()
 }
 
-func (s strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, params *bo.QueryStrategyGroupListParams) ([]*bizmodel.StrategyGroup, error) {
+func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, params *bo.QueryStrategyGroupListParams) ([]*bizmodel.StrategyGroup, error) {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return nil, err
@@ -170,7 +168,7 @@ func (s strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, para
 	return bizWrapper.Order(bizQuery.StrategyGroup.ID.Desc()).Find()
 }
 
-func (s strategyGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.UpdateStrategyGroupStatusParams) error {
+func (s *strategyGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.UpdateStrategyGroupStatusParams) error {
 	bizDB, err := s.data.GetBizGormDB(params.TeamID)
 	if !types.IsNil(err) {
 		return err

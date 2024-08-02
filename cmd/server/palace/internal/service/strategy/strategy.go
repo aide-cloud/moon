@@ -87,13 +87,28 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 		StrategyGroupIds: groupIDs,
 		Status:           vobj.StatusUnknown,
 	})
+
+	strategyCountMap := types.ToMap(strategyCount, func(strategy *bo.StrategyCountModel) uint32 {
+		return strategy.GroupID
+	})
 	strategyEnableCount := s.strategyCountBiz.StrategyCount(ctx, &bo.GetStrategyCountParams{
 		StrategyGroupIds: groupIDs,
 		Status:           vobj.StatusEnable,
 	})
+
+	strategyEnableMap := types.ToMap(strategyEnableCount, func(strategy *bo.StrategyCountModel) uint32 {
+		return strategy.GroupID
+	})
+	countDetail := &bo.StrategyCountMap{
+		StrategyCountMap:  strategyCountMap,
+		StrategyEnableMap: strategyEnableMap,
+	}
 	return &strategyapi.ListStrategyGroupReply{
 		Pagination: build.NewPageBuilder(params.Page).ToAPI(),
-		List:       build.NewBuilder().WithStrategyGroupList(listPage, strategyCount, strategyEnableCount).ToStrategyGroupList(),
+		List: build.NewBuilder().
+			StrategyGroupModuleBuilder().
+			WithDoStrategyGroupList(listPage).
+			WithStrategyCountMap(countDetail).ToAPIs(),
 	}, nil
 }
 
@@ -111,7 +126,30 @@ func (s *Service) GetStrategyGroup(ctx context.Context, req *strategyapi.GetStra
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	return &strategyapi.GetStrategyGroupReply{Detail: build.NewBuilder().WithContext(ctx).WithAPIStrategyGroup(groupDetail).ToAPI()}, nil
+
+	ids := []uint32{groupDetail.ID}
+	strategyCount := s.strategyCountBiz.StrategyCount(ctx, &bo.GetStrategyCountParams{
+		StrategyGroupIds: ids,
+		Status:           vobj.StatusUnknown,
+	})
+
+	strategyCountMap := types.ToMap(strategyCount, func(strategy *bo.StrategyCountModel) uint32 {
+		return strategy.GroupID
+	})
+	strategyEnableCount := s.strategyCountBiz.StrategyCount(ctx, &bo.GetStrategyCountParams{
+		StrategyGroupIds: ids,
+		Status:           vobj.StatusEnable,
+	})
+	strategyEnableMap := types.ToMap(strategyEnableCount, func(strategy *bo.StrategyCountModel) uint32 {
+		return strategy.GroupID
+	})
+	countDetail := &bo.StrategyCountMap{
+		StrategyCountMap:  strategyCountMap,
+		StrategyEnableMap: strategyEnableMap,
+	}
+	return &strategyapi.GetStrategyGroupReply{Detail: build.NewBuilder().WithContext(ctx).
+		StrategyGroupModuleBuilder().WithDoStrategyGroup(groupDetail).
+		WithStrategyCountMap(countDetail).ToAPI()}, nil
 }
 
 // UpdateStrategyGroup 更新策略组

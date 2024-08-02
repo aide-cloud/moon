@@ -52,6 +52,7 @@ type (
 
 		WithAPIStrategyGroup(strategyGroup *bizmodel.StrategyGroup) StrategyGroupModelBuilder
 		WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder
+
 		WithCreateBoStrategyGroup(*strategyapi.CreateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithUpdateBoStrategyGroup(*strategyapi.UpdateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithListStrategyGroup(*strategyapi.ListStrategyGroupRequest) StrategyGroupRequestBuilder
@@ -85,21 +86,18 @@ type (
 
 		WithAPIDatasourceMetricLabel(metric *bizmodel.MetricLabel) DatasourceMetricLabelModelBuilder
 		WithAPIDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
+
+		StrategyGroupModuleBuilder() StrategyGroupModuleBuilder
 	}
 )
 
-func (b *builder) WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder {
-	return &strategyGroupBuilder{
-		StrategyGroups:           strategyGroup,
-		StrategyCountModel:       strategyCountModel,
-		StrategyEnableCountModel: strategyEnableCountModel,
-	}
+func (b *builder) StrategyGroupModuleBuilder() StrategyGroupModuleBuilder {
+	return NewStrategyGroupModuleBuilder(b.ctx)
 }
 
-func (b *builder) WithStrategyCount(models []*bo.StrategyCountModel) StrategyGroupModelBuilder {
+func (b *builder) WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder {
 	return &strategyGroupBuilder{
-		StrategyCountModel: models,
-		ctx:                b.ctx,
+		StrategyGroups: strategyGroup,
 	}
 }
 

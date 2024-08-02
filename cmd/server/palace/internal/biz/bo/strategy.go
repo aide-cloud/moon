@@ -155,15 +155,15 @@ type (
 
 	// StrategyCountModel 策略数量统计  策略总数,策略开启总数接收model
 	StrategyCountModel struct {
-		GroupID uint32 `json:"group_id"`
+		GroupID uint32 `gorm:"column:group_id"`
 		// 总数
-		Total uint64 `json:"total"`
+		Total uint64 `gorm:"column:total"`
 	}
-	// StrategyCountDetail 策略数量详情
-	StrategyCountDetail struct {
+	// StrategyCountMap 策略总数map
+	StrategyCountMap struct {
 		// 策略开启总数
-		StrategyEnableCounts StrategyCountModel `json:"strategyEnableCounts"`
+		StrategyCountMap map[uint32]*StrategyCountModel `json:"strategyCountMap"`
 		// 策略总数
-		StrategyCounts StrategyCountModel `json:"strategyCounts"`
+		StrategyEnableMap map[uint32]*StrategyCountModel `json:"strategyEnableMap"`
 	}
 )
