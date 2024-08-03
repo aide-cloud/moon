@@ -40,16 +40,16 @@ func (s *strategyRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.Up
 	return err
 }
 
-func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, params *bo.DelStrategyParams) error {
+func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, strategyID uint32) error {
 	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return err
 	}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if _, err = tx.Strategy.WithContext(ctx).Where(tx.Strategy.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+		if _, err = tx.Strategy.WithContext(ctx).Where(tx.Strategy.ID.Eq(strategyID)).Delete(); !types.IsNil(err) {
 			return err
 		}
-		if _, err = tx.StrategyLevel.WithContext(ctx).Where(tx.StrategyLevel.StrategyID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+		if _, err = tx.StrategyLevel.WithContext(ctx).Where(tx.StrategyLevel.StrategyID.Eq(strategyID)).Delete(); !types.IsNil(err) {
 			return err
 		}
 		return nil
@@ -146,13 +146,13 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 	})
 }
 
-func (s *strategyRepositoryImpl) GetByID(ctx context.Context, params *bo.GetStrategyDetailParams) (*bizmodel.Strategy, error) {
+func (s *strategyRepositoryImpl) GetByID(ctx context.Context, strategyID uint32) (*bizmodel.Strategy, error) {
 	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
 	bizWrapper := bizQuery.Strategy.WithContext(ctx)
-	return bizWrapper.Where(bizQuery.Strategy.ID.Eq(params.ID)).Preload(field.Associations).First()
+	return bizWrapper.Where(bizQuery.Strategy.ID.Eq(strategyID)).Preload(field.Associations).First()
 }
 
 func (s *strategyRepositoryImpl) FindByPage(ctx context.Context, params *bo.QueryStrategyListParams) ([]*bizmodel.Strategy, error) {
@@ -209,17 +209,17 @@ func (s *strategyRepositoryImpl) FindByPage(ctx context.Context, params *bo.Quer
 	return strategyWrapper.Order(bizQuery.Strategy.ID.Desc()).Find()
 }
 
-func (s *strategyRepositoryImpl) CopyStrategy(ctx context.Context, params *bo.CopyStrategyParams) (*bizmodel.Strategy, error) {
+func (s *strategyRepositoryImpl) CopyStrategy(ctx context.Context, strategyID uint32) (*bizmodel.Strategy, error) {
 	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
 	strategyWrapper := bizQuery.Strategy.WithContext(ctx)
-	strategy, err := strategyWrapper.Where(bizQuery.Strategy.ID.Eq(params.StrategyID)).Preload(field.Associations).First()
+	strategy, err := strategyWrapper.Where(bizQuery.Strategy.ID.Eq(strategyID)).Preload(field.Associations).First()
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	strategy.Name = fmt.Sprintf("%s-%d-%s", strategy.Name, params.StrategyID, "copy")
+	strategy.Name = fmt.Sprintf("%s-%d-%s", strategy.Name, strategyID, "copy")
 	strategy.ID = 0
 	err = bizQuery.Transaction(func(tx *bizquery.Query) error {
 		if err := tx.Strategy.WithContext(ctx).Create(strategy); !types.IsNil(err) {

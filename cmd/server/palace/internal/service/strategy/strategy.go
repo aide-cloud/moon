@@ -97,10 +97,7 @@ func (s *Service) ListStrategyGroup(ctx context.Context, req *strategyapi.ListSt
 
 // GetStrategyGroup 获取策略组详情
 func (s *Service) GetStrategyGroup(ctx context.Context, req *strategyapi.GetStrategyGroupRequest) (*strategyapi.GetStrategyGroupReply, error) {
-	params := &bo.GetStrategyGroupDetailParams{
-		ID: req.GetId(),
-	}
-	groupDetail, err := s.strategyGroupBiz.GetStrategyGroupDetail(ctx, params)
+	groupDetail, err := s.strategyGroupBiz.GetStrategyGroupDetail(ctx, req.GetId())
 	if !types.IsNil(err) {
 		return nil, err
 	}
@@ -187,10 +184,7 @@ func (s *Service) UpdateStrategy(ctx context.Context, req *strategyapi.UpdateStr
 
 // DeleteStrategy 删除策略
 func (s *Service) DeleteStrategy(ctx context.Context, req *strategyapi.DeleteStrategyRequest) (*strategyapi.DeleteStrategyReply, error) {
-	param := &bo.DelStrategyParams{
-		ID: req.GetId(),
-	}
-	if err := s.strategyBiz.DeleteByID(ctx, param); !types.IsNil(err) {
+	if err := s.strategyBiz.DeleteByID(ctx, req.GetId()); !types.IsNil(err) {
 		return nil, err
 	}
 	return &strategyapi.DeleteStrategyReply{}, nil
@@ -198,10 +192,7 @@ func (s *Service) DeleteStrategy(ctx context.Context, req *strategyapi.DeleteStr
 
 // GetStrategy 获取策略详情
 func (s *Service) GetStrategy(ctx context.Context, req *strategyapi.GetStrategyRequest) (*strategyapi.GetStrategyReply, error) {
-	param := &bo.GetStrategyDetailParams{
-		ID: req.GetId(),
-	}
-	strategy, err := s.strategyBiz.GetStrategy(ctx, param)
+	strategy, err := s.strategyBiz.GetStrategy(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -245,10 +236,7 @@ func (s *Service) UpdateStrategyStatus(ctx context.Context, req *strategyapi.Upd
 
 // CopyStrategy 复制策略
 func (s *Service) CopyStrategy(ctx context.Context, req *strategyapi.CopyStrategyRequest) (*strategyapi.CopyStrategyReply, error) {
-	param := &bo.CopyStrategyParams{
-		StrategyID: req.StrategyId,
-	}
-	strategy, err := s.strategyBiz.CopyStrategy(ctx, param)
+	strategy, err := s.strategyBiz.CopyStrategy(ctx, req.GetStrategyId())
 	if !types.IsNil(err) {
 		return nil, err
 	}

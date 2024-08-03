@@ -49,16 +49,6 @@ type (
 		SourceType vobj.TemplateSourceType
 	}
 
-	// GetStrategyDetailParams 获取策略详情请求参数
-	GetStrategyDetailParams struct {
-		ID uint32 `json:"id"`
-	}
-
-	// DelStrategyParams 删除策略请求参数
-	DelStrategyParams struct {
-		ID uint32 `json:"id"`
-	}
-
 	// UpdateStrategyStatusParams 更新策略状态请求参数
 	UpdateStrategyStatusParams struct {
 		Ids    []uint32 `json:"ids"`
@@ -88,11 +78,6 @@ type (
 		Status vobj.Status `json:"status"`
 	}
 
-	// CopyStrategyParams 复制策略请求参数
-	CopyStrategyParams struct {
-		StrategyID uint32 `json:"strategyID"`
-	}
-
 	// CreateStrategyGroupParams 创建策略组请求参数
 	CreateStrategyGroupParams struct {
 		// 策略组名称
@@ -115,11 +100,6 @@ type (
 	UpdateStrategyGroupParams struct {
 		ID          uint32 `json:"id"`
 		UpdateParam CreateStrategyGroupParams
-	}
-
-	// GetStrategyGroupDetailParams 获取策略组详情请求参数
-	GetStrategyGroupDetailParams struct {
-		ID uint32 `json:"id"`
 	}
 
 	// DelStrategyGroupParams 删除策略组请求参数

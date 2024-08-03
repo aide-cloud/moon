@@ -59,8 +59,8 @@ func (s *StrategyGroupBiz) UpdateStrategyGroup(ctx context.Context, params *bo.U
 }
 
 // GetStrategyGroupDetail 获取策略分组详情
-func (s *StrategyGroupBiz) GetStrategyGroupDetail(ctx context.Context, params *bo.GetStrategyGroupDetailParams) (*bizmodel.StrategyGroup, error) {
-	strategyGroup, err := s.strategyRepo.GetStrategyGroup(ctx, params)
+func (s *StrategyGroupBiz) GetStrategyGroupDetail(ctx context.Context, groupID uint32) (*bizmodel.StrategyGroup, error) {
+	strategyGroup, err := s.strategyRepo.GetStrategyGroup(ctx, groupID)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, merr.ErrorI18nStrategyGroupNotFoundErr(ctx)

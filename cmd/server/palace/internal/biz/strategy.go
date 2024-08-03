@@ -26,8 +26,8 @@ type StrategyBiz struct {
 }
 
 // GetStrategy 获取策略
-func (b *StrategyBiz) GetStrategy(ctx context.Context, param *bo.GetStrategyDetailParams) (*bizmodel.Strategy, error) {
-	strategy, err := b.strategyRepo.GetByID(ctx, param)
+func (b *StrategyBiz) GetStrategy(ctx context.Context, strategyID uint32) (*bizmodel.Strategy, error) {
+	strategy, err := b.strategyRepo.GetByID(ctx, strategyID)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, merr.ErrorI18nStrategyNotFoundErr(ctx)
@@ -68,8 +68,8 @@ func (b *StrategyBiz) UpdateStatus(ctx context.Context, param *bo.UpdateStrategy
 }
 
 // DeleteByID 删除策略
-func (b *StrategyBiz) DeleteByID(ctx context.Context, param *bo.DelStrategyParams) error {
-	err := b.strategyRepo.DeleteByID(ctx, param)
+func (b *StrategyBiz) DeleteByID(ctx context.Context, strategyID uint32) error {
+	err := b.strategyRepo.DeleteByID(ctx, strategyID)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return merr.ErrorI18nStrategyNotFoundErr(ctx)
@@ -89,8 +89,8 @@ func (b *StrategyBiz) StrategyPage(ctx context.Context, param *bo.QueryStrategyL
 }
 
 // CopyStrategy 复制策略
-func (b *StrategyBiz) CopyStrategy(ctx context.Context, param *bo.CopyStrategyParams) (*bizmodel.Strategy, error) {
-	strategy, err := b.strategyRepo.CopyStrategy(ctx, param)
+func (b *StrategyBiz) CopyStrategy(ctx context.Context, strategyID uint32) (*bizmodel.Strategy, error) {
+	strategy, err := b.strategyRepo.CopyStrategy(ctx, strategyID)
 	if !types.IsNil(err) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return strategy, merr.ErrorI18nStrategyNotFoundErr(ctx)

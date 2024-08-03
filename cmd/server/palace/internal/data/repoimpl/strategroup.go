@@ -126,13 +126,13 @@ func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, p
 	})
 }
 
-func (s *strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, params *bo.GetStrategyGroupDetailParams) (*bizmodel.StrategyGroup, error) {
+func (s *strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, groupID uint32) (*bizmodel.StrategyGroup, error) {
 	bizQuery, err := getBizQuery(ctx, s.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
 	bizWrapper := bizQuery.StrategyGroup.WithContext(ctx)
-	return bizWrapper.Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Preload(field.Associations).First()
+	return bizWrapper.Where(bizQuery.StrategyGroup.ID.Eq(groupID)).Preload(field.Associations).First()
 }
 
 func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, params *bo.QueryStrategyGroupListParams) ([]*bizmodel.StrategyGroup, error) {
