@@ -50,7 +50,9 @@ type (
 		WithUpdateBoStrategy(*strategyapi.UpdateStrategyRequest) StrategyRequestBuilder
 		WithAPIStrategyLevel(*bizmodel.StrategyLevel) StrategyLevelModelBuilder
 
-		WithAPIStrategyGroup(*bizmodel.StrategyGroup) StrategyGroupModelBuilder
+		WithAPIStrategyGroup(strategyGroup *bizmodel.StrategyGroup) StrategyGroupModelBuilder
+		WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder
+
 		WithCreateBoStrategyGroup(*strategyapi.CreateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithUpdateBoStrategyGroup(*strategyapi.UpdateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithListStrategyGroup(*strategyapi.ListStrategyGroupRequest) StrategyGroupRequestBuilder
@@ -85,10 +87,22 @@ type (
 		WithAPIDatasourceMetricLabel(metric *bizmodel.MetricLabel) DatasourceMetricLabelModelBuilder
 		WithAPIDatasourceMetricLabelValue(metric *bizmodel.MetricLabelValue) DatasourceMetricLabelValueBuilder
 
+		StrategyGroupModuleBuilder() StrategyGroupModuleBuilder
+
 		RealTimeAlarmModule() RealtimeAlarmModuleBuilder
 		DashboardModule() DashboardModuleBuilder
 	}
 )
+
+func (b *builder) StrategyGroupModuleBuilder() StrategyGroupModuleBuilder {
+	return NewStrategyGroupModuleBuilder(b.ctx)
+}
+
+func (b *builder) WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder {
+	return &strategyGroupBuilder{
+		StrategyGroups: strategyGroup,
+	}
+}
 
 func (b *builder) DashboardModule() DashboardModuleBuilder {
 	return NewDashboardModuleBuilder(b.ctx)
