@@ -29,7 +29,7 @@ service Alarm {
   // 删除告警组
   rpc DeleteAlarmGroup (DeleteAlarmGroupRequest) returns (DeleteAlarmGroupReply) {
     option (google.api.http) = {
-      delete: "/v1/group/alarm/{id}"
+      delete: "/v1/group/alarm/delete/{id}"
     };
   }
 
@@ -44,7 +44,7 @@ service Alarm {
   // 告警组详情
   rpc GetAlarmGroup (GetAlarmGroupRequest) returns (GetAlarmGroupReply) {
     option (google.api.http) = {
-      get: "/v1/group/alarm/{id}"
+      get: "/v1/group/alarm/detail/{id}"
     };
   }
 

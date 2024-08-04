@@ -33,5 +33,6 @@ func Models() []any {
 func AlarmModels() []any {
 	return []any{
 		&RealtimeAlarm{},
+		&AlarmGroup{},
 	}
 }

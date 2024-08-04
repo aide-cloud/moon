@@ -51,8 +51,6 @@ type (
 	// StrategyGroupModelBuilder 策略组模型构建器
 	StrategyGroupModelBuilder interface {
 		ToAPI() *admin.StrategyGroupItem
-
-		ToStrategyGroupList() []*admin.StrategyGroupItem
 	}
 
 	// StrategyGroupRequestBuilder 策略组请求构建器
@@ -336,41 +334,6 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 		Status:  vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
 		Page:    types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
 	}
-}
-
-func (b *strategyGroupBuilder) ToStrategyGroupList() []*admin.StrategyGroupItem {
-	if types.IsNil(b) || types.IsNil(b.StrategyGroups) {
-		return nil
-	}
-	countMap := map[uint32]uint64{}
-	enableCountMap := map[uint32]uint64{}
-	if !types.IsNil(b.StrategyCountModel) {
-		for _, strategy := range b.StrategyCountModel {
-			countMap[strategy.GroupID] = strategy.Total
-		}
-	}
-	if !types.IsNil(b.StrategyEnableCountModel) {
-		for _, strategy := range b.StrategyEnableCountModel {
-			enableCountMap[strategy.GroupID] = strategy.Total
-		}
-	}
-	return types.SliceTo(b.StrategyGroups, func(item *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
-		groupAPI := NewBuilder().WithAPIStrategyGroup(item).ToAPI()
-		count, exists := countMap[item.ID]
-		if exists {
-			groupAPI.StrategyCount = count
-		}
-		enableCount, exists := enableCountMap[item.ID]
-		if exists {
-			groupAPI.EnableStrategyCount = enableCount
-		}
-
-		return groupAPI
-	})
-}
-
-func newDosStrategyGroupBuilder(ctx context.Context, strategyGroup []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
-	return &dosStrategyGroupBuilder{ctx: ctx, StrategyGroups: strategyGroup}
 }
 
 func (d *strategyGroupModuleBuilder) WithDosStrategyGroup(item []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {

@@ -6,6 +6,39 @@ import (
 )
 
 type (
+
+	// CreateAlarmGroupParams 创建告警组请求参数
+	CreateAlarmGroupParams struct {
+		// 告警组名称
+		Name string `json:"name,omitempty"`
+		// 告警组说明信息
+		Remark string `json:"remark,omitempty"`
+		// 告警组状态
+		Status vobj.Status `json:"status,omitempty"`
+		// 告警分组类型
+		MemberIDs []uint32 `json:"memberIds,omitempty"`
+	}
+
+	// UpdateAlarmGroupStatusParams 更新告警组状态请求参数
+	UpdateAlarmGroupStatusParams struct {
+		IDs    []uint32 `json:"ids"`
+		Status vobj.Status
+	}
+
+	// UpdateAlarmGroupParams 更新告警组请求参数
+	UpdateAlarmGroupParams struct {
+		ID          uint32 `json:"id"`
+		UpdateParam *CreateAlarmGroupParams
+	}
+
+	// QueryAlarmGroupListParams 查询告警组列表请求参数
+	QueryAlarmGroupListParams struct {
+		Keyword string `json:"keyword"`
+		Page    types.Pagination
+		Name    string
+		Status  vobj.Status
+	}
+
 	// GetRealTimeAlarmParams 获取实时告警参数
 	GetRealTimeAlarmParams struct {
 		// 告警ID

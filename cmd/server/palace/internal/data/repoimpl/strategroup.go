@@ -70,10 +70,7 @@ func (s *strategyGroupRepositoryImpl) CreateStrategyGroup(ctx context.Context, p
 	}
 	strategyGroupModel := createStrategyGroupParamsToModel(ctx, params)
 	err = bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if err := tx.StrategyGroup.WithContext(ctx).Create(strategyGroupModel); !types.IsNil(err) {
-			return err
-		}
-		return nil
+		return tx.StrategyGroup.WithContext(ctx).Create(strategyGroupModel)
 	})
 	if !types.IsNil(err) {
 		return nil, err
@@ -131,8 +128,7 @@ func (s *strategyGroupRepositoryImpl) GetStrategyGroup(ctx context.Context, grou
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	bizWrapper := bizQuery.StrategyGroup.WithContext(ctx)
-	return bizWrapper.Where(bizQuery.StrategyGroup.ID.Eq(groupID)).Preload(field.Associations).First()
+	return bizQuery.StrategyGroup.WithContext(ctx).Where(bizQuery.StrategyGroup.ID.Eq(groupID)).Preload(field.Associations).First()
 }
 
 func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, params *bo.QueryStrategyGroupListParams) ([]*bizmodel.StrategyGroup, error) {
@@ -155,7 +151,7 @@ func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, par
 		bizWrapper = bizWrapper.Or(bizQuery.StrategyGroup.Remark.Like(params.Keyword))
 	}
 
-	bizWrapper = bizWrapper.Where(wheres...).Preload(field.Associations)
+	bizWrapper = bizWrapper.Where(wheres...)
 
 	if err := types.WithPageQuery[bizquery.IStrategyGroupDo](bizWrapper, params.Page); err != nil {
 		return nil, err
