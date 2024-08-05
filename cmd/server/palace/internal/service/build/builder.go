@@ -91,6 +91,7 @@ type (
 		RealTimeAlarmModule() RealtimeAlarmModuleBuilder
 		DashboardModule() DashboardModuleBuilder
 
+		AlarmGroupModule() AlarmGroupModuleBuilder
 		AlarmModule() AlarmModuleBuilder
 		AlarmPageModule() AlarmPageModuleBuilder
 	}
@@ -112,7 +113,7 @@ func (b *builder) RealTimeAlarmModule() RealtimeAlarmModuleBuilder {
 	return newRealtimeAlarmModuleBuilder(b.ctx)
 }
 
-func (b *builder) AlarmModule() AlarmModuleBuilder {
+func (b *builder) AlarmGroupModule() AlarmGroupModuleBuilder {
 	return newAlarmModuleBuilder(b.ctx)
 }
 

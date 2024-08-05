@@ -330,9 +330,10 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 		return nil
 	}
 	return &bo.QueryStrategyGroupListParams{
-		Keyword: b.ListStrategyGroupRequest.GetKeyword(),
-		Status:  vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
-		Page:    types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
+		Keyword:       b.ListStrategyGroupRequest.GetKeyword(),
+		Status:        vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
+		Page:          types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
+		CategoriesIds: b.ListStrategyGroupRequest.GetCategoriesIds(),
 	}
 }
 

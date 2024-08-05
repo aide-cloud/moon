@@ -10,7 +10,6 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel"
 	"github.com/aide-family/moon/pkg/palace/model/bizmodel/bizquery"
 	"github.com/aide-family/moon/pkg/util/types"
-	"github.com/aide-family/moon/pkg/vobj"
 
 	"gorm.io/gen"
 	"gorm.io/gen/field"
@@ -83,8 +82,16 @@ func (a *alarmGroupRepositoryImpl) DeleteAlarmGroup(ctx context.Context, alarmId
 	if !types.IsNil(err) {
 		return err
 	}
+	groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: alarmId}}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if _, err = bizQuery.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmId)).Delete(); !types.IsNil(err) {
+		// 清除通知人员关联信息
+		if err := tx.AlarmGroup.Members.Model(groupModel).Clear(); err != nil {
+			return err
+		}
+
+		// TODO 清空hook关联信息
+
+		if _, err = tx.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmId)).Delete(); !types.IsNil(err) {
 			return err
 		}
 		return nil
@@ -126,12 +133,16 @@ func (a *alarmGroupRepositoryImpl) AlarmGroupPage(ctx context.Context, params *b
 }
 
 func (a *alarmGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.UpdateAlarmGroupStatusParams) error {
+	if len(params.IDs) == 0 {
+		return nil
+	}
+
 	bizQuery, err := getBizQuery(ctx, a.data)
 	if !types.IsNil(err) {
 		return err
 	}
-	bizWrapper := bizQuery.AlarmGroup.WithContext(ctx)
-	if _, err = bizWrapper.Where(bizQuery.AlarmGroup.ID.In(params.IDs...)).Update(bizQuery.AlarmGroup.Status, params.Status); !types.IsNil(err) {
+
+	if _, err = bizQuery.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.In(params.IDs...)).Update(bizQuery.AlarmGroup.Status, params.Status); !types.IsNil(err) {
 		return err
 	}
 	return nil
@@ -141,7 +152,7 @@ func (a *alarmGroupRepositoryImpl) UpdateStatus(ctx context.Context, params *bo.
 func createAlarmGroupParamsToModel(ctx context.Context, params *bo.CreateAlarmGroupParams) *bizmodel.AlarmGroup {
 	alarmGroup := &bizmodel.AlarmGroup{
 		Name:   params.Name,
-		Status: vobj.Status(params.Status),
+		Status: params.Status,
 		Remark: params.Remark,
 		Members: types.SliceToWithFilter(params.MemberIDs, func(id uint32) (*bizmodel.SysTeamMember, bool) {
 			if id <= 0 {

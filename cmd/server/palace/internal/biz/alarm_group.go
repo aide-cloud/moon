@@ -84,5 +84,5 @@ func (s *AlarmGroupBiz) ListPage(ctx context.Context, params *bo.QueryAlarmGroup
 	if !types.IsNil(err) {
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
-	return AlarmGroups, err
+	return AlarmGroups, nil
 }

@@ -77,6 +77,7 @@ func RegisterService(
 	strategyTemplateService *strategy.TemplateService,
 	dashboardService *realtime.DashboardService,
 	alarmService *realtime.AlarmService,
+	alarmGroupService *alarm.GroupService,
 	alarmPageSelfService *realtime.AlarmPageSelfService,
 	alarmGroupService *alarm.AlarmGroupService,
 ) *Server {

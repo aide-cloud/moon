@@ -24,14 +24,14 @@ type (
 		WithAPIListAlarmRequest(*realtimeapi.ListAlarmRequest) APIListAlarmParamsBuilder
 	}
 
-	AlarmModuleBuilder interface {
+	AlarmGroupModuleBuilder interface {
 		WithDoAlarmGroup(*bizmodel.AlarmGroup) DoAlarmGroupBuilder
 		WithDosAlarmGroup([]*bizmodel.AlarmGroup) DosAlarmGroupBuilder
 		WithAPICreateAlarmGroupRequest(item *alarmapi.CreateAlarmGroupRequest) APICreateAlarmGroupParamsBuilder
 		WithAPIQueryAlarmGroupListRequest(request *alarmapi.ListAlarmGroupRequest) APIQueryAlarmGroupListParamsBuilder
 		WithAPIUpdateAlarmGroupRequest(*alarmapi.UpdateAlarmGroupRequest) APIUpdateAlarmGroupParamsBuilder
 		WithAPIUpdateStatusAlarmGroupRequest(request *alarmapi.UpdateAlarmGroupStatusRequest) APIUpdateAlarmGroupStatusParamsBuilder
-		WithContext(context.Context) AlarmModuleBuilder
+		WithContext(context.Context) AlarmGroupModuleBuilder
 	}
 
 	// DoAlarmGroupBuilder do  alarm group builder
@@ -147,7 +147,7 @@ func (a *dosAlarmGroupBuilder) ToAPIs() []*adminapi.AlarmGroupItem {
 		return nil
 	}
 	return types.SliceTo(a.alarms, func(item *bizmodel.AlarmGroup) *adminapi.AlarmGroupItem {
-		alarmGroup := NewBuilder().AlarmModule().
+		alarmGroup := NewBuilder().AlarmGroupModule().
 			WithContext(a.ctx).WithDoAlarmGroup(item).ToAPI()
 		return alarmGroup
 	})
@@ -166,7 +166,7 @@ func (a *alarmModuleBuilder) WithAPICreateAlarmGroupRequest(request *alarmapi.Cr
 }
 
 func (a *alarmModuleBuilder) WithAPIQueryAlarmGroupListRequest(request *alarmapi.ListAlarmGroupRequest) APIQueryAlarmGroupListParamsBuilder {
-	return newapiListAlarmGroupParamsBuilder(a.ctx, request)
+	return newAPIListAlarmGroupParamsBuilder(a.ctx, request)
 }
 
 func (a *alarmModuleBuilder) WithAPIUpdateAlarmGroupRequest(request *alarmapi.UpdateAlarmGroupRequest) APIUpdateAlarmGroupParamsBuilder {
@@ -177,7 +177,7 @@ func (a *alarmModuleBuilder) WithAPIUpdateStatusAlarmGroupRequest(request *alarm
 	return newAPIUpdateAlarmGroupStatusParamsBuilder(a.ctx, request)
 }
 
-func (a *alarmModuleBuilder) WithContext(ctx context.Context) AlarmModuleBuilder {
+func (a *alarmModuleBuilder) WithContext(ctx context.Context) AlarmGroupModuleBuilder {
 	if types.IsNil(a) {
 		return newAlarmModuleBuilder(ctx)
 	}
@@ -377,7 +377,7 @@ func newAPIUpdateAlarmGroupStatusParamsBuilder(ctx context.Context, req *alarmap
 	return &apiUpdateAlarmGroupStatusParamsBuilder{ctx: ctx, param: req}
 }
 
-func newapiListAlarmGroupParamsBuilder(ctx context.Context, req *alarmapi.ListAlarmGroupRequest) APIQueryAlarmGroupListParamsBuilder {
+func newAPIListAlarmGroupParamsBuilder(ctx context.Context, req *alarmapi.ListAlarmGroupRequest) APIQueryAlarmGroupListParamsBuilder {
 	return &apiListAlarmGroupParamsBuilder{ctx: ctx, param: req}
 }
 
@@ -389,6 +389,6 @@ func newDosAlarmGroupBuilder(ctx context.Context, alarmGroups []*bizmodel.AlarmG
 	return &dosAlarmGroupBuilder{ctx: ctx, alarms: alarmGroups}
 }
 
-func newAlarmModuleBuilder(ctx context.Context) AlarmModuleBuilder {
+func newAlarmModuleBuilder(ctx context.Context) AlarmGroupModuleBuilder {
 	return &alarmModuleBuilder{ctx: ctx}
 }

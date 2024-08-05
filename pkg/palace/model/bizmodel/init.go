@@ -23,6 +23,7 @@ func Models() []any {
 		&StrategyGroup{},
 		&Dashboard{},
 		&DashboardChart{},
+		&AlarmGroup{},
 		&DashboardSelf{},
 		&AlarmPageSelf{},
 		&AlarmHook{},
@@ -33,6 +34,5 @@ func Models() []any {
 func AlarmModels() []any {
 	return []any{
 		&RealtimeAlarm{},
-		&AlarmGroup{},
 	}
 }

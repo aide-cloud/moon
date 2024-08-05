@@ -115,8 +115,19 @@ func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, p
 	if !types.IsNil(err) {
 		return err
 	}
+	groupModel := &bizmodel.StrategyGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if _, err = bizQuery.StrategyGroup.WithContext(ctx).Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
+		// 清除策略类型中间表信息
+		if err := tx.StrategyGroup.Categories.Model(groupModel).Clear(); err != nil {
+			return err
+		}
+
+		//清除策略中间表信息
+		if err := tx.StrategyGroup.Categories.Model(groupModel).Clear(); err != nil {
+			return err
+		}
+
+		if _, err = tx.StrategyGroup.WithContext(ctx).Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
 			return err
 		}
 		return nil
