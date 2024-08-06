@@ -49,18 +49,19 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 	if !types.IsNil(err) {
 		return err
 	}
-	members := types.SliceToWithFilter(params.UpdateParam.MemberIDs, func(id uint32) (*bizmodel.SysTeamMember, bool) {
-		if id <= 0 {
+	noticeUsers := types.SliceToWithFilter(params.UpdateParam.NoticeUsers, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
+		if noticeUser.UserId <= 0 {
 			return nil, false
 		}
-		return &bizmodel.SysTeamMember{
-			AllFieldModel: model.AllFieldModel{ID: id},
+		return &bizmodel.AlarmNoticeUser{
+			AllFieldModel:   model.AllFieldModel{ID: noticeUser.UserId},
+			AlarmNoticeType: noticeUser.NotifyType,
 		}, true
 	})
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if !types.IsNil(params.UpdateParam.MemberIDs) {
-			if err = tx.AlarmGroup.Members.
-				Model(&bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(members...); !types.IsNil(err) {
+		if !types.IsNil(params.UpdateParam.NoticeUsers) {
+			if err = tx.AlarmGroup.NoticeUsers.
+				Model(&bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(noticeUsers...); !types.IsNil(err) {
 				return err
 			}
 			// 更新告警分组
@@ -85,7 +86,7 @@ func (a *alarmGroupRepositoryImpl) DeleteAlarmGroup(ctx context.Context, alarmId
 	groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: alarmId}}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		// 清除通知人员关联信息
-		if err := tx.AlarmGroup.Members.Model(groupModel).Clear(); err != nil {
+		if err := tx.AlarmGroup.NoticeUsers.Model(groupModel).Clear(); err != nil {
 			return err
 		}
 
@@ -154,12 +155,13 @@ func createAlarmGroupParamsToModel(ctx context.Context, params *bo.CreateAlarmGr
 		Name:   params.Name,
 		Status: params.Status,
 		Remark: params.Remark,
-		Members: types.SliceToWithFilter(params.MemberIDs, func(id uint32) (*bizmodel.SysTeamMember, bool) {
-			if id <= 0 {
+		NoticeUsers: types.SliceToWithFilter(params.NoticeUsers, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
+			if noticeUser.UserId <= 0 {
 				return nil, false
 			}
-			return &bizmodel.SysTeamMember{
-				AllFieldModel: model.AllFieldModel{ID: id},
+			return &bizmodel.AlarmNoticeUser{
+				AllFieldModel:   model.AllFieldModel{ID: noticeUser.UserId},
+				AlarmNoticeType: noticeUser.NotifyType,
 			}, true
 		}),
 		// TODO 添加hook关联信息

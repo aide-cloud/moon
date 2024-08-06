@@ -24,6 +24,7 @@ func Models() []any {
 		&Dashboard{},
 		&DashboardChart{},
 		&AlarmGroup{},
+		&AlarmNoticeUser{},
 		&DashboardSelf{},
 		&AlarmPageSelf{},
 		&AlarmHook{},

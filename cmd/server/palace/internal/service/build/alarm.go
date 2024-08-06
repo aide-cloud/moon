@@ -230,10 +230,15 @@ func (a *apiUpdateAlarmGroupParamsBuilder) ToBo() *bo.UpdateAlarmGroupParams {
 	return &bo.UpdateAlarmGroupParams{
 		ID: a.param.GetId(),
 		UpdateParam: &bo.CreateAlarmGroupParams{
-			Name:      a.param.GetUpdate().GetName(),
-			Remark:    a.param.Update.GetRemark(),
-			Status:    vobj.Status(a.param.Update.GetStatus()),
-			MemberIDs: a.param.Update.GetNoticeUserIds(),
+			Name:   a.param.GetUpdate().GetName(),
+			Remark: a.param.GetUpdate().GetRemark(),
+			Status: vobj.Status(a.param.GetUpdate().GetStatus()),
+			NoticeUsers: types.SliceTo(a.param.GetUpdate().GetNoticeUser(), func(user *alarmapi.CreateNoticeUserRequest) *bo.CreateNoticeUserParams {
+				return &bo.CreateNoticeUserParams{
+					UserId:     user.GetUserId(),
+					NotifyType: vobj.NotifyType(user.GetNotifyType()),
+				}
+			}),
 		},
 	}
 }
@@ -243,10 +248,15 @@ func (a apiCreateAlarmGroupParamsBuilder) ToBo() *bo.CreateAlarmGroupParams {
 		return nil
 	}
 	return &bo.CreateAlarmGroupParams{
-		Name:      a.param.GetName(),
-		Remark:    a.param.GetRemark(),
-		Status:    vobj.Status(a.param.GetStatus()),
-		MemberIDs: a.param.GetNoticeUserIds(),
+		Name:   a.param.GetName(),
+		Remark: a.param.GetRemark(),
+		Status: vobj.Status(a.param.GetStatus()),
+		NoticeUsers: types.SliceTo(a.param.NoticeUser, func(user *alarmapi.CreateNoticeUserRequest) *bo.CreateNoticeUserParams {
+			return &bo.CreateNoticeUserParams{
+				UserId:     user.GetUserId(),
+				NotifyType: vobj.NotifyType(user.GetNotifyType()),
+			}
+		}),
 	}
 }
 

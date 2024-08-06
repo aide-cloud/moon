@@ -306,3 +306,15 @@ enum AlertStatus {
   // 告警已静音
   ALERT_STATUS_Silenced = 3;
 }
+
+enum NotifyType{
+  // UNKNOWN 未知
+  NOTIFY_UNKNOWN = 0;
+  // 手机
+  NOTIFY_PHONE = 1;
+  // 短信
+  NOTIFY_SMS = 2;
+  // 邮箱
+  NOTIFY_EMAIL = 3;
+}
+

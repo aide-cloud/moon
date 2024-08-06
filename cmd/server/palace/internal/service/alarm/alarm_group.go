@@ -2,8 +2,11 @@ package alarm
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	alarmyapi "github.com/aide-family/moon/api/admin/alarm"
+	"github.com/aide-family/moon/api/merr"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz"
 	"github.com/aide-family/moon/cmd/server/palace/internal/service/build"
 	"github.com/aide-family/moon/pkg/util/types"
@@ -24,6 +27,14 @@ func NewAlarmService(alarmGroupBiz *biz.AlarmGroupBiz) *GroupService {
 
 // CreateAlarmGroup 创建告警组
 func (s *GroupService) CreateAlarmGroup(ctx context.Context, req *alarmyapi.CreateAlarmGroupRequest) (*alarmyapi.CreateAlarmGroupReply, error) {
+	// 校验通知人是否重复
+	if has := types.SlicesHasDuplicates(req.GetNoticeUser(), func(request *alarmyapi.CreateNoticeUserRequest) string {
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%d-", request.GetUserId()))
+		return sb.String()
+	}); has {
+		return nil, merr.ErrorI18nAlarmNoticeRepeatErr(ctx)
+	}
 	param := build.NewBuilder().WithContext(ctx).
 		AlarmGroupModule().
 		WithAPICreateAlarmGroupRequest(req).
@@ -75,6 +86,14 @@ func (s *GroupService) GetAlarmGroup(ctx context.Context, req *alarmyapi.GetAlar
 
 // UpdateAlarmGroup 更新告警组信息
 func (s *GroupService) UpdateAlarmGroup(ctx context.Context, req *alarmyapi.UpdateAlarmGroupRequest) (*alarmyapi.UpdateAlarmGroupReply, error) {
+	// 校验通知人是否重复
+	if has := types.SlicesHasDuplicates(req.GetUpdate().GetNoticeUser(), func(request *alarmyapi.CreateNoticeUserRequest) string {
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%d-", request.GetUserId()))
+		return sb.String()
+	}); has {
+		return nil, merr.ErrorI18nAlarmNoticeRepeatErr(ctx)
+	}
 	param := build.NewBuilder().WithContext(ctx).
 		AlarmGroupModule().
 		WithAPIUpdateAlarmGroupRequest(req).

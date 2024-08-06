@@ -15,8 +15,16 @@ type (
 		Remark string `json:"remark,omitempty"`
 		// 告警组状态
 		Status vobj.Status `json:"status,omitempty"`
-		// 告警分组类型
-		MemberIDs []uint32 `json:"memberIds,omitempty"`
+		// 告警分组通知人
+		NoticeUsers []*CreateNoticeUserParams `json:"noticeUsers,omitempty"`
+	}
+
+	// CreateNoticeUserParams 创建通知人参数
+	CreateNoticeUserParams struct {
+		// 用户id
+		UserId uint32
+		// 通知方式
+		NotifyType vobj.NotifyType
 	}
 
 	// UpdateAlarmGroupStatusParams 更新告警组状态请求参数
