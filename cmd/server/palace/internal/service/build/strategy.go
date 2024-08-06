@@ -248,7 +248,10 @@ func (b *dosStrategyGroupBuilder) ToAPI() *admin.StrategyGroupItem {
 		Status:    api.Status(b.StrategyGroup.Status),
 		CreatedAt: b.StrategyGroup.CreatedAt.String(),
 		UpdatedAt: b.StrategyGroup.UpdatedAt.String(),
-		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).GetUsername(),
+		Categories: types.SliceTo(b.StrategyGroup.Categories, func(category *bizmodel.SysDict) *admin.Dict {
+			return NewBuilder().WithDict(category).ToAPI()
+		}),
+		Creator: NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).GetUsername(),
 	}
 	count := b.StrategyCountMap[id]
 	enableCount := b.StrategyEnableMap[id]

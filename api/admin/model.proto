@@ -400,7 +400,8 @@ message StrategyGroupItem {
   uint64 strategyCount = 10;
   // 策略开启总数
   uint64 enableStrategyCount = 11;
-
+  // 分组类型
+  repeated Dict  categories = 12;
 }
 
 message StrategyLevelTemplate {
