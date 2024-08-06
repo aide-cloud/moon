@@ -162,6 +162,18 @@ func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, par
 		bizWrapper = bizWrapper.Or(bizQuery.StrategyGroup.Remark.Like(params.Keyword))
 	}
 
+	// 通过策略分组类型进行查询
+	if len(params.CategoriesIds) > 0 {
+		var strategyGroupIds []uint32
+		_ = bizQuery.StrategyGroupCategories.
+			Where(bizQuery.StrategyGroupCategories.SysDictId.In(params.CategoriesIds...)).
+			Select(bizQuery.StrategyGroupCategories.StrategyGroupId).
+			Scan(strategyGroupIds)
+		if len(strategyGroupIds) > 0 {
+			bizWrapper = bizWrapper.Or(bizQuery.StrategyGroup.ID.In(strategyGroupIds...))
+		}
+	}
+
 	bizWrapper = bizWrapper.Where(wheres...)
 
 	if err := types.WithPageQuery[bizquery.IStrategyGroupDo](bizWrapper, params.Page); err != nil {
