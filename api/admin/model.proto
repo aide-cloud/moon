@@ -582,6 +582,6 @@ message AlarmGroupItem {
   string creator = 7;
   // 创建者ID
   uint32 creatorId = 8;
-  // 通知人列表列表
+  // 通知人列表
   repeated TeamMember noticeUsers = 9;
 }

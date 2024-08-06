@@ -49,18 +49,18 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 	if !types.IsNil(err) {
 		return err
 	}
+	members := types.SliceToWithFilter(params.UpdateParam.MemberIDs, func(id uint32) (*bizmodel.SysTeamMember, bool) {
+		if id <= 0 {
+			return nil, false
+		}
+		return &bizmodel.SysTeamMember{
+			AllFieldModel: model.AllFieldModel{ID: id},
+		}, true
+	})
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		if !types.IsNil(params.UpdateParam.MemberIDs) {
-			Members := types.SliceToWithFilter(params.UpdateParam.MemberIDs, func(id uint32) (*bizmodel.SysTeamMember, bool) {
-				if id <= 0 {
-					return nil, false
-				}
-				return &bizmodel.SysTeamMember{
-					AllFieldModel: model.AllFieldModel{ID: id},
-				}, true
-			})
 			if err = tx.AlarmGroup.Members.
-				Model(&bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(Members...); !types.IsNil(err) {
+				Model(&bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(members...); !types.IsNil(err) {
 				return err
 			}
 			// 更新告警分组
@@ -71,8 +71,8 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 				return err
 			}
 		}
-
 		//TODO 更新hook
+
 		return nil
 	})
 }
