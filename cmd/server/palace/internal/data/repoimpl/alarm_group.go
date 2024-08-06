@@ -33,9 +33,18 @@ func (a *alarmGroupRepositoryImpl) CreateAlarmGroup(ctx context.Context, params 
 	if !types.IsNil(err) {
 		return nil, err
 	}
+
 	alarmGroupModel := createAlarmGroupParamsToModel(ctx, params)
+
 	err = bizQuery.Transaction(func(tx *bizquery.Query) error {
-		return tx.AlarmGroup.WithContext(ctx).Create(alarmGroupModel)
+		if err := tx.AlarmGroup.WithContext(ctx).Create(alarmGroupModel); err != nil {
+			return err
+		}
+		noticeUsers := createAlarmNoticeUsersToModel(ctx, params.NoticeUsers, alarmGroupModel.ID)
+		if err := tx.AlarmNoticeUser.WithContext(ctx).Create(noticeUsers...); err != nil {
+			return err
+		}
+		return nil
 	})
 	if !types.IsNil(err) {
 		return nil, err
@@ -49,21 +58,9 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 	if !types.IsNil(err) {
 		return err
 	}
-	noticeUsers := types.SliceToWithFilter(params.UpdateParam.NoticeUsers, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
-		if noticeUser.UserId <= 0 {
-			return nil, false
-		}
-		return &bizmodel.AlarmNoticeUser{
-			AllFieldModel:   model.AllFieldModel{ID: noticeUser.UserId},
-			AlarmNoticeType: noticeUser.NotifyType,
-		}, true
-	})
+	noticeUsers := createAlarmNoticeUsersToModel(ctx, params.UpdateParam.NoticeUsers, params.ID)
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		if !types.IsNil(params.UpdateParam.NoticeUsers) {
-			if err = tx.AlarmGroup.NoticeUsers.
-				Model(&bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}).Replace(noticeUsers...); !types.IsNil(err) {
-				return err
-			}
 			// 更新告警分组
 			if _, err = tx.AlarmGroup.WithContext(ctx).Where(tx.AlarmGroup.ID.Eq(params.ID)).UpdateSimple(
 				tx.AlarmGroup.Name.Value(params.UpdateParam.Name),
@@ -71,9 +68,19 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 			); !types.IsNil(err) {
 				return err
 			}
+
+			if len(params.UpdateParam.NoticeUsers) > 0 {
+				// 清除通知人员关联信息
+				groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}
+				if err := tx.AlarmGroup.NoticeUsers.Model(groupModel).Clear(); err != nil {
+					return err
+				}
+				if err := tx.AlarmNoticeUser.WithContext(ctx).Create(noticeUsers...); err != nil {
+					return err
+				}
+			}
 		}
 		//TODO 更新hook
-
 		return nil
 	})
 }
@@ -155,17 +162,23 @@ func createAlarmGroupParamsToModel(ctx context.Context, params *bo.CreateAlarmGr
 		Name:   params.Name,
 		Status: params.Status,
 		Remark: params.Remark,
-		NoticeUsers: types.SliceToWithFilter(params.NoticeUsers, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
-			if noticeUser.UserId <= 0 {
-				return nil, false
-			}
-			return &bizmodel.AlarmNoticeUser{
-				AllFieldModel:   model.AllFieldModel{ID: noticeUser.UserId},
-				AlarmNoticeType: noticeUser.NotifyType,
-			}, true
-		}),
 		// TODO 添加hook关联信息
 	}
 	alarmGroup.WithContext(ctx)
 	return alarmGroup
+}
+
+func createAlarmNoticeUsersToModel(ctx context.Context, params []*bo.CreateNoticeUserParams, alarmGroupID uint32) []*bizmodel.AlarmNoticeUser {
+	return types.SliceToWithFilter(params, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
+		if noticeUser.UserId <= 0 {
+			return nil, false
+		}
+		resUser := &bizmodel.AlarmNoticeUser{
+			AlarmNoticeType: noticeUser.NotifyType,
+			UserId:          noticeUser.UserId,
+			AlarmGroupID:    alarmGroupID,
+		}
+		resUser.WithContext(ctx)
+		return resUser, true
+	})
 }
