@@ -80,9 +80,9 @@ func (s *AlarmGroupBiz) UpdateStatus(ctx context.Context, params *bo.UpdateAlarm
 
 // ListPage 分页查询告警分组
 func (s *AlarmGroupBiz) ListPage(ctx context.Context, params *bo.QueryAlarmGroupListParams) ([]*bizmodel.AlarmGroup, error) {
-	AlarmGroups, err := s.strategyRepo.AlarmGroupPage(ctx, params)
+	alarmGroups, err := s.strategyRepo.AlarmGroupPage(ctx, params)
 	if !types.IsNil(err) {
 		return nil, merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
-	return AlarmGroups, nil
+	return alarmGroups, nil
 }
