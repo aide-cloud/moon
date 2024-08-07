@@ -77,9 +77,8 @@ func RegisterService(
 	strategyTemplateService *strategy.TemplateService,
 	dashboardService *realtime.DashboardService,
 	alarmService *realtime.AlarmService,
-	alarmGroupService *alarm.GroupService,
 	alarmPageSelfService *realtime.AlarmPageSelfService,
-	alarmGroupService *alarm.AlarmGroupService,
+	alarmGroupService *alarm.GroupService,
 ) *Server {
 	// 注册GRPC服务
 	v1.RegisterGreeterServer(rpcSrv, greeter)

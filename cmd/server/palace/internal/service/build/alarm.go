@@ -198,6 +198,12 @@ func (a *doAlarmGroupBuilder) ToAPI() *adminapi.AlarmGroupItem {
 		CreatedAt: a.alarm.CreatedAt.String(),
 		UpdatedAt: a.alarm.UpdatedAt.String(),
 		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(a.ctx, a.alarm.CreatorID)).GetUsername(),
+		NoticeUsers: types.SliceTo(a.alarm.NoticeUsers, func(user *bizmodel.AlarmNoticeUser) *adminapi.NoticeItem {
+			return &adminapi.NoticeItem{
+				User:       NewBuilder().WithAPIUserBo(cache.GetUser(a.ctx, user.UserId)).ToAPI(),
+				NotifyType: api.NotifyType(user.AlarmNoticeType),
+			}
+		}),
 	}
 	return alarmGroup
 }

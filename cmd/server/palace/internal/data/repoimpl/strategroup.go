@@ -168,7 +168,7 @@ func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, par
 		_ = bizQuery.StrategyGroupCategories.
 			Where(bizQuery.StrategyGroupCategories.SysDictId.In(params.CategoriesIds...)).
 			Select(bizQuery.StrategyGroupCategories.StrategyGroupId).
-			Scan(strategyGroupIds)
+			Scan(&strategyGroupIds)
 		if len(strategyGroupIds) > 0 {
 			bizWrapper = bizWrapper.Or(bizQuery.StrategyGroup.ID.In(strategyGroupIds...))
 		}

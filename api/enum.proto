@@ -315,6 +315,6 @@ enum NotifyType{
   // 短信
   NOTIFY_SMS = 2;
   // 邮箱
-  NOTIFY_EMAIL = 3;
+  NOTIFY_EMAIL = 4;
 }
 

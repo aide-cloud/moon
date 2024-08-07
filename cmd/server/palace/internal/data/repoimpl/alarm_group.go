@@ -60,27 +60,29 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 	}
 	noticeUsers := createAlarmNoticeUsersToModel(ctx, params.UpdateParam.NoticeUsers, params.ID)
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
-		if !types.IsNil(params.UpdateParam.NoticeUsers) {
-			// 更新告警分组
-			if _, err = tx.AlarmGroup.WithContext(ctx).Where(tx.AlarmGroup.ID.Eq(params.ID)).UpdateSimple(
-				tx.AlarmGroup.Name.Value(params.UpdateParam.Name),
-				tx.AlarmGroup.Remark.Value(params.UpdateParam.Remark),
-			); !types.IsNil(err) {
+		//告警组关联通知人中间表操作
+		groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}
+		noticeParams := params.UpdateParam.NoticeUsers
+		if !types.IsNil(noticeParams) && len(noticeParams) > 0 {
+			// 替换通知人员关联信息
+			if err := tx.AlarmGroup.NoticeUsers.Model(groupModel).Replace(noticeUsers...); err != nil {
 				return err
 			}
-
-			if len(params.UpdateParam.NoticeUsers) > 0 {
-				// 清除通知人员关联信息
-				groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: params.ID}}
-				if err := tx.AlarmGroup.NoticeUsers.Model(groupModel).Clear(); err != nil {
-					return err
-				}
-				if err := tx.AlarmNoticeUser.WithContext(ctx).Create(noticeUsers...); err != nil {
-					return err
-				}
+		} else {
+			// 清除通知人员关联信息
+			if _, err := tx.AlarmNoticeUser.WithContext(ctx).Where(tx.AlarmNoticeUser.AlarmGroupID.Eq(params.ID)).Delete(); err != nil {
+				return err
 			}
 		}
-		//TODO 更新hook
+		//TODO 更新hook操作
+
+		// 更新告警分组
+		if _, err = tx.AlarmGroup.WithContext(ctx).Where(tx.AlarmGroup.ID.Eq(params.ID)).UpdateSimple(
+			tx.AlarmGroup.Name.Value(params.UpdateParam.Name),
+			tx.AlarmGroup.Remark.Value(params.UpdateParam.Remark),
+		); !types.IsNil(err) {
+			return err
+		}
 		return nil
 	})
 }
@@ -90,10 +92,9 @@ func (a *alarmGroupRepositoryImpl) DeleteAlarmGroup(ctx context.Context, alarmId
 	if !types.IsNil(err) {
 		return err
 	}
-	groupModel := &bizmodel.AlarmGroup{AllFieldModel: model.AllFieldModel{ID: alarmId}}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		// 清除通知人员关联信息
-		if err := tx.AlarmGroup.NoticeUsers.Model(groupModel).Clear(); err != nil {
+		if _, err := tx.AlarmNoticeUser.WithContext(ctx).Where(tx.AlarmNoticeUser.AlarmGroupID.Eq(alarmId)).Delete(); err != nil {
 			return err
 		}
 

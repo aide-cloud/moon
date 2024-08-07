@@ -584,5 +584,12 @@ message AlarmGroupItem {
   // 创建者ID
   uint32 creatorId = 8;
   // 通知人列表
-  repeated TeamMember noticeUsers = 9;
+  repeated NoticeItem noticeUsers = 9;
+}
+
+message NoticeItem {
+  // 用户明细
+  User user = 1;
+  // 通知类型
+  NotifyType notifyType = 2;
 }
