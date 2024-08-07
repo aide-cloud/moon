@@ -122,11 +122,6 @@ func (s *strategyGroupRepositoryImpl) DeleteStrategyGroup(ctx context.Context, p
 			return err
 		}
 
-		//清除策略中间表信息
-		if err := tx.StrategyGroup.Categories.Model(groupModel).Clear(); err != nil {
-			return err
-		}
-
 		if _, err = tx.StrategyGroup.WithContext(ctx).Where(bizQuery.StrategyGroup.ID.Eq(params.ID)).Delete(); !types.IsNil(err) {
 			return err
 		}
