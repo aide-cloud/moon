@@ -166,8 +166,8 @@ func (s *strategyGroupRepositoryImpl) StrategyGroupPage(ctx context.Context, par
 	if len(params.CategoriesIds) > 0 {
 		var strategyGroupIds []uint32
 		_ = bizQuery.StrategyGroupCategories.
-			Where(bizQuery.StrategyGroupCategories.SysDictId.In(params.CategoriesIds...)).
-			Select(bizQuery.StrategyGroupCategories.StrategyGroupId).
+			Where(bizQuery.StrategyGroupCategories.SysDictID.In(params.CategoriesIds...)).
+			Select(bizQuery.StrategyGroupCategories.StrategyGroupID).
 			Scan(&strategyGroupIds)
 		if len(strategyGroupIds) > 0 {
 			bizWrapper = bizWrapper.Or(bizQuery.StrategyGroup.ID.In(strategyGroupIds...))

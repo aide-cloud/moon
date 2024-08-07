@@ -90,9 +90,7 @@ type (
 
 		RealTimeAlarmModule() RealtimeAlarmModuleBuilder
 		DashboardModule() DashboardModuleBuilder
-
 		AlarmGroupModule() AlarmGroupModuleBuilder
-		AlarmModule() AlarmModuleBuilder
 		AlarmPageModule() AlarmPageModuleBuilder
 	}
 )
