@@ -60,8 +60,8 @@ func (s *AlarmGroupBiz) GetAlarmGroupDetail(ctx context.Context, groupID uint32)
 }
 
 // DeleteAlarmGroup 删除告警分组
-func (s *AlarmGroupBiz) DeleteAlarmGroup(ctx context.Context, alarmId uint32) error {
-	if err := s.strategyRepo.DeleteAlarmGroup(ctx, alarmId); !types.IsNil(err) {
+func (s *AlarmGroupBiz) DeleteAlarmGroup(ctx context.Context, alarmID uint32) error {
+	if err := s.strategyRepo.DeleteAlarmGroup(ctx, alarmID); !types.IsNil(err) {
 		return merr.ErrorI18nSystemErr(ctx).WithCause(err)
 	}
 	return nil

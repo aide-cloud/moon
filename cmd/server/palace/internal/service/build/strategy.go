@@ -62,6 +62,7 @@ type (
 		ToListStrategyGroupBO() *bo.QueryStrategyGroupListParams
 	}
 
+	// StrategyGroupModuleBuilder StrategyGroupBuilder 策略组构建器
 	StrategyGroupModuleBuilder interface {
 		WithDoStrategyCount(items *bo.StrategyCountMap) DosStrategyGroupBuilder
 		WithDoStrategyGroupList(items []*bizmodel.StrategyGroup) DosStrategyGroupBuilder
@@ -72,12 +73,14 @@ type (
 		ctx context.Context
 	}
 
+	// DosStrategyGroupBuilder   do  alarm group builder
 	DosStrategyGroupBuilder interface {
 		WithStrategyCountMap(item *bo.StrategyCountMap) DosStrategyGroupBuilder
 		ToAPIs() []*admin.StrategyGroupItem
 		ToAPI() *admin.StrategyGroupItem
 	}
 
+	// dosStrategyGroupBuilder dos  alarm group builder
 	dosStrategyGroupBuilder struct {
 		StrategyGroups []*bizmodel.StrategyGroup
 		StrategyGroup  *bizmodel.StrategyGroup
@@ -340,10 +343,11 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 	}
 }
 
-func (d *strategyGroupModuleBuilder) WithDosStrategyGroup(item []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
-	return &dosStrategyGroupBuilder{ctx: d.ctx, StrategyGroups: item}
+func (s *strategyGroupModuleBuilder) WithDosStrategyGroup(item []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
+	return &dosStrategyGroupBuilder{ctx: s.ctx, StrategyGroups: item}
 }
 
+// NewStrategyGroupModuleBuilder 创建策略组模块构建器
 func NewStrategyGroupModuleBuilder(ctx context.Context) StrategyGroupModuleBuilder {
 	return &strategyGroupModuleBuilder{ctx: ctx}
 }

@@ -22,7 +22,7 @@ type (
 	// CreateNoticeUserParams 创建通知人参数
 	CreateNoticeUserParams struct {
 		// 用户id
-		UserId uint32
+		UserID uint32
 		// 通知方式
 		NotifyType vobj.NotifyType
 	}

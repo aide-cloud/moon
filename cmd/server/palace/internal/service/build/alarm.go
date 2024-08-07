@@ -24,6 +24,7 @@ type (
 		WithAPIListAlarmRequest(*realtimeapi.ListAlarmRequest) APIListAlarmParamsBuilder
 	}
 
+	// AlarmGroupModuleBuilder 告警组模块构造器
 	AlarmGroupModuleBuilder interface {
 		WithDoAlarmGroup(*bizmodel.AlarmGroup) DoAlarmGroupBuilder
 		WithDosAlarmGroup([]*bizmodel.AlarmGroup) DosAlarmGroupBuilder
@@ -44,18 +45,22 @@ type (
 		ToAPIs() []*adminapi.AlarmGroupItem
 	}
 
+	// APICreateAlarmGroupParamsBuilder create alarm group params builder
 	APICreateAlarmGroupParamsBuilder interface {
 		ToBo() *bo.CreateAlarmGroupParams
 	}
 
+	// APIQueryAlarmGroupListParamsBuilder query alarm group list params builder
 	APIQueryAlarmGroupListParamsBuilder interface {
 		ToBo() *bo.QueryAlarmGroupListParams
 	}
 
+	// APIUpdateAlarmGroupParamsBuilder update alarm group params builder
 	APIUpdateAlarmGroupParamsBuilder interface {
 		ToBo() *bo.UpdateAlarmGroupParams
 	}
 
+	// APIUpdateAlarmGroupStatusParamsBuilder update alarm group status params builder
 	APIUpdateAlarmGroupStatusParamsBuilder interface {
 		ToBo() *bo.UpdateAlarmGroupStatusParams
 	}
@@ -200,7 +205,7 @@ func (a *doAlarmGroupBuilder) ToAPI() *adminapi.AlarmGroupItem {
 		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(a.ctx, a.alarm.CreatorID)).GetUsername(),
 		NoticeUsers: types.SliceTo(a.alarm.NoticeUsers, func(user *bizmodel.AlarmNoticeUser) *adminapi.NoticeItem {
 			return &adminapi.NoticeItem{
-				User:       NewBuilder().WithAPIUserBo(cache.GetUser(a.ctx, user.UserId)).ToAPI(),
+				User:       NewBuilder().WithAPIUserBo(cache.GetUser(a.ctx, user.UserID)).ToAPI(),
 				NotifyType: api.NotifyType(user.AlarmNoticeType),
 			}
 		}),
@@ -241,7 +246,7 @@ func (a *apiUpdateAlarmGroupParamsBuilder) ToBo() *bo.UpdateAlarmGroupParams {
 			Status: vobj.Status(a.param.GetUpdate().GetStatus()),
 			NoticeUsers: types.SliceTo(a.param.GetUpdate().GetNoticeUser(), func(user *alarmapi.CreateNoticeUserRequest) *bo.CreateNoticeUserParams {
 				return &bo.CreateNoticeUserParams{
-					UserId:     user.GetUserId(),
+					UserID:     user.GetUserId(),
 					NotifyType: vobj.NotifyType(user.GetNotifyType()),
 				}
 			}),
@@ -259,7 +264,7 @@ func (a apiCreateAlarmGroupParamsBuilder) ToBo() *bo.CreateAlarmGroupParams {
 		Status: vobj.Status(a.param.GetStatus()),
 		NoticeUsers: types.SliceTo(a.param.NoticeUser, func(user *alarmapi.CreateNoticeUserRequest) *bo.CreateNoticeUserParams {
 			return &bo.CreateNoticeUserParams{
-				UserId:     user.GetUserId(),
+				UserID:     user.GetUserId(),
 				NotifyType: vobj.NotifyType(user.GetNotifyType()),
 			}
 		}),

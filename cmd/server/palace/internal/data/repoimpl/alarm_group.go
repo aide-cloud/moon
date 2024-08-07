@@ -87,32 +87,32 @@ func (a *alarmGroupRepositoryImpl) UpdateAlarmGroup(ctx context.Context, params 
 	})
 }
 
-func (a *alarmGroupRepositoryImpl) DeleteAlarmGroup(ctx context.Context, alarmId uint32) error {
+func (a *alarmGroupRepositoryImpl) DeleteAlarmGroup(ctx context.Context, alarmID uint32) error {
 	bizQuery, err := getBizQuery(ctx, a.data)
 	if !types.IsNil(err) {
 		return err
 	}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
 		// 清除通知人员关联信息
-		if _, err := tx.AlarmNoticeUser.WithContext(ctx).Where(tx.AlarmNoticeUser.AlarmGroupID.Eq(alarmId)).Delete(); err != nil {
+		if _, err := tx.AlarmNoticeUser.WithContext(ctx).Where(tx.AlarmNoticeUser.AlarmGroupID.Eq(alarmID)).Delete(); err != nil {
 			return err
 		}
 
 		// TODO 清空hook关联信息
 
-		if _, err = tx.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmId)).Delete(); !types.IsNil(err) {
+		if _, err = tx.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmID)).Delete(); !types.IsNil(err) {
 			return err
 		}
 		return nil
 	})
 }
 
-func (a *alarmGroupRepositoryImpl) GetAlarmGroup(ctx context.Context, alarmId uint32) (*bizmodel.AlarmGroup, error) {
+func (a *alarmGroupRepositoryImpl) GetAlarmGroup(ctx context.Context, alarmID uint32) (*bizmodel.AlarmGroup, error) {
 	bizQuery, err := getBizQuery(ctx, a.data)
 	if !types.IsNil(err) {
 		return nil, err
 	}
-	return bizQuery.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmId)).Preload(field.Associations).First()
+	return bizQuery.AlarmGroup.WithContext(ctx).Where(bizQuery.AlarmGroup.ID.Eq(alarmID)).Preload(field.Associations).First()
 }
 
 func (a *alarmGroupRepositoryImpl) AlarmGroupPage(ctx context.Context, params *bo.QueryAlarmGroupListParams) ([]*bizmodel.AlarmGroup, error) {
@@ -171,12 +171,12 @@ func createAlarmGroupParamsToModel(ctx context.Context, params *bo.CreateAlarmGr
 
 func createAlarmNoticeUsersToModel(ctx context.Context, params []*bo.CreateNoticeUserParams, alarmGroupID uint32) []*bizmodel.AlarmNoticeUser {
 	return types.SliceToWithFilter(params, func(noticeUser *bo.CreateNoticeUserParams) (*bizmodel.AlarmNoticeUser, bool) {
-		if noticeUser.UserId <= 0 {
+		if noticeUser.UserID <= 0 {
 			return nil, false
 		}
 		resUser := &bizmodel.AlarmNoticeUser{
 			AlarmNoticeType: noticeUser.NotifyType,
-			UserId:          noticeUser.UserId,
+			UserID:          noticeUser.UserID,
 			AlarmGroupID:    alarmGroupID,
 		}
 		resUser.WithContext(ctx)
