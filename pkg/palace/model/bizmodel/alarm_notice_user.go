@@ -28,7 +28,7 @@ func (c *AlarmNoticeUser) MarshalBinary() (data []byte, err error) {
 	return json.Marshal(c)
 }
 
-// TableName Strategy's table name
+// TableName AlarmNoticeUser's table name
 func (*AlarmNoticeUser) TableName() string {
 	return tableNameAlarmNoticeUsers
 }
