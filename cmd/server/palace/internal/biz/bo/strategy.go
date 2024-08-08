@@ -76,6 +76,8 @@ type (
 		LevelID uint32 `json:"LevelID"`
 		// 状态
 		Status vobj.Status `json:"status"`
+		// 告警页面
+		AlarmPageIds []uint32 `json:"alarmPageIds"`
 	}
 
 	// CreateStrategyGroupParams 创建策略组请求参数

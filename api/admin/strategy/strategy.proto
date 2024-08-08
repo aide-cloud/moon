@@ -338,6 +338,14 @@ message CreateStrategyLevelRequest{
   double threshold = 7;
   // 条件
   Condition condition = 8;
+  // 告警页面ID
+  repeated uint32 alarmPageIds = 9 [(buf.validate.field).cel = {
+    message: "请选择告警页面",
+    expression: "this.size() > 0"
+  }, (buf.validate.field).cel = {
+    message: "必须保证修改对象数据唯一",
+    expression: "this.unique()"
+  }];
 }
 
 message CopyStrategyRequest {

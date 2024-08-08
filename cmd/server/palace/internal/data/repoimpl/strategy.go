@@ -135,6 +135,7 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 				return err
 			}
 		}
+
 		// 删除策略等级数据
 		if _, err = tx.StrategyLevel.WithContext(ctx).Where(tx.StrategyLevel.StrategyID.Eq(params.ID)).Delete(); !types.IsNil(err) {
 			return err
@@ -265,6 +266,14 @@ func createStrategyLevelParamsToModel(ctx context.Context, params []*bo.CreateSt
 			Threshold:   item.Threshold,
 			LevelID:     item.LevelID,
 			Status:      item.Status,
+			AlarmPage: types.SliceToWithFilter(item.AlarmPageIds, func(pageID uint32) (*bizmodel.SysDict, bool) {
+				if pageID <= 0 {
+					return nil, false
+				}
+				return &bizmodel.SysDict{
+					AllFieldModel: model.AllFieldModel{ID: pageID},
+				}, true
+			}),
 		}
 		templateLevel.WithContext(ctx)
 		return templateLevel

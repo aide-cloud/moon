@@ -150,6 +150,7 @@ func (b *strategyBuilder) ToCreateStrategyBO() *bo.CreateStrategyParams {
 			Threshold:          strategyLevel.GetThreshold(),
 			Status:             vobj.Status(strategyLevel.GetStatus()),
 			LevelID:            strategyLevel.GetLevelId(),
+			AlarmPageIds:       strategyLevel.GetAlarmPageIds(),
 		})
 	}
 	return &bo.CreateStrategyParams{
