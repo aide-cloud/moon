@@ -51,7 +51,6 @@ type (
 		WithAPIStrategyLevel(*bizmodel.StrategyLevel) StrategyLevelModelBuilder
 
 		WithAPIStrategyGroup(strategyGroup *bizmodel.StrategyGroup) StrategyGroupModelBuilder
-		WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder
 
 		WithCreateBoStrategyGroup(*strategyapi.CreateStrategyGroupRequest) StrategyGroupRequestBuilder
 		WithUpdateBoStrategyGroup(*strategyapi.UpdateStrategyGroupRequest) StrategyGroupRequestBuilder
@@ -91,6 +90,7 @@ type (
 
 		RealTimeAlarmModule() RealtimeAlarmModuleBuilder
 		DashboardModule() DashboardModuleBuilder
+		AlarmGroupModule() AlarmGroupModuleBuilder
 		AlarmPageModule() AlarmPageModuleBuilder
 	}
 )
@@ -103,18 +103,16 @@ func (b *builder) StrategyGroupModuleBuilder() StrategyGroupModuleBuilder {
 	return NewStrategyGroupModuleBuilder(b.ctx)
 }
 
-func (b *builder) WithStrategyGroupList(strategyGroup []*bizmodel.StrategyGroup, strategyCountModel []*bo.StrategyCountModel, strategyEnableCountModel []*bo.StrategyCountModel) StrategyGroupModelBuilder {
-	return &strategyGroupBuilder{
-		StrategyGroups: strategyGroup,
-	}
-}
-
 func (b *builder) DashboardModule() DashboardModuleBuilder {
 	return NewDashboardModuleBuilder(b.ctx)
 }
 
 func (b *builder) RealTimeAlarmModule() RealtimeAlarmModuleBuilder {
 	return newRealtimeAlarmModuleBuilder(b.ctx)
+}
+
+func (b *builder) AlarmGroupModule() AlarmGroupModuleBuilder {
+	return newAlarmModuleBuilder(b.ctx)
 }
 
 func (b *builder) WithDict(dict imodel.IDict) DictModelBuilder {

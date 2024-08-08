@@ -76,6 +76,8 @@ type (
 		LevelID uint32 `json:"LevelID"`
 		// 状态
 		Status vobj.Status `json:"status"`
+		// 告警页面
+		AlarmPageIds []uint32 `json:"alarmPageIds"`
 	}
 
 	// CreateStrategyGroupParams 创建策略组请求参数
@@ -109,10 +111,11 @@ type (
 
 	// QueryStrategyGroupListParams 查询策略组列表请求参数
 	QueryStrategyGroupListParams struct {
-		Keyword string `json:"keyword"`
-		Page    types.Pagination
-		Name    string
-		Status  vobj.Status
+		Keyword       string `json:"keyword"`
+		Page          types.Pagination
+		Name          string
+		Status        vobj.Status
+		CategoriesIds []uint32 `json:"categoriesIds"`
 	}
 
 	// GetStrategyCountParams 查询策略总数参数

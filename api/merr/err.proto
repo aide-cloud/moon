@@ -355,4 +355,18 @@ enum ErrorReason {
     (errors.message) = "仪表盘数据不存在!",
     (errors.id) = "DASHBOARD_DATA_NOT_FOUND_ERR"
   ];
+
+  // 告警分组数据不存在
+  ALARM_GROUP_DATA_NOT_FOUND_ERR = 50 [
+    (errors.code) = 405,
+    (errors.message) = "告警分组数据不存在!",
+    (errors.id) = "ALARM_GROUP_DATA_NOT_FOUND_ERR"
+  ];
+
+  // 告警通知人不允许重复
+  ALARM_NOTICE_REPEAT_ERR = 51 [
+    (errors.code) = 405,
+    (errors.message) = "告警通知人不允许重复!",
+    (errors.id) = "ALARM_NOTICE_REPEAT_ERR"
+  ];
 }

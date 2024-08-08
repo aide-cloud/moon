@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"gorm.io/gen"
-	"gorm.io/gen/field"
-
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/bo"
 	"github.com/aide-family/moon/cmd/server/palace/internal/biz/repository"
 	"github.com/aide-family/moon/cmd/server/palace/internal/data"
@@ -16,6 +13,9 @@ import (
 	"github.com/aide-family/moon/pkg/palace/model/query"
 	"github.com/aide-family/moon/pkg/util/types"
 	"github.com/aide-family/moon/pkg/vobj"
+
+	"gorm.io/gen"
+	"gorm.io/gen/field"
 )
 
 // NewStrategyRepository 创建策略仓库
@@ -45,7 +45,18 @@ func (s *strategyRepositoryImpl) DeleteByID(ctx context.Context, strategyID uint
 	if !types.IsNil(err) {
 		return err
 	}
+	strategy := &bizmodel.Strategy{AllFieldModel: model.AllFieldModel{ID: strategyID}}
 	return bizQuery.Transaction(func(tx *bizquery.Query) error {
+		// 移除策略数据源中间表关联关系
+		if err := tx.Strategy.Datasource.Model(strategy).Clear(); err != nil {
+			return err
+		}
+
+		// 移除策略类型中间表关联关系
+		if err := tx.Strategy.Categories.Model(strategy).Clear(); err != nil {
+			return err
+		}
+
 		if _, err = tx.Strategy.WithContext(ctx).Where(tx.Strategy.ID.Eq(strategyID)).Delete(); !types.IsNil(err) {
 			return err
 		}
@@ -124,6 +135,7 @@ func (s *strategyRepositoryImpl) UpdateByID(ctx context.Context, params *bo.Upda
 				return err
 			}
 		}
+
 		// 删除策略等级数据
 		if _, err = tx.StrategyLevel.WithContext(ctx).Where(tx.StrategyLevel.StrategyID.Eq(params.ID)).Delete(); !types.IsNil(err) {
 			return err
@@ -254,6 +266,14 @@ func createStrategyLevelParamsToModel(ctx context.Context, params []*bo.CreateSt
 			Threshold:   item.Threshold,
 			LevelID:     item.LevelID,
 			Status:      item.Status,
+			AlarmPage: types.SliceToWithFilter(item.AlarmPageIds, func(pageID uint32) (*bizmodel.SysDict, bool) {
+				if pageID <= 0 {
+					return nil, false
+				}
+				return &bizmodel.SysDict{
+					AllFieldModel: model.AllFieldModel{ID: pageID},
+				}, true
+			}),
 		}
 		templateLevel.WithContext(ctx)
 		return templateLevel

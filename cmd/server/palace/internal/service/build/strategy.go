@@ -51,8 +51,6 @@ type (
 	// StrategyGroupModelBuilder 策略组模型构建器
 	StrategyGroupModelBuilder interface {
 		ToAPI() *admin.StrategyGroupItem
-
-		ToStrategyGroupList() []*admin.StrategyGroupItem
 	}
 
 	// StrategyGroupRequestBuilder 策略组请求构建器
@@ -64,6 +62,7 @@ type (
 		ToListStrategyGroupBO() *bo.QueryStrategyGroupListParams
 	}
 
+	// StrategyGroupModuleBuilder StrategyGroupBuilder 策略组构建器
 	StrategyGroupModuleBuilder interface {
 		WithDoStrategyCount(items *bo.StrategyCountMap) DosStrategyGroupBuilder
 		WithDoStrategyGroupList(items []*bizmodel.StrategyGroup) DosStrategyGroupBuilder
@@ -74,12 +73,14 @@ type (
 		ctx context.Context
 	}
 
+	// DosStrategyGroupBuilder   do  alarm group builder
 	DosStrategyGroupBuilder interface {
 		WithStrategyCountMap(item *bo.StrategyCountMap) DosStrategyGroupBuilder
 		ToAPIs() []*admin.StrategyGroupItem
 		ToAPI() *admin.StrategyGroupItem
 	}
 
+	// dosStrategyGroupBuilder dos  alarm group builder
 	dosStrategyGroupBuilder struct {
 		StrategyGroups []*bizmodel.StrategyGroup
 		StrategyGroup  *bizmodel.StrategyGroup
@@ -149,6 +150,7 @@ func (b *strategyBuilder) ToCreateStrategyBO() *bo.CreateStrategyParams {
 			Threshold:          strategyLevel.GetThreshold(),
 			Status:             vobj.Status(strategyLevel.GetStatus()),
 			LevelID:            strategyLevel.GetLevelId(),
+			AlarmPageIds:       strategyLevel.GetAlarmPageIds(),
 		})
 	}
 	return &bo.CreateStrategyParams{
@@ -250,7 +252,10 @@ func (b *dosStrategyGroupBuilder) ToAPI() *admin.StrategyGroupItem {
 		Status:    api.Status(b.StrategyGroup.Status),
 		CreatedAt: b.StrategyGroup.CreatedAt.String(),
 		UpdatedAt: b.StrategyGroup.UpdatedAt.String(),
-		Creator:   NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).GetUsername(),
+		Categories: types.SliceTo(b.StrategyGroup.Categories, func(category *bizmodel.SysDict) *admin.Dict {
+			return NewBuilder().WithDict(category).ToAPI()
+		}),
+		Creator: NewBuilder().WithAPIUserBo(cache.GetUser(b.ctx, b.StrategyGroup.CreatorID)).GetUsername(),
 	}
 	count := b.StrategyCountMap[id]
 	enableCount := b.StrategyEnableMap[id]
@@ -332,51 +337,18 @@ func (b *strategyGroupBuilder) ToListStrategyGroupBO() *bo.QueryStrategyGroupLis
 		return nil
 	}
 	return &bo.QueryStrategyGroupListParams{
-		Keyword: b.ListStrategyGroupRequest.GetKeyword(),
-		Status:  vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
-		Page:    types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
+		Keyword:       b.ListStrategyGroupRequest.GetKeyword(),
+		Status:        vobj.Status(b.ListStrategyGroupRequest.GetStatus()),
+		Page:          types.NewPagination(b.ListStrategyGroupRequest.GetPagination()),
+		CategoriesIds: b.ListStrategyGroupRequest.GetCategoriesIds(),
 	}
 }
 
-func (b *strategyGroupBuilder) ToStrategyGroupList() []*admin.StrategyGroupItem {
-	if types.IsNil(b) || types.IsNil(b.StrategyGroups) {
-		return nil
-	}
-	countMap := map[uint32]uint64{}
-	enableCountMap := map[uint32]uint64{}
-	if !types.IsNil(b.StrategyCountModel) {
-		for _, strategy := range b.StrategyCountModel {
-			countMap[strategy.GroupID] = strategy.Total
-		}
-	}
-	if !types.IsNil(b.StrategyEnableCountModel) {
-		for _, strategy := range b.StrategyEnableCountModel {
-			enableCountMap[strategy.GroupID] = strategy.Total
-		}
-	}
-	return types.SliceTo(b.StrategyGroups, func(item *bizmodel.StrategyGroup) *admin.StrategyGroupItem {
-		groupAPI := NewBuilder().WithAPIStrategyGroup(item).ToAPI()
-		count, exists := countMap[item.ID]
-		if exists {
-			groupAPI.StrategyCount = count
-		}
-		enableCount, exists := enableCountMap[item.ID]
-		if exists {
-			groupAPI.EnableStrategyCount = enableCount
-		}
-
-		return groupAPI
-	})
+func (s *strategyGroupModuleBuilder) WithDosStrategyGroup(item []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
+	return &dosStrategyGroupBuilder{ctx: s.ctx, StrategyGroups: item}
 }
 
-func newDosStrategyGroupBuilder(ctx context.Context, strategyGroup []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
-	return &dosStrategyGroupBuilder{ctx: ctx, StrategyGroups: strategyGroup}
-}
-
-func (d *strategyGroupModuleBuilder) WithDosStrategyGroup(item []*bizmodel.StrategyGroup) DosStrategyGroupBuilder {
-	return &dosStrategyGroupBuilder{ctx: d.ctx, StrategyGroups: item}
-}
-
+// NewStrategyGroupModuleBuilder 创建策略组模块构建器
 func NewStrategyGroupModuleBuilder(ctx context.Context) StrategyGroupModuleBuilder {
 	return &strategyGroupModuleBuilder{ctx: ctx}
 }
